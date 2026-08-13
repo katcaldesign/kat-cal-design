@@ -1,26 +1,239 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/*
+  ============================================================================
+  DESIGN TOKENS — two tiers, based on Ffern's colour system
+  ============================================================================
+  TIER 1 · PRIMITIVES  — the raw palette. Named colours + numeric steps.
+                         These are the "ingredients". You rarely use them
+                         directly in a page; they exist to be referenced.
+  TIER 2 · SEMANTICS    — roles. "What is this colour FOR" (text, link,
+                         button, border…). Each one POINTS AT a primitive.
+
+  Why two tiers? So meaning and value are separated. When the brand decides
+  links should be darker, you repoint ONE semantic token at a different
+  primitive step — every link on the site moves, and no raw hex is ever
+  duplicated. This is exactly how Figma variables → modes work.
+
+  Tailwind reads every --color-* key here and generates utilities:
+    --color-sand-100  -> bg-sand-100  text-sand-100  border-sand-100
+    --color-ink       -> text-ink     bg-ink         border-ink
+    --color-accent    -> text-accent  bg-accent      ...
+
+  A NAMING NOTE (worth understanding): in Figma your group is called "text".
+  In Tailwind the *property* is the prefix (`text-…` sets colour, `bg-…` sets
+  fill), so a token literally named "text" would read `text-text`. So semantic
+  colour tokens are named by ROLE instead — "ink" is your text/primary, applied
+  as `text-ink`. The Figma name each token maps to is in the comment beside it.
+*/
+
+@theme {
+  /* ========================================================================
+     TIER 1 · PRIMITIVES
+     ======================================================================== */
+
+  /* Chartreuse — the single hero accent. BRIGHT: use as a FILL with dark ink
+     on top, or as a highlight/underline. It's too light for text on the pale
+     ground, so link/label text uses the DARK steps (800/900), never 500. */
+  --color-chartreuse-50:  #fbffe0;
+  --color-chartreuse-100: #f5ffb8;
+  --color-chartreuse-200: #eaff85;
+  --color-chartreuse-300: #dbf94d;
+  --color-chartreuse-400: #cdec1f;
+  --color-chartreuse-500: #c2e000; /* default accent — the bright fill */
+  --color-chartreuse-600: #a3bd00;
+  --color-chartreuse-700: #7f9400;
+  --color-chartreuse-800: #5c6b00;
+  --color-chartreuse-900: #3a4400;
+
+  /* Sand — signature warm neutral (backgrounds + warm near-black text) */
+  --color-sand-50:  #fcfbf7; /* default page background */
+  --color-sand-75:  #f5f2ec;
+  --color-sand-100: #efe7da;
+  --color-sand-200: #e2d5c5;
+  --color-sand-300: #cdbca7;
+  --color-sand-400: #a0907e;
+  --color-sand-500: #7e7469;
+  --color-sand-600: #6a6359;
+  --color-sand-700: #59524a;
+  --color-sand-800: #4d4135;
+  --color-sand-900: #382b1f; /* default body text — warm near-black, never #000 */
+
+  /* Ash — cool neutral grey */
+  --color-ash-50:  #ffffff;
+  --color-ash-100: #faf9f5;
+  --color-ash-200: #f0f0ea;
+  --color-ash-300: #dcdcd6;
+  --color-ash-400: #b8b8aa;
+  --color-ash-500: #95968a;
+  --color-ash-600: #717267;
+  --color-ash-700: #484a43;
+  --color-ash-800: #232420;
+  --color-ash-900: #030302;
+
+  /* Grey — TRUE neutral (hueless: R=G=B). Drives the UI roles below.
+     Distinct from ash (green-tinted) and sand (warm). Steps are spaced
+     perceptually — finer near the top, coarser near the bottom. */
+  --color-grey-50:  #fafafa;
+  --color-grey-75:  #f4f4f4;
+  --color-grey-100: #ececec;
+  --color-grey-200: #dedede;
+  --color-grey-300: #c9c9c9;
+  --color-grey-400: #a3a3a3;
+  --color-grey-500: #777777;
+  --color-grey-600: #575757;
+  --color-grey-700: #404040;
+  --color-grey-800: #2a2a2a;
+  --color-grey-900: #1a1a1a; /* ink — soft near-black, never #000 */
+
+  /* Green — positive state ONLY (never decoration) */
+  --color-green-50:  #ebf4e4;
+  --color-green-100: #d1e6c8;
+  --color-green-200: #b6d6a5;
+  --color-green-300: #85b978;
+  --color-green-400: #539343;
+  --color-green-500: #3f7d2f;
+  --color-green-600: #2c681d;
+  --color-green-700: #225615;
+  --color-green-800: #134417;
+  --color-green-900: #082b0b;
+
+  /* Red — negative state ONLY */
+  --color-red-50:  #ffebee;
+  --color-red-100: #ffcdd3;
+  --color-red-200: #ef9a9a;
+  --color-red-300: #e57373;
+  --color-red-400: #ef5350;
+  --color-red-500: #f44336;
+  --color-red-600: #d3302f;
+  --color-red-700: #a12121;
+  --color-red-800: #891615;
+  --color-red-900: #540d0d;
+
+  /* ========================================================================
+     TIER 2 · SEMANTICS — roles that reference the primitives above
+     (Figma group each maps to is noted in the comment)
+     ======================================================================== */
+
+  /* text/primary (5) — your reading + heading ink, darkest → lightest */
+  --color-ink:        var(--color-grey-900); /* text/primary/darkest  */
+  --color-ink-dark:   var(--color-grey-700); /* text/primary/dark     */
+  --color-ink-mid:    var(--color-grey-500); /* text/primary/mid      */
+  --color-ink-light:  var(--color-grey-400); /* text/primary/light    */
+  --color-ink-faint:  var(--color-grey-300); /* text/primary/lightest */
+  /* text/secondary (1) — text sitting ON a dark or accent fill */
+  --color-ink-inverse: var(--color-grey-50); /* text/secondary/lightest */
+
+  /* link (4) */
+  --color-link:          var(--color-chartreuse-800); /* link/primary — dark step, readable */
+  --color-link-hover:    var(--color-chartreuse-900); /* link/hover                         */
+  --color-link-visited:  var(--color-chartreuse-700); /* link/visited * (my guess)          */
+  --color-link-disabled: var(--color-grey-300);       /* link/disabled                      */
+
+  /* button/primary (3) — chartreuse fill with DARK ink (white would vanish) */
+  --color-btn-primary:       var(--color-chartreuse-500); /* fill  */
+  --color-btn-primary-hover: var(--color-chartreuse-600); /* hover */
+  --color-btn-primary-text:  var(--color-grey-900);       /* label — dark on bright */
+
+  /* button/sand (3) — secondary button */
+  --color-btn-secondary:        var(--color-grey-100); /* fill   */
+  --color-btn-secondary-border: var(--color-grey-300); /* border */
+  --color-btn-secondary-text:   var(--color-grey-900); /* label  */
+
+  /* input field (3) */
+  --color-input:        var(--color-grey-100); /* field fill */
+  --color-input-border: var(--color-grey-300); /* border     */
+  --color-input-label:  var(--color-grey-400); /* label      */
+
+  /* feedback/success (3) */
+  --color-success:    var(--color-green-600); /* text / icon        */
+  --color-success-mid: #bdd3b1;               /* mid tone (border)  */
+  --color-success-bg: var(--color-green-50);  /* soft fill          */
+
+  /* feedback/error (3) */
+  --color-error:    var(--color-red-600); /* text / icon       */
+  --color-error-mid: var(--color-red-200); /* mid tone (border) */
+  --color-error-bg: var(--color-red-50);  /* soft fill         */
+
+  /* feedback/disabled (4) */
+  --color-disabled-surface: var(--color-grey-100); /* * my 4th (confirm) */
+  --color-disabled-bg:      var(--color-grey-75);  /* disabled bg     */
+  --color-disabled-border:  var(--color-grey-200); /* disabled border */
+  --color-disabled-text:    var(--color-grey-300); /* disabled text   */
+
+  /* background (2) */
+  --color-bg:      var(--color-grey-50); /* background/light — page */
+  --color-surface: var(--color-grey-75); /* background/mid — cards  */
+
+  /* border (3) */
+  --color-border-light: var(--color-grey-75);  /* border/light */
+  --color-border:       var(--color-grey-100); /* border/mid   */
+  --color-border-dark:  var(--color-grey-200); /* border/dark  */
+
+  /* convenience alias — the one hero accent */
+  --color-accent:      var(--color-chartreuse-500);
+  --color-accent-hover: var(--color-chartreuse-600);
+
+  /* ========================================================================
+     TYPE + SHAPE
+     ======================================================================== */
+  --font-sans: var(--font-brand-sans), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: var(--font-brand-mono), ui-monospace, "SF Mono", Menlo, monospace;
+
+  --radius-card: 1rem;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+/* Base document defaults — warm sand ground, warm ink, sans body. */
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/*
+  TYPE SCALE — text styles
+  ------------------------
+  Each is a complete text STYLE (family + size + line-height), like a Figma
+  text style. Apply as a single class:
+    <p className="kat-body-md">…</p>
+    <span className="kat-mono-sm">2025 — current</span>
+  kat-body-* -> Geist (reading text)   kat-mono-* -> Apercu Mono Pro (labels).
+  Sizes in rem (1rem = 16px) so they respect a visitor's browser zoom; px in
+  the comment maps back to your spec.
+*/
+
+/* Body — Geist */
+@utility kat-body-xl { font-family: var(--font-sans); font-size: 1.375rem; line-height: 1.3; } /* 22px */
+@utility kat-body-lg { font-family: var(--font-sans); font-size: 1.125rem; line-height: 1.5; } /* 18px */
+@utility kat-body-md { font-family: var(--font-sans); font-size: 0.875rem; line-height: 1.5; } /* 14px */
+@utility kat-body-sm { font-family: var(--font-sans); font-size: 0.75rem;  line-height: 1.5; } /* 12px */
+@utility kat-body-xs { font-family: var(--font-sans); font-size: 0.625rem; line-height: 1.4; } /* 10px */
+
+/* Mono — Apercu Mono Pro */
+@utility kat-mono-lg { font-family: var(--font-mono); font-size: 1rem;     line-height: 1.4; } /* 16px */
+@utility kat-mono-md { font-family: var(--font-mono); font-size: 0.875rem; line-height: 1.4; } /* 14px */
+@utility kat-mono-sm { font-family: var(--font-mono); font-size: 0.75rem;  line-height: 1.4; } /* 12px */
+@utility kat-mono-xs { font-family: var(--font-mono); font-size: 0.625rem; line-height: 1.4; } /* 10px */
+
+/*
+  COMPONENT — animated cat logo
+  -----------------------------
+  At REST the glasses sit up covering the eyes (translateY(-55) lifts them from
+  their drawn position onto the eyes). On hover/focus of the logo lockup they
+  slip back DOWN to translateY(0) — the artwork's drawn position — revealing the
+  eyes. The lift is always applied (so even reduced-motion users see the glasses
+  on); only the transition + the slip-down are gated behind prefers-reduced-motion.
+*/
+.cat-glasses {
+  transform: translateY(-55px); /* rest: glasses up, covering the eyes */
+}
+@media (prefers-reduced-motion: no-preference) {
+  .cat-glasses {
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .cat-logo-trigger:hover .cat-glasses,
+  .cat-logo-trigger:focus-visible .cat-glasses {
+    transform: translateY(0); /* hover: slip down to drawn position, eyes revealed */
+  }
 }
