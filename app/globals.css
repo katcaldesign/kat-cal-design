@@ -230,7 +230,7 @@ body {
   on); only the transition + the slip-down are gated behind prefers-reduced-motion.
 */
 .cat-glasses {
-  transform: translateY(-55px); /* rest: glasses up, covering the eyes */
+  transform: translate(-8.3px, -27px); /* rest: exact placement from Figma (kat mapping) */
 }
 @media (prefers-reduced-motion: no-preference) {
   .cat-glasses {
@@ -238,6 +238,6 @@ body {
   }
   .cat-logo-trigger:hover .cat-glasses,
   .cat-logo-trigger:focus-visible .cat-glasses {
-    transform: translateY(0); /* hover: slip down to drawn position, eyes revealed */
+    transform: translate(-3.85px, -0.5px); /* hover: Figma slid-down end — down AND right of rest */
   }
 }

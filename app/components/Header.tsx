@@ -80,7 +80,7 @@ export default function Header() {
     >
       <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
         <Link href="/" className="cat-logo-trigger flex items-center gap-3">
-          <CatLogo className="h-9 w-9" />
+          <CatLogo className="h-16 w-16" />
           <span className="kat-body-xl font-medium text-ink">kat calvert</span>
         </Link>
 
