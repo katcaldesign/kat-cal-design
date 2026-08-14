@@ -17,14 +17,14 @@ export default function Home() {
       <div className="mt-8 flex items-center gap-6">
         {/* Primary button — chartreuse fill, dark ink (our verified-contrast pairing) */}
         <Link
-          href="/portfolio"
+          href="/work"
           className="kat-mono-sm inline-flex rounded-md bg-btn-primary px-4 py-2 uppercase tracking-wider text-btn-primary-text transition-colors hover:bg-btn-primary-hover"
         >
-          View portfolio
+          View work
         </Link>
         {/* Inline link — dark chartreuse so it stays readable */}
         <Link
-          href="/about"
+          href="/info"
           className="kat-body-md text-link underline underline-offset-4 hover:text-link-hover"
         >
           More about me
