@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
-import Header from "./components/Header";
+import Sidebar from "./components/Sidebar";
 
 /*
   FONTS — next/font self-hosts these, prevents layout shift, and hands us a CSS
@@ -37,18 +37,17 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${geist.variable} ${apercuMono.variable} h-full`}>
-      <body className="flex min-h-full flex-col">
-        {/* Header is fixed to the top, so it sits OUTSIDE the normal flow… */}
-        <Header />
-        {/* …which means the page content needs top padding (pt-28) to clear it. */}
-        <main className="mx-auto w-full max-w-5xl grow px-6 pt-28 pb-24">{children}</main>
-        <footer className="border-t border-border">
-          <div className="mx-auto max-w-5xl px-6 py-8">
-            <span className="kat-mono-xs uppercase tracking-wider text-ink-light">
-              © {new Date().getFullYear()} kat calvert
-            </span>
-          </div>
-        </footer>
+      <body className="min-h-full">
+        {/* Sidebar renders its own fixed left RAIL (desktop) + TOP BAR (mobile).
+            It sits outside the content flow, so the content column just needs a
+            left offset on desktop (md:pl-60) to clear the 240px rail. The © and
+            connect links now live in the rail, so no separate footer. */}
+        <Sidebar />
+        <div className="md:pl-60">
+          <main className="mx-auto w-full max-w-4xl px-6 py-14 md:px-10 md:py-20">
+            {children}
+          </main>
+        </div>
       </body>
     </html>
   );
