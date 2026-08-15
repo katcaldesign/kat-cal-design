@@ -84,21 +84,26 @@ export default function SidePanel({
         aria-modal="true"
         aria-label={label}
         tabIndex={-1}
-        className={`absolute inset-x-0 bottom-0 flex max-h-[85vh] flex-col rounded-t-2xl border-t border-border bg-bg shadow-2xl outline-none transition-transform duration-300 ease-out md:inset-y-0 md:left-auto md:right-0 md:max-h-none md:w-[560px] md:max-w-[90vw] md:rounded-none md:border-l md:border-t-0 ${
+        className={`absolute inset-x-0 bottom-0 flex max-h-[85vh] flex-col rounded-t-2xl border-t border-border bg-bg shadow-2xl outline-none transition-transform duration-300 ease-out md:inset-y-0 md:left-auto md:right-0 md:max-h-none md:w-[640px] md:max-w-[92vw] md:rounded-none md:border-l md:border-t-0 lg:w-[720px] ${
           open ? "translate-y-0 md:translate-x-0" : "translate-y-full md:translate-y-0 md:translate-x-full"
         }`}
       >
-        {/* Close affordance, pinned top-right of the panel. */}
-        <button
-          type="button"
-          onClick={onClose}
-          className="kat-mono-xs absolute right-4 top-4 z-10 rounded-md px-2 py-1 uppercase tracking-wider text-ink-mid transition-colors hover:bg-surface hover:text-ink"
-        >
-          Close ✕
-        </button>
+        {/* Header row with the close affordance. Right-aligned on mobile (the
+            bottom sheet), left-aligned on desktop (the right drawer, so close is
+            nearest the screen edge you reach for). In normal flow, not absolute,
+            so it never overlaps the left-aligned content below. */}
+        <div className="flex shrink-0 justify-end px-6 pt-5 md:justify-start md:px-10 md:pt-6">
+          <button
+            type="button"
+            onClick={onClose}
+            className="kat-mono-xs -mx-2 rounded-md px-2 py-1 uppercase tracking-wider text-ink-mid transition-colors hover:bg-surface hover:text-ink"
+          >
+            ✕ Close
+          </button>
+        </div>
 
         {/* Scrollable content area. Generous padding for the archival feel. */}
-        <div className="grow overflow-y-auto px-6 py-14 md:px-10">{children}</div>
+        <div className="grow overflow-y-auto px-6 pb-14 pt-4 md:px-10">{children}</div>
       </div>
     </div>
   );
