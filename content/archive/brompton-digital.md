@@ -6,7 +6,7 @@ skills: [User Research, Co-creation, Conceptual Modelling, Prototyping, Product 
 showSkills: true
 context: Brompton
 year: 2023
-cover: /archive/brompton-digital.jpg
+cover: /archive/brompton-digital.png
 images: []
 order: 2
 link:

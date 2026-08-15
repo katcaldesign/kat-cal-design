@@ -6,7 +6,7 @@ skills: [Branding, Illustration]
 showSkills: true
 context: Personal, with my brother
 year: 2020
-cover: /archive/lopello.jpg
+cover: /archive/lopello.png
 images: []
 order: 11
 link:

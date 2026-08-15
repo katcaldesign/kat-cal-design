@@ -6,7 +6,7 @@ skills: [User Research, Conceptual Modelling, Prototyping, CAD]
 showSkills: true
 context: MSc intro project (part group, part individual)
 year: 2018
-cover: /archive/collaboraid.jpg
+cover: /archive/collaboraid.png
 images: []
 order: 9
 link:

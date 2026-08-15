@@ -6,7 +6,7 @@ skills: [User Research, Usability Testing, Academic Research, Co-creation]
 showSkills: true
 context: Brompton
 year: 2022–2024
-cover: /archive/brompton.jpg
+cover: /archive/brompton.png
 images: []
 order: 3
 link:

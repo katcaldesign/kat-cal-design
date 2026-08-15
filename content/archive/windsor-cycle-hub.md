@@ -6,7 +6,7 @@ skills: [Service Design, Branding, Co-creation, Web Development]
 showSkills: true
 context: Co-founded, 2020
 year: 2021
-cover: /archive/windsor-cycle-hub.jpg
+cover: /archive/windsor-cycle-hub.png
 images: []
 order: 4
 link:
