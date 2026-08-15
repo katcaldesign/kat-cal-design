@@ -10,6 +10,17 @@ cover: /archive/fine-line.jpg
 images: []
 order: 10
 link:
+
+# Panel sections. Blank means the section doesn't show at all; fill one in and
+# it appears. Set showOverview / showApproach to false to hide text you want to
+# keep. See _template.md.
+overview: |
+
+showOverview: true
+
+approach: |
+
+showApproach: true
 ---
 
 Somewhere between a hobby and a side hustle. Loving my access to a laser cutter, I started making personalised illustrated coasters and keyrings as gifts — then, after a few requests, set up an online shop and took a stall at Glasgow Christmas Market.

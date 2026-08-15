@@ -215,6 +215,9 @@ body {
 */
 
 /* Body — Geist */
+/* 2xl is the panel/detail heading — the biggest step, so its line-height is
+   tighter (1.2): the larger the type, the less air a line needs. */
+@utility kat-body-2xl { font-family: var(--font-sans); font-size: 1.75rem;  line-height: 1.2; } /* 28px */
 @utility kat-body-xl { font-family: var(--font-sans); font-size: 1.375rem; line-height: 1.3; } /* 22px */
 @utility kat-body-lg { font-family: var(--font-sans); font-size: 1.125rem; line-height: 1.5; } /* 18px */
 @utility kat-body-md { font-family: var(--font-sans); font-size: 0.875rem; line-height: 1.5; } /* 14px */

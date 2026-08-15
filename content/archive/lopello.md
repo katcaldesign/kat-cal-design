@@ -10,6 +10,17 @@ cover: /archive/lopello.png
 images: []
 order: 11
 link:
+
+# Panel sections. Blank means the section doesn't show at all; fill one in and
+# it appears. Set showOverview / showApproach to false to hide text you want to
+# keep. See _template.md.
+overview: |
+
+showOverview: true
+
+approach: |
+
+showApproach: true
 ---
 
 Summer 2020, back home with my brother — a keen brewing enthusiast — we started doing pilot brews, developing two recipes we loved and bottling them to send to friends and family through Covid.

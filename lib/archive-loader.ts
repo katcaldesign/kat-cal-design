@@ -12,7 +12,12 @@
 import fs from "node:fs";
 import path from "node:path";
 import matter from "gray-matter";
-import { ARCHIVE_CATEGORIES, type ArchiveCategory, type ArchiveProject } from "./archive";
+import {
+  ARCHIVE_CATEGORIES,
+  type ArchiveCategory,
+  type ArchiveProject,
+  type ArchiveSection,
+} from "./archive";
 
 const CONTENT_DIR = path.join(process.cwd(), "content", "archive");
 const PUBLIC_DIR = path.join(process.cwd(), "public");
@@ -27,6 +32,39 @@ function toList(v: unknown): string[] {
   if (Array.isArray(v)) return v.map((x) => String(x).trim()).filter(Boolean);
   if (typeof v === "string" && v.trim()) return [v.trim()];
   return [];
+}
+
+// Split a block of writing into paragraphs on blank lines, collapsing the
+// single line breaks you get from wrapping text in the editor.
+function toParagraphs(v: unknown): string[] {
+  if (typeof v !== "string") return [];
+  return v
+    .trim()
+    .split(/\n\s*\n/)
+    .map((p) => p.replace(/\s+/g, " ").trim())
+    .filter(Boolean);
+}
+
+/*
+  The labelled sections a project can have, in the order they appear in the
+  panel. Each one is optional twice over: leave the field out (or blank) and it
+  vanishes, or keep the text but set its `show…` flag to false to hide it
+  without deleting anything.
+
+  To add a third section later, add a line here and nothing else changes.
+*/
+const SECTIONS = [
+  { field: "overview", flag: "showOverview", label: "Overview" },
+  { field: "approach", flag: "showApproach", label: "Approach" },
+] as const;
+
+function toSections(data: Record<string, unknown>): ArchiveSection[] {
+  return SECTIONS.flatMap(({ field, flag, label }) => {
+    // Default is to show, so a project only needs the flag when hiding.
+    if (data[flag] === false) return [];
+    const paragraphs = toParagraphs(data[field]);
+    return paragraphs.length ? [{ label, paragraphs }] : [];
+  });
 }
 
 export function getArchiveProjects(): ArchiveProject[] {
@@ -57,11 +95,8 @@ export function getArchiveProjects(): ArchiveProject[] {
       images: toList(data.images).filter(imageExists),
       link: data.link ? String(data.link) : undefined,
       order: typeof data.order === "number" ? data.order : 999,
-      description: content
-        .trim()
-        .split(/\n\s*\n/)
-        .map((p) => p.replace(/\s+/g, " ").trim())
-        .filter(Boolean),
+      description: toParagraphs(content),
+      sections: toSections(data),
     };
   });
 
