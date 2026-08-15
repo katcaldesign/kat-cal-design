@@ -1,11 +1,11 @@
 ---
 title: Windsor Cycle Hub
-headline: Founder, graphic & service design
-categories: [Service, Physical]
-skills: [Service Design, Branding, Co-creation, Web Development]
+headline: Building a community cycle hub from scratch
+categories: [Service]
+skills: [Branding, Service Design, Co-creation, Web Development]
 showSkills: true
-context: Co-founded, 2020
-year: 2021
+context: Co-founded
+year: 2020
 cover: /archive/windsor-cycle-hub.png
 images: []
 order: 4
