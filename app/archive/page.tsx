@@ -1,11 +1,16 @@
+import { getArchiveProjects } from "../../lib/archive-loader";
+import ArchiveGrid from "../components/ArchiveGrid";
+
+// Server component: reads the markdown files at build time and hands the typed
+// projects to the client grid.
 export default function Archive() {
+  const projects = getArchiveProjects();
+
   return (
-    <section className="max-w-2xl">
-      <p className="kat-mono-sm uppercase tracking-wider text-ink-light">Archive</p>
-      <h1 className="kat-body-xl mt-4 font-medium text-ink">Odds &amp; ends</h1>
-      <p className="kat-body-md mt-6 text-ink-mid">
-        Older experiments, side projects, and things that didn&apos;t fit anywhere else.
-      </p>
+    <section>
+      {/* Header + subtitle removed for now (may re-add). Page opens straight
+          into the filter chips + tile grid. */}
+      <ArchiveGrid projects={projects} />
     </section>
   );
 }

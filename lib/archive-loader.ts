@@ -1,0 +1,69 @@
+/*
+  Archive content loader — "CMS without a CMS" (server / build-time only).
+
+  Reads /content/archive/*.md at BUILD time (next build, output: "export") and
+  returns a typed array. Imported ONLY by the server page — never a client
+  component — because it uses node:fs.
+
+  To add a project: copy content/archive/_template.md, fill it in, drop images
+  in /public/archive/, commit.
+*/
+
+import fs from "node:fs";
+import path from "node:path";
+import matter from "gray-matter";
+import { ARCHIVE_CATEGORIES, type ArchiveCategory, type ArchiveProject } from "./archive";
+
+const CONTENT_DIR = path.join(process.cwd(), "content", "archive");
+const PUBLIC_DIR = path.join(process.cwd(), "public");
+
+// True only if the image path points at a file that actually exists in /public.
+function imageExists(p: unknown): p is string {
+  return typeof p === "string" && !!p.trim() && fs.existsSync(path.join(PUBLIC_DIR, p.trim().replace(/^\//, "")));
+}
+
+// Accept a YAML value that may be a single string or a list; return a clean array.
+function toList(v: unknown): string[] {
+  if (Array.isArray(v)) return v.map((x) => String(x).trim()).filter(Boolean);
+  if (typeof v === "string" && v.trim()) return [v.trim()];
+  return [];
+}
+
+export function getArchiveProjects(): ArchiveProject[] {
+  const files = fs
+    .readdirSync(CONTENT_DIR)
+    .filter((f) => f.endsWith(".md") && !f.startsWith("_"));
+
+  const projects = files.map((file): ArchiveProject => {
+    const raw = fs.readFileSync(path.join(CONTENT_DIR, file), "utf8");
+    const { data, content } = matter(raw);
+    const slug = file.replace(/\.md$/, "");
+
+    const categories = toList(data.categories).filter((c): c is ArchiveCategory =>
+      (ARCHIVE_CATEGORIES as readonly string[]).includes(c),
+    );
+
+    return {
+      slug,
+      title: String(data.title ?? slug),
+      headline: String(data.headline ?? ""),
+      categories,
+      skills: toList(data.skills),
+      // Default: show skills. Set `showSkills: false` to hide them on a project.
+      showSkills: data.showSkills !== false,
+      context: String(data.context ?? ""),
+      year: data.year != null ? String(data.year) : "",
+      cover: imageExists(data.cover) ? String(data.cover).trim() : null,
+      images: toList(data.images).filter(imageExists),
+      link: data.link ? String(data.link) : undefined,
+      order: typeof data.order === "number" ? data.order : 999,
+      description: content
+        .trim()
+        .split(/\n\s*\n/)
+        .map((p) => p.replace(/\s+/g, " ").trim())
+        .filter(Boolean),
+    };
+  });
+
+  return projects.sort((a, b) => a.order - b.order || a.title.localeCompare(b.title));
+}
