@@ -1,6 +1,6 @@
 ---
 title: Trail Kat
-headline: An outdoor YouTube channel & video editing
+headline: An outdoor YouTube channel
 categories: [Video]
 skills: [Video Editing, Illustration]
 showSkills: true

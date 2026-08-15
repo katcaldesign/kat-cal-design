@@ -1,10 +1,10 @@
 ---
 title: Splitboard Boot
 headline: A boot solution to give splitboarders edge grip
-categories: [Physical]
+categories: [Physical, Design Research]
 skills: [User Research, CAD, Prototyping]
 showSkills: true
-context: MSc dissertation, Glasgow School of Art
+context: MSc dissertation @ GSA
 year: 2019
 cover: /archive/splitboard-boot.jpg
 images: []

@@ -1,8 +1,8 @@
 ---
 title: design:ends
 headline: Designing an actionable Circular Design Tool
-categories: [Design Research, Service]
-skills: [Academic Research, User Research, Co-creation, Service Blueprinting, Conceptual Modelling, Wireframing, Prototyping]
+categories: [Design Research, Service, UX]
+skills: [Academic Research, User Research, Co-creation, Service Blueprinting, Wireframing]
 showSkills: true
 context: MSc project
 year: 2022

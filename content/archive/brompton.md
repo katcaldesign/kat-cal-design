@@ -1,7 +1,7 @@
 ---
-title: Brompton
+title: Brompton Design Research
 headline: Design Research at Brompton
-categories: [Design Research]
+categories: [Design Research, Physical]
 skills: [User Research, Usability Testing, Academic Research, Co-creation]
 showSkills: true
 context: Brompton

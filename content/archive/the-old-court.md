@@ -1,9 +1,9 @@
 ---
 title: The Old Court
 headline: Marketing and graphic design for a community artspace
-categories: [Service, Design Research]
+categories: []
 skills: [User Research, Visual Design, Service Design]
-showSkills: true
+showSkills: false
 context: Marketing & Graphic Design Co-ordinator
 year: 2019
 cover: /archive/the-old-court.jpg

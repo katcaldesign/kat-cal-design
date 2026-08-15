@@ -1,10 +1,10 @@
 ---
 title: Collaboraid
-headline: MSc Product Design Engineering intro project
+headline: A product to optimise collaboration
 categories: [Physical, Design Research]
-skills: [User Research, Conceptual Modelling, Prototyping, CAD]
-showSkills: true
-context: MSc intro project (part group, part individual)
+skills: [User Research, Prototyping, CAD]
+showSkills: false
+context: MSc intro project
 year: 2018
 cover: /archive/collaboraid.png
 images: []

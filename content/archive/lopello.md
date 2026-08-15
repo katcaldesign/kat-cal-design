@@ -4,7 +4,7 @@ headline: Brand and graphic design for a lockdown brewery
 categories: []
 skills: [Branding, Illustration]
 showSkills: true
-context: Personal, with my brother
+context: Personal project
 year: 2020
 cover: /archive/lopello.png
 images: []
