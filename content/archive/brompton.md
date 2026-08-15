@@ -1,6 +1,6 @@
 ---
 title: Brompton Design Research
-headline: Design Research at Brompton
+headline: Turning mixed-method research into product roadmaps
 categories: [Design Research, Physical]
 skills: [User Research, Usability Testing, Academic Research, Co-creation]
 showSkills: true
