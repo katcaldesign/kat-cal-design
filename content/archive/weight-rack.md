@@ -10,6 +10,17 @@ cover: /archive/weight-rack.jpg
 images: []
 order: 7
 link:
+
+# Panel sections. Blank means the section doesn't show at all; fill one in and
+# it appears. Set showOverview / showApproach to false to hide text you want to
+# keep. See _template.md.
+overview: |
+
+showOverview: true
+
+approach: |
+
+showApproach: true
 ---
 
 A hands-on build, end to end. CAD geometry sized to the weights (a 5° slope), laser-cut from 3mm steel, tack-welded, deburred, polished and powder-coated black.

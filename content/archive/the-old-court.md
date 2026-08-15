@@ -10,6 +10,17 @@ cover: /archive/the-old-court.jpg
 images: []
 order: 8
 link:
+
+# Panel sections. Blank means the section doesn't show at all; fill one in and
+# it appears. Set showOverview / showApproach to false to hide text you want to
+# keep. See _template.md.
+overview: |
+
+showOverview: true
+
+approach: |
+
+showApproach: true
 ---
 
 I was brought in to design and co-ordinate a marketing strategy for a community artspace and bar, with the bottom-line aim of lifting bar revenue — especially at quieter times of the week.

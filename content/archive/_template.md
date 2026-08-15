@@ -10,6 +10,19 @@ cover: /archive/your-image.jpg  # drop the file in /public/archive/ (blank = pla
 images: []                      # optional gallery, e.g. [/archive/x-1.jpg, /archive/x-2.jpg]
 order: 99                       # lower shows first
 link:                           # optional external URL
+
+# Labelled sections in the panel. Leave a field out (or blank) and it doesn't
+# show at all; keep the text but set its show flag to false to hide it without
+# deleting it. The `|` lets you write across several lines; a blank line inside
+# starts a new paragraph.
+overview: |
+  What the project was and why it mattered.
+showOverview: true
+
+approach: |
+  How you went about it.
+showApproach: true
 ---
 
-Narrative — one or two tight paragraphs. Keep it human and short.
+Narrative, one or two tight paragraphs. Keep it human and short. This sits
+above the sections above, unlabelled. Leave it blank if the sections say it all.
