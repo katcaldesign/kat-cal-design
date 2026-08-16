@@ -74,16 +74,42 @@ export function areaColorForSkill(skill: string): string {
 }
 
 /*
-  A labelled block of narrative in the panel (Overview, Approach…).
+  A labelled block in the panel: a heading, some paragraphs, and optionally a
+  piece of media that belongs to that block (a still, or a carousel).
 
-  The loader does all the deciding: it reads the matching front-matter field,
-  honours its `show…` flag, drops anything empty, and hands over only the
-  sections that should actually render. So the component below never asks
-  "does this project have an approach?" — it just maps over what it's given.
+  A section can carry EITHER an image OR a carousel, never both. When it has
+  media the panel lays it out two-up on a wide screen (copy beside the picture)
+  and stacked on a narrow one, so "Website Design" reads as one unit rather
+  than as loose text followed by a loose image.
+
+  The loader does all the deciding: it reads the front matter, drops anything
+  empty or switched off, and hands over only the sections that should actually
+  render. So the component never asks "does this project have an approach?", it
+  just maps over what it's given.
 */
 export type ArchiveSection = {
   label: string; // heading shown above the text, e.g. "Overview"
   paragraphs: string[];
+  image?: string; // one still, paired with the copy
+  carousel?: string[]; // square scroll-snap strip, paired with the copy
+};
+
+/*
+  An optional video that plays at the top of a project's panel.
+
+  Two kinds, because a portfolio video is either hosted somewhere that handles
+  streaming for you, or it's a file sitting in /public:
+  • "youtube" — `src` is the bare video id, embedded through youtube-nocookie.
+  • "file"    — `src` is a path in /public, played by the browser's own player.
+
+  The loader works out which from what you write in the front matter, so the
+  markdown only ever has one `video:` line. See lib/archive-loader.ts.
+*/
+export type ArchiveVideo = {
+  kind: "youtube" | "file";
+  src: string;
+  poster?: string; // still frame shown before a "file" video starts
+  caption?: string; // small credit line under the frame
 };
 
 export type ArchiveProject = {
@@ -97,8 +123,11 @@ export type ArchiveProject = {
   year: string;
   cover: string | null; // e.g. "/archive/brompton.jpg" — null until the image exists
   images: string[]; // optional gallery (paths that exist)
+  video: ArchiveVideo | null; // plays at the top of the panel; null on most projects
+  banner: string | null; // full-width image that signs the panel off
+  wide: boolean; // open in the roomier panel (see SidePanel's `wide` prop)
   link?: string;
   order: number;
   description: string[]; // narrative (the body text), split into paragraphs
-  sections: ArchiveSection[]; // Overview / Approach — empty ones already removed
+  sections: ArchiveSection[]; // labelled blocks — empty ones already removed
 };

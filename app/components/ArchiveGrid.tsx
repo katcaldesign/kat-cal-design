@@ -11,7 +11,13 @@
 
 import { useMemo, useRef, useState } from "react";
 import SidePanel from "./SidePanel";
-import { ARCHIVE_CATEGORIES, areaColorForSkill, type ArchiveCategory, type ArchiveProject } from "../../lib/archive";
+import {
+  ARCHIVE_CATEGORIES,
+  areaColorForSkill,
+  type ArchiveCategory,
+  type ArchiveProject,
+  type ArchiveVideo,
+} from "../../lib/archive";
 
 const FILTERS = ["All", ...ARCHIVE_CATEGORIES] as const;
 type Filter = (typeof FILTERS)[number];
@@ -144,6 +150,48 @@ function Carousel({ images }: { images: string[] }) {
   );
 }
 
+// ── Video block — sits above the copy when a project has film. ──────────────
+// One frame, two possible players. Both sit in a 16:9 box (`aspect-video`), so
+// the panel's height doesn't jump around while the video loads.
+//
+// YouTube goes through youtube-nocookie.com, which holds off on tracking
+// cookies until someone actually presses play. A local file uses the browser's
+// own <video> controls: `preload="metadata"` fetches only the first few KB (just
+// enough for the duration), so opening the panel never downloads the whole file.
+function VideoBlock({ video, title }: { video: ArchiveVideo; title: string }) {
+  return (
+    <figure>
+      <div className="aspect-video w-full overflow-hidden rounded-lg border border-border bg-ink">
+        {video.kind === "youtube" ? (
+          <iframe
+            src={`https://www.youtube-nocookie.com/embed/${video.src}?rel=0`}
+            title={`${title} video`}
+            loading="lazy"
+            allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+            allowFullScreen
+            className="h-full w-full border-0"
+          />
+        ) : (
+          <video
+            src={video.src}
+            poster={video.poster}
+            controls
+            playsInline
+            preload="metadata"
+            className="h-full w-full object-cover"
+          />
+        )}
+      </div>
+
+      {video.caption && (
+        <figcaption className="kat-mono-xs mt-2 uppercase tracking-wider text-ink-light">
+          {video.caption}
+        </figcaption>
+      )}
+    </figure>
+  );
+}
+
 // ── Project detail inside the panel. ────────────────────────────────────────
 function ArchiveDetail({ p }: { p: ArchiveProject }) {
   const meta = [p.context, p.year].filter(Boolean).join(" · ");
@@ -160,6 +208,13 @@ function ArchiveDetail({ p }: { p: ArchiveProject }) {
       {p.showSkills && p.skills.length > 0 && (
         <div className="mt-6">
           <SkillPills skills={p.skills} />
+        </div>
+      )}
+
+      {/* Film leads, then artwork, then the copy. */}
+      {p.video && (
+        <div className="mt-8">
+          <VideoBlock video={p.video} title={p.title} />
         </div>
       )}
 

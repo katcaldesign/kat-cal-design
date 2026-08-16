@@ -8,6 +8,15 @@ context: Personal project       # one short credibility line
 year: 2023
 cover: /archive/your-image.jpg  # drop the file in /public/archive/ (blank = placeholder tile)
 images: []                      # optional gallery, e.g. [/archive/x-1.jpg, /archive/x-2.jpg]
+
+# Optional film, shown in a 16:9 frame above the copy. One line, two options:
+#   a YouTube link or id  →  video: https://youtu.be/dQw4w9WgXcQ
+#   a file in /public     →  video: /archive/your-project/film.mp4
+# Leave it blank and no video shows. videoPoster only applies to a file.
+video:
+videoPoster:                    # e.g. /archive/your-project/film-poster.jpg
+videoCaption:                   # small credit line under the frame
+
 order: 99                       # lower shows first
 link:                           # optional external URL
 

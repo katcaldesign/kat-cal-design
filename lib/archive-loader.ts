@@ -17,13 +17,16 @@ import {
   type ArchiveCategory,
   type ArchiveProject,
   type ArchiveSection,
+  type ArchiveVideo,
 } from "./archive";
 
 const CONTENT_DIR = path.join(process.cwd(), "content", "archive");
 const PUBLIC_DIR = path.join(process.cwd(), "public");
 
-// True only if the image path points at a file that actually exists in /public.
-function imageExists(p: unknown): p is string {
+// True only if the path points at a file (image, video, poster) that actually
+// exists in /public. Lets the markdown name an asset before you've added it
+// without the build breaking or a dead frame showing up on the page.
+function assetExists(p: unknown): p is string {
   return typeof p === "string" && !!p.trim() && fs.existsSync(path.join(PUBLIC_DIR, p.trim().replace(/^\//, "")));
 }
 
@@ -46,25 +49,107 @@ function toParagraphs(v: unknown): string[] {
 }
 
 /*
-  The labelled sections a project can have, in the order they appear in the
-  panel. Each one is optional twice over: leave the field out (or blank) and it
-  vanishes, or keep the text but set its `show…` flag to false to hide it
-  without deleting anything.
+  Work out what `video:` in the front matter is pointing at.
 
-  To add a third section later, add a line here and nothing else changes.
+  You write ONE line and the loader decides:
+  • starts with "/"  → a file in /public (only used if it's really there)
+  • anything else     → YouTube, whether you paste a full watch/share/embed URL
+                        or just the bare 11-character id
+
+  Returns null when there's no video, which is every project but one right now.
 */
-const SECTIONS = [
+function toVideo(data: Record<string, unknown>): ArchiveVideo | null {
+  const raw = typeof data.video === "string" ? data.video.trim() : "";
+  if (!raw) return null;
+
+  const caption = typeof data.videoCaption === "string" && data.videoCaption.trim()
+    ? data.videoCaption.trim()
+    : undefined;
+
+  if (raw.startsWith("/")) {
+    if (!assetExists(raw)) return null; // file not added yet: show nothing
+    return {
+      kind: "file",
+      src: raw,
+      poster: assetExists(data.videoPoster) ? String(data.videoPoster).trim() : undefined,
+      caption,
+    };
+  }
+
+  // Pull the id out of whatever YouTube URL shape got pasted in, or accept an
+  // id on its own. YouTube ids are 11 characters of [A-Za-z0-9_-].
+  const id = raw.match(/(?:v=|\/embed\/|youtu\.be\/|\/shorts\/)([A-Za-z0-9_-]{11})/)?.[1]
+    ?? raw.match(/^[A-Za-z0-9_-]{11}$/)?.[0];
+  return id ? { kind: "youtube", src: id, caption } : null;
+}
+
+/*
+  Overview and Approach: the shorthand every project gets for free.
+
+  These two are just sugar. They become the first entries in the sections list
+  below, saving you from writing out `label: Overview` on a light project.
+  Each is optional twice over: leave the field blank and it vanishes, or keep
+  the text and set its `show…` flag to false to hide it without deleting it.
+*/
+const SHORTHAND_SECTIONS = [
   { field: "overview", flag: "showOverview", label: "Overview" },
   { field: "approach", flag: "showApproach", label: "Approach" },
 ] as const;
 
+/*
+  Anything beyond those two goes in a `sections:` list, where each entry names
+  its own heading and can bring a picture with it:
+
+    sections:
+      - label: Website Design
+        text: |
+          I designed and built it in WordPress…
+        image: /archive/my-project/website.png
+      - label: Service Design
+        text: |
+          Two services, both free…
+        carousel:
+          - /archive/my-project/rides-1.png
+          - /archive/my-project/rides-2.png
+
+  Missing image files are dropped (see assetExists), so you can write the paths
+  before you've exported the artwork.
+*/
+function toListedSections(v: unknown): ArchiveSection[] {
+  if (!Array.isArray(v)) return [];
+
+  return v.flatMap((entry): ArchiveSection[] => {
+    if (!entry || typeof entry !== "object") return [];
+    const s = entry as Record<string, unknown>;
+    if (s.show === false) return [];
+
+    const label = typeof s.label === "string" ? s.label.trim() : "";
+    const paragraphs = toParagraphs(s.text);
+    const image = assetExists(s.image) ? String(s.image).trim() : undefined;
+    const carousel = toList(s.carousel).filter(assetExists);
+
+    // Nothing to show at all? Then there's no section.
+    if (!paragraphs.length && !image && !carousel.length) return [];
+
+    return [{
+      label,
+      paragraphs,
+      image,
+      // A section carries one kind of media, so an image wins over a carousel.
+      carousel: !image && carousel.length ? carousel : undefined,
+    }];
+  });
+}
+
 function toSections(data: Record<string, unknown>): ArchiveSection[] {
-  return SECTIONS.flatMap(({ field, flag, label }) => {
+  const shorthand = SHORTHAND_SECTIONS.flatMap(({ field, flag, label }) => {
     // Default is to show, so a project only needs the flag when hiding.
     if (data[flag] === false) return [];
     const paragraphs = toParagraphs(data[field]);
     return paragraphs.length ? [{ label, paragraphs }] : [];
   });
+
+  return [...shorthand, ...toListedSections(data.sections)];
 }
 
 export function getArchiveProjects(): ArchiveProject[] {
@@ -91,8 +176,13 @@ export function getArchiveProjects(): ArchiveProject[] {
       showSkills: data.showSkills !== false,
       context: String(data.context ?? ""),
       year: data.year != null ? String(data.year) : "",
-      cover: imageExists(data.cover) ? String(data.cover).trim() : null,
-      images: toList(data.images).filter(imageExists),
+      cover: assetExists(data.cover) ? String(data.cover).trim() : null,
+      images: toList(data.images).filter(assetExists),
+      video: toVideo(data),
+      banner: assetExists(data.banner) ? String(data.banner).trim() : null,
+      // Default is the standard drawer; `wide: true` opts a big project into
+      // the roomier one.
+      wide: data.wide === true,
       link: data.link ? String(data.link) : undefined,
       order: typeof data.order === "number" ? data.order : 999,
       description: toParagraphs(content),
