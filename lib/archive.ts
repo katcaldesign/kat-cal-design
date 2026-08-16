@@ -96,6 +96,7 @@ export type ArchiveProject = {
   context: string; // one credibility line, e.g. "MSc project"
   year: string;
   cover: string | null; // e.g. "/archive/brompton.jpg" — null until the image exists
+  poster: string | null; // optional tall hero image; when present it sits beside the copy
   images: string[]; // optional gallery, shown as a paged carousel (paths that exist)
   illustrations: string[]; // optional artwork row, shown as the hover accordion
   link?: string;
