@@ -23,9 +23,9 @@ import {
 const CONTENT_DIR = path.join(process.cwd(), "content", "archive");
 const PUBLIC_DIR = path.join(process.cwd(), "public");
 
-// True only if the path points at a file (image, video, poster) that actually
-// exists in /public. Lets the markdown name an asset before you've added it
-// without the build breaking or a dead frame showing up on the page.
+// True only if the path points at a file that actually exists in /public. Used
+// for images and video alike, so a path you haven't dropped the file in for yet
+// is simply ignored rather than rendering a broken asset.
 function assetExists(p: unknown): p is string {
   return typeof p === "string" && !!p.trim() && fs.existsSync(path.join(PUBLIC_DIR, p.trim().replace(/^\//, "")));
 }
@@ -52,35 +52,28 @@ function toParagraphs(v: unknown): string[] {
   Work out what `video:` in the front matter is pointing at.
 
   You write ONE line and the loader decides:
-  • starts with "/"  → a file in /public (only used if it's really there)
-  • anything else     → YouTube, whether you paste a full watch/share/embed URL
-                        or just the bare 11-character id
+  • starts with "/"  → a file in /public (used only if it's really there)
+  • anything else    → YouTube, whether you paste a full watch/share/embed URL
+                       or just the bare 11-character id
 
-  Returns null when there's no video, which is every project but one right now.
+  Hosting a clip yourself is fine when it's small, but the site is a static
+  export on GitHub Pages, which refuses files over 100MB and serves whatever
+  you commit at one fixed quality. So anything long or heavy goes on YouTube
+  and only its link lives in the repo.
 */
-function toVideo(data: Record<string, unknown>): ArchiveVideo | null {
-  const raw = typeof data.video === "string" ? data.video.trim() : "";
+function toVideo(v: unknown): ArchiveVideo | null {
+  const raw = typeof v === "string" ? v.trim() : "";
   if (!raw) return null;
 
-  const caption = typeof data.videoCaption === "string" && data.videoCaption.trim()
-    ? data.videoCaption.trim()
-    : undefined;
-
   if (raw.startsWith("/")) {
-    if (!assetExists(raw)) return null; // file not added yet: show nothing
-    return {
-      kind: "file",
-      src: raw,
-      poster: assetExists(data.videoPoster) ? String(data.videoPoster).trim() : undefined,
-      caption,
-    };
+    return assetExists(raw) ? { kind: "file", src: raw } : null;
   }
 
   // Pull the id out of whatever YouTube URL shape got pasted in, or accept an
   // id on its own. YouTube ids are 11 characters of [A-Za-z0-9_-].
   const id = raw.match(/(?:v=|\/embed\/|youtu\.be\/|\/shorts\/)([A-Za-z0-9_-]{11})/)?.[1]
     ?? raw.match(/^[A-Za-z0-9_-]{11}$/)?.[0];
-  return id ? { kind: "youtube", src: id, caption } : null;
+  return id ? { kind: "youtube", src: id } : null;
 }
 
 /*
@@ -130,9 +123,9 @@ export function getArchiveProjects(): ArchiveProject[] {
       context: String(data.context ?? ""),
       year: data.year != null ? String(data.year) : "",
       cover: assetExists(data.cover) ? String(data.cover).trim() : null,
+      video: toVideo(data.video),
       images: toList(data.images).filter(assetExists),
       illustrations: toList(data.illustrations).filter(assetExists),
-      video: toVideo(data),
       link: data.link ? String(data.link) : undefined,
       order: typeof data.order === "number" ? data.order : 999,
       description: toParagraphs(content),

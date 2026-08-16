@@ -7,15 +7,10 @@ showSkills: true
 context: Co-founded
 year: 2020
 cover: /archive/windsor-cycle-hub.png
+video: https://www.youtube.com/watch?v=JOYzOjxNzFk
 images: []
 order: 4
 link:
-
-# Film at the top of the panel. Either a YouTube link (as here) or a path to a
-# file in /public. videoPoster only applies to a file.
-video: https://www.youtube.com/watch?v=JOYzOjxNzFk
-videoPoster:
-videoCaption:
 
 # Panel sections. Blank means the section doesn't show at all; fill one in and
 # it appears. Set showOverview / showApproach to false to hide text you want to

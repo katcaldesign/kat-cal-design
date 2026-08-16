@@ -87,21 +87,19 @@ export type ArchiveSection = {
 };
 
 /*
-  An optional video that plays at the top of a project's panel.
+  A project's optional video, shown under the copy.
 
   Two kinds, because a portfolio video is either hosted somewhere that handles
-  streaming for you, or it's a file sitting in /public:
+  the streaming for you, or it's a file sitting in /public:
   • "youtube" — `src` is the bare video id, embedded through youtube-nocookie.
   • "file"    — `src` is a path in /public, played by the browser's own player.
 
-  The loader works out which from what you write in the front matter, so the
-  markdown only ever has one `video:` line. See lib/archive-loader.ts.
+  The loader works out which from what you write, so the markdown only ever has
+  one `video:` line. See lib/archive-loader.ts.
 */
 export type ArchiveVideo = {
   kind: "youtube" | "file";
   src: string;
-  poster?: string; // still frame shown before a "file" video starts
-  caption?: string; // small credit line under the frame
 };
 
 export type ArchiveProject = {
@@ -114,11 +112,11 @@ export type ArchiveProject = {
   context: string; // one credibility line, e.g. "MSc project"
   year: string;
   cover: string | null; // e.g. "/archive/brompton.jpg" — null until the image exists
+  video: ArchiveVideo | null; // optional clip under the copy (null when there isn't one)
   images: string[]; // optional gallery, shown as a paged carousel (paths that exist)
   illustrations: string[]; // optional artwork row, shown as the hover accordion
-  video: ArchiveVideo | null; // plays at the top of the panel; null on most projects
   link?: string;
   order: number;
   description: string[]; // narrative (the body text), split into paragraphs
-  sections: ArchiveSection[]; // labelled blocks — empty ones already removed
+  sections: ArchiveSection[]; // Overview / Approach — empty ones already removed
 };

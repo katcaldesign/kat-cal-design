@@ -97,6 +97,47 @@ function IllustrationStrip({ illustrations }: { illustrations: string[] }) {
   );
 }
 
+// ── Video — a single clip below the copy, for the film/animation projects. ──
+// Deliberately plain: native controls, nothing autoplaying, square corners.
+//
+// A self-hosted file uses the browser's own player. `preload="metadata"` means
+// it fetches only the header (a few KB) until someone presses play, so a heavy
+// clip costs nothing to open, and the poster is the project's own cover, so the
+// frame you clicked in the grid is the frame that greets you here.
+//
+// A YouTube clip is an iframe instead, through youtube-nocookie so no tracking
+// cookie is set until play, and `loading="lazy"` so nothing is fetched from
+// YouTube until the panel is actually open. YouTube supplies its own thumbnail,
+// which is why the cover isn't used there.
+//
+// Both sit in the same 16:9 box, so panel height doesn't jump while loading.
+function Video({ video, poster, title }: { video: ArchiveVideo; poster: string | null; title: string }) {
+  if (video.kind === "youtube") {
+    return (
+      <iframe
+        src={`https://www.youtube-nocookie.com/embed/${video.src}?rel=0`}
+        title={`${title} video`}
+        loading="lazy"
+        allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+        allowFullScreen
+        className="aspect-video w-full border border-border bg-ink"
+      />
+    );
+  }
+
+  return (
+    <video
+      src={video.src}
+      poster={poster ?? undefined}
+      controls
+      playsInline
+      preload="metadata"
+      aria-label={title}
+      className="aspect-video w-full border border-border bg-ink object-cover"
+    />
+  );
+}
+
 // ── Carousel — horizontal scroll-snap strip of landscape images. ────────────
 // CSS scroll-snap does the work (smooth, swipeable on mobile); the arrows just
 // scroll by one panel-width. Feed it the `images` array from a project.
@@ -149,48 +190,6 @@ function Carousel({ images }: { images: string[] }) {
   );
 }
 
-// ── Video block — sits above the copy when a project has film. ──────────────
-// One frame, two possible players. Both sit in a 16:9 box (`aspect-video`), so
-// the panel's height doesn't jump around while the video loads.
-//
-// YouTube goes through youtube-nocookie.com, which holds off on tracking
-// cookies until someone actually presses play. A local file uses the browser's
-// own <video> controls: `preload="metadata"` fetches only the first few KB (just
-// enough for the duration), so opening the panel never downloads the whole file.
-function VideoBlock({ video, title }: { video: ArchiveVideo; title: string }) {
-  return (
-    <figure>
-      <div className="aspect-video w-full overflow-hidden border border-border bg-ink">
-        {video.kind === "youtube" ? (
-          <iframe
-            src={`https://www.youtube-nocookie.com/embed/${video.src}?rel=0`}
-            title={`${title} video`}
-            loading="lazy"
-            allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-            allowFullScreen
-            className="h-full w-full border-0"
-          />
-        ) : (
-          <video
-            src={video.src}
-            poster={video.poster}
-            controls
-            playsInline
-            preload="metadata"
-            className="h-full w-full object-cover"
-          />
-        )}
-      </div>
-
-      {video.caption && (
-        <figcaption className="kat-mono-xs mt-2 uppercase tracking-wider text-ink-light">
-          {video.caption}
-        </figcaption>
-      )}
-    </figure>
-  );
-}
-
 // ── Project detail inside the panel. ────────────────────────────────────────
 function ArchiveDetail({ p }: { p: ArchiveProject }) {
   const meta = [p.context, p.year].filter(Boolean).join(" · ");
@@ -207,13 +206,6 @@ function ArchiveDetail({ p }: { p: ArchiveProject }) {
       {p.showSkills && p.skills.length > 0 && (
         <div className="mt-6">
           <SkillPills skills={p.skills} />
-        </div>
-      )}
-
-      {/* Film leads, then artwork, then the copy. */}
-      {p.video && (
-        <div className="mt-8">
-          <VideoBlock video={p.video} title={p.title} />
         </div>
       )}
 
@@ -250,6 +242,14 @@ function ArchiveDetail({ p }: { p: ArchiveProject }) {
           </div>
         </section>
       ))}
+
+      {/* Video sits under the copy, so you read what the piece is before
+          watching it. */}
+      {p.video && (
+        <div className="mt-8">
+          <Video video={p.video} poster={p.cover} title={p.title} />
+        </div>
+      )}
 
       {/* Gallery last, after all the copy, so the writing isn't split in two. */}
       {p.images.length > 0 && (
