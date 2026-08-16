@@ -93,6 +93,7 @@ export function getArchiveProjects(): ArchiveProject[] {
       year: data.year != null ? String(data.year) : "",
       cover: imageExists(data.cover) ? String(data.cover).trim() : null,
       images: toList(data.images).filter(imageExists),
+      illustrations: toList(data.illustrations).filter(imageExists),
       link: data.link ? String(data.link) : undefined,
       order: typeof data.order === "number" ? data.order : 999,
       description: toParagraphs(content),

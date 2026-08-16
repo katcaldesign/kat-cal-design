@@ -7,7 +7,8 @@ showSkills: true
 context: Brompton
 year: 2023
 cover: /archive/brompton-digital.png
-images:
+images: []
+illustrations:
   - /archive/brompton-digital/01-unboxing.png
   - /archive/brompton-digital/02-commute.png
   - /archive/brompton-digital/03-ride-data.png
