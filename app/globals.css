@@ -255,3 +255,45 @@ body {
     transform: translate(-3.85px, -0.5px); /* hover: Figma slid-down end — down AND right of rest */
   }
 }
+
+/*
+  COMPONENT: archive illustration strip
+  -------------------------------------
+  A row of artwork frames that behaves as an accordion. Every frame sits at
+  flex: 1; the hovered one grows to flex-grow: 3, so the rest compress on their
+  own, because flexbox redistributes the free space. No :has() or peer selectors
+  needed. As a frame widens, object-cover reveals more of the landscape image,
+  which is the point: at rest they're too narrow to read.
+
+  Below md the strip is a 2×2 grid instead (see the component). These flex rules
+  are inert there, since grid items ignore flex-grow, so nothing needs unsetting.
+
+  Reduced motion follows the cat logo above: the hover resize still happens, it
+  just snaps rather than springing, and the entrance stagger is dropped entirely.
+*/
+.illo-frame {
+  flex: 1 1 0%;
+  min-width: 0;
+}
+.illo-frame:hover {
+  flex-grow: 3;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .illo-frame {
+    transition: flex-grow 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .illo-enter {
+    opacity: 0;
+    animation: illo-rise 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+  @keyframes illo-rise {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
