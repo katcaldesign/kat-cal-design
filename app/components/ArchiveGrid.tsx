@@ -68,18 +68,22 @@ function SkillPills({ skills }: { skills: string[] }) {
 }
 
 // ── Illustration strip: decorative row of project artwork. ──────────────────
+// Reads `illustrations`, NOT `images`. The two are different things: `images`
+// is a gallery you page through (Carousel below), this is a fixed row of
+// artwork that sets the tone above the copy.
+//
 // Flex accordion: hovering a frame grows it and compresses the others (the
 // .illo-* rules live in globals.css, next to the cat logo they borrow their
 // spring curve from). Below md it's a 2×2 grid, because there's no hover on
 // touch and four across a phone gives ~85px frames.
 //
 // aria-hidden because this is decoration: the artwork carries no information the
-// body copy doesn't already state, and `images` is a bare string[] with nowhere
+// body copy doesn't already state, and the field is a bare string[] with nowhere
 // to put alt text. Better to hide it than to announce four unlabelled images.
-function IllustrationStrip({ images }: { images: string[] }) {
+function IllustrationStrip({ illustrations }: { illustrations: string[] }) {
   return (
     <div aria-hidden className="grid grid-cols-2 gap-2 md:flex md:h-40">
-      {images.map((src, i) => (
+      {illustrations.map((src, i) => (
         <div
           key={src}
           style={{ animationDelay: `${i * 70}ms` }}
@@ -96,11 +100,6 @@ function IllustrationStrip({ images }: { images: string[] }) {
 // ── Carousel — horizontal scroll-snap strip of landscape images. ────────────
 // CSS scroll-snap does the work (smooth, swipeable on mobile); the arrows just
 // scroll by one panel-width. Feed it the `images` array from a project.
-//
-// Currently unused: `images` renders through IllustrationStrip above. Kept for a
-// future project with a real gallery, where paging beats an accordion. Swap the
-// call in ArchiveDetail. Delete both this and the disable below if that never lands.
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function Carousel({ images }: { images: string[] }) {
   const scroller = useRef<HTMLDivElement>(null);
 
@@ -219,9 +218,9 @@ function ArchiveDetail({ p }: { p: ArchiveProject }) {
       )}
 
       {/* Artwork sits above the copy, as it did on the old Framer page. */}
-      {p.images.length > 0 && (
+      {p.illustrations.length > 0 && (
         <div className="mt-8">
-          <IllustrationStrip images={p.images} />
+          <IllustrationStrip illustrations={p.illustrations} />
         </div>
       )}
 
@@ -251,6 +250,13 @@ function ArchiveDetail({ p }: { p: ArchiveProject }) {
           </div>
         </section>
       ))}
+
+      {/* Gallery last, after all the copy, so the writing isn't split in two. */}
+      {p.images.length > 0 && (
+        <div className="mt-8">
+          <Carousel images={p.images} />
+        </div>
+      )}
 
       {p.link && (
         <a

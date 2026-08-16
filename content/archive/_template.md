@@ -7,7 +7,8 @@ showSkills: true                # set false to hide the skill pills on lighter p
 context: Personal project       # one short credibility line
 year: 2023
 cover: /archive/your-image.jpg  # drop the file in /public/archive/ (blank = placeholder tile)
-images: []                      # optional gallery, e.g. [/archive/x-1.jpg, /archive/x-2.jpg]
+images: []                      # optional gallery you page through, e.g. [/archive/x-1.jpg, /archive/x-2.jpg]
+illustrations: []               # optional row of artwork above the copy; hovering one frame expands it
 
 # Optional film, shown in a 16:9 frame above the copy. One line, two options:
 #   a YouTube link or id  →  video: https://youtu.be/dQw4w9WgXcQ

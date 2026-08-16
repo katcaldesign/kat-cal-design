@@ -122,7 +122,8 @@ export type ArchiveProject = {
   context: string; // one credibility line, e.g. "MSc project"
   year: string;
   cover: string | null; // e.g. "/archive/brompton.jpg" — null until the image exists
-  images: string[]; // optional gallery (paths that exist)
+  images: string[]; // optional gallery, shown as a paged carousel (paths that exist)
+  illustrations: string[]; // optional artwork row, shown as the hover accordion
   video: ArchiveVideo | null; // plays at the top of the panel; null on most projects
   banner: string | null; // full-width image that signs the panel off
   wide: boolean; // open in the roomier panel (see SidePanel's `wide` prop)

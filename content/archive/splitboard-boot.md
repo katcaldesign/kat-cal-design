@@ -15,14 +15,15 @@ link:
 # it appears. Set showOverview / showApproach to false to hide text you want to
 # keep. See _template.md.
 overview: |
+  For my MSc Dissertation Project, I created a brief to look at increasing the efficiency of splitboarding. An initial exploratory stage focused me to focus on a boot redesign.
+  
 
 showOverview: true
 
 approach: |
+  Research with people who are immersed in the sport was key to getting to the crux of a design problem, and allowed high quality feedback for development. My approach in the project was to bring the together the technical and social contexts, reflecting my background undergrad of Physics with Philosophy. 
+  
+
 
 showApproach: true
 ---
-
-For my MSc dissertation I set a brief around increasing the efficiency of splitboarding, narrowing an exploratory stage down to a boot redesign — closing the gap in speed and experience between ski-touring and splitboarding.
-
-Research with people immersed in the sport got me to the crux of the problem, bringing together the technical and user contexts — reflecting my Physics-with-Philosophy background.

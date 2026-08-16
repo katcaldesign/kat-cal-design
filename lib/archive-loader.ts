@@ -178,6 +178,7 @@ export function getArchiveProjects(): ArchiveProject[] {
       year: data.year != null ? String(data.year) : "",
       cover: assetExists(data.cover) ? String(data.cover).trim() : null,
       images: toList(data.images).filter(assetExists),
+      illustrations: toList(data.illustrations).filter(assetExists),
       video: toVideo(data),
       banner: assetExists(data.banner) ? String(data.banner).trim() : null,
       // Default is the standard drawer; `wide: true` opts a big project into
