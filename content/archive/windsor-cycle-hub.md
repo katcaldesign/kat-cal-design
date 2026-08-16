@@ -27,5 +27,3 @@ approach: |
 
 showApproach: true
 ---
-
-Body text
