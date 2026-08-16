@@ -160,7 +160,7 @@ function Carousel({ images }: { images: string[] }) {
 function VideoBlock({ video, title }: { video: ArchiveVideo; title: string }) {
   return (
     <figure>
-      <div className="aspect-video w-full overflow-hidden rounded-lg border border-border bg-ink">
+      <div className="aspect-video w-full overflow-hidden border border-border bg-ink">
         {video.kind === "youtube" ? (
           <iframe
             src={`https://www.youtube-nocookie.com/embed/${video.src}?rel=0`}

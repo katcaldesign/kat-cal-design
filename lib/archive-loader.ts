@@ -84,72 +84,25 @@ function toVideo(data: Record<string, unknown>): ArchiveVideo | null {
 }
 
 /*
-  Overview and Approach: the shorthand every project gets for free.
+  The labelled sections a project can have, in the order they appear in the
+  panel. Each one is optional twice over: leave the field out (or blank) and it
+  vanishes, or keep the text but set its `show…` flag to false to hide it
+  without deleting anything.
 
-  These two are just sugar. They become the first entries in the sections list
-  below, saving you from writing out `label: Overview` on a light project.
-  Each is optional twice over: leave the field blank and it vanishes, or keep
-  the text and set its `show…` flag to false to hide it without deleting it.
+  To add a third section later, add a line here and nothing else changes.
 */
-const SHORTHAND_SECTIONS = [
+const SECTIONS = [
   { field: "overview", flag: "showOverview", label: "Overview" },
   { field: "approach", flag: "showApproach", label: "Approach" },
 ] as const;
 
-/*
-  Anything beyond those two goes in a `sections:` list, where each entry names
-  its own heading and can bring a picture with it:
-
-    sections:
-      - label: Website Design
-        text: |
-          I designed and built it in WordPress…
-        image: /archive/my-project/website.png
-      - label: Service Design
-        text: |
-          Two services, both free…
-        carousel:
-          - /archive/my-project/rides-1.png
-          - /archive/my-project/rides-2.png
-
-  Missing image files are dropped (see assetExists), so you can write the paths
-  before you've exported the artwork.
-*/
-function toListedSections(v: unknown): ArchiveSection[] {
-  if (!Array.isArray(v)) return [];
-
-  return v.flatMap((entry): ArchiveSection[] => {
-    if (!entry || typeof entry !== "object") return [];
-    const s = entry as Record<string, unknown>;
-    if (s.show === false) return [];
-
-    const label = typeof s.label === "string" ? s.label.trim() : "";
-    const paragraphs = toParagraphs(s.text);
-    const image = assetExists(s.image) ? String(s.image).trim() : undefined;
-    const carousel = toList(s.carousel).filter(assetExists);
-
-    // Nothing to show at all? Then there's no section.
-    if (!paragraphs.length && !image && !carousel.length) return [];
-
-    return [{
-      label,
-      paragraphs,
-      image,
-      // A section carries one kind of media, so an image wins over a carousel.
-      carousel: !image && carousel.length ? carousel : undefined,
-    }];
-  });
-}
-
 function toSections(data: Record<string, unknown>): ArchiveSection[] {
-  const shorthand = SHORTHAND_SECTIONS.flatMap(({ field, flag, label }) => {
+  return SECTIONS.flatMap(({ field, flag, label }) => {
     // Default is to show, so a project only needs the flag when hiding.
     if (data[flag] === false) return [];
     const paragraphs = toParagraphs(data[field]);
     return paragraphs.length ? [{ label, paragraphs }] : [];
   });
-
-  return [...shorthand, ...toListedSections(data.sections)];
 }
 
 export function getArchiveProjects(): ArchiveProject[] {
@@ -180,10 +133,6 @@ export function getArchiveProjects(): ArchiveProject[] {
       images: toList(data.images).filter(assetExists),
       illustrations: toList(data.illustrations).filter(assetExists),
       video: toVideo(data),
-      banner: assetExists(data.banner) ? String(data.banner).trim() : null,
-      // Default is the standard drawer; `wide: true` opts a big project into
-      // the roomier one.
-      wide: data.wide === true,
       link: data.link ? String(data.link) : undefined,
       order: typeof data.order === "number" ? data.order : 999,
       description: toParagraphs(content),

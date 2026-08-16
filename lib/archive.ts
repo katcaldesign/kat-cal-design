@@ -74,24 +74,16 @@ export function areaColorForSkill(skill: string): string {
 }
 
 /*
-  A labelled block in the panel: a heading, some paragraphs, and optionally a
-  piece of media that belongs to that block (a still, or a carousel).
+  A labelled block of narrative in the panel (Overview, Approach…).
 
-  A section can carry EITHER an image OR a carousel, never both. When it has
-  media the panel lays it out two-up on a wide screen (copy beside the picture)
-  and stacked on a narrow one, so "Website Design" reads as one unit rather
-  than as loose text followed by a loose image.
-
-  The loader does all the deciding: it reads the front matter, drops anything
-  empty or switched off, and hands over only the sections that should actually
-  render. So the component never asks "does this project have an approach?", it
-  just maps over what it's given.
+  The loader does all the deciding: it reads the matching front-matter field,
+  honours its `show…` flag, drops anything empty, and hands over only the
+  sections that should actually render. So the component below never asks
+  "does this project have an approach?" — it just maps over what it's given.
 */
 export type ArchiveSection = {
   label: string; // heading shown above the text, e.g. "Overview"
   paragraphs: string[];
-  image?: string; // one still, paired with the copy
-  carousel?: string[]; // square scroll-snap strip, paired with the copy
 };
 
 /*
@@ -125,8 +117,6 @@ export type ArchiveProject = {
   images: string[]; // optional gallery, shown as a paged carousel (paths that exist)
   illustrations: string[]; // optional artwork row, shown as the hover accordion
   video: ArchiveVideo | null; // plays at the top of the panel; null on most projects
-  banner: string | null; // full-width image that signs the panel off
-  wide: boolean; // open in the roomier panel (see SidePanel's `wide` prop)
   link?: string;
   order: number;
   description: string[]; // narrative (the body text), split into paragraphs
