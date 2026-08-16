@@ -10,6 +10,17 @@ cover: /archive/collaboraid.png
 images: []
 order: 9
 link:
+
+# Panel sections. Blank means the section doesn't show at all; fill one in and
+# it appears. Set showOverview / showApproach to false to hide text you want to
+# keep. See _template.md.
+overview: |
+
+showOverview: true
+
+approach: |
+
+showApproach: true
 ---
 
 A research-led MSc intro project designing a product to optimise collaboration. We began by observing group study in libraries and interviewing students.

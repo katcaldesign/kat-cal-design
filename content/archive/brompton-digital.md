@@ -14,6 +14,17 @@ images:
   - /archive/brompton-digital/04-error.png
 order: 2
 link:
+
+# Panel sections. Blank means the section doesn't show at all; fill one in and
+# it appears. Set showOverview / showApproach to false to hide text you want to
+# keep. See _template.md.
+overview: |
+
+showOverview: true
+
+approach: |
+
+showApproach: true
 ---
 
 Brompton had no digital offer for its electric riders. I initiated this project to find out what one could be, and which parts were worth building first.

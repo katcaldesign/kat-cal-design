@@ -10,6 +10,17 @@ cover: /archive/windsor-cycle-hub.png
 images: []
 order: 4
 link:
+
+# Panel sections. Blank means the section doesn't show at all; fill one in and
+# it appears. Set showOverview / showApproach to false to hide text you want to
+# keep. See _template.md.
+overview: |
+
+showOverview: true
+
+approach: |
+
+showApproach: true
 ---
 
 Amid the Covid lockdowns I co-founded a community cycle hub in Windsor, set up as a charity in 2021 to widen access to cycling — especially for the people who stand to benefit most but find it intimidating or "not for them".

@@ -10,6 +10,17 @@ cover: /archive/splitboard-boot.jpg
 images: []
 order: 5
 link:
+
+# Panel sections. Blank means the section doesn't show at all; fill one in and
+# it appears. Set showOverview / showApproach to false to hide text you want to
+# keep. See _template.md.
+overview: |
+
+showOverview: true
+
+approach: |
+
+showApproach: true
 ---
 
 For my MSc dissertation I set a brief around increasing the efficiency of splitboarding, narrowing an exploratory stage down to a boot redesign — closing the gap in speed and experience between ski-touring and splitboarding.

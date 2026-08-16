@@ -73,6 +73,19 @@ export function areaColorForSkill(skill: string): string {
   return AREA_COLOR[SKILL_AREA[skill] ?? "other"];
 }
 
+/*
+  A labelled block of narrative in the panel (Overview, Approach…).
+
+  The loader does all the deciding: it reads the matching front-matter field,
+  honours its `show…` flag, drops anything empty, and hands over only the
+  sections that should actually render. So the component below never asks
+  "does this project have an approach?" — it just maps over what it's given.
+*/
+export type ArchiveSection = {
+  label: string; // heading shown above the text, e.g. "Overview"
+  paragraphs: string[];
+};
+
 export type ArchiveProject = {
   slug: string;
   title: string; // short name, e.g. "design:ends"
@@ -86,5 +99,6 @@ export type ArchiveProject = {
   images: string[]; // optional gallery (paths that exist)
   link?: string;
   order: number;
-  description: string[]; // narrative, split into paragraphs
+  description: string[]; // narrative (the body text), split into paragraphs
+  sections: ArchiveSection[]; // Overview / Approach — empty ones already removed
 };

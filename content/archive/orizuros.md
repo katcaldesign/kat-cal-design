@@ -10,6 +10,17 @@ cover: /archive/orizuros.jpg
 images: []
 order: 6
 link:
+
+# Panel sections. Blank means the section doesn't show at all; fill one in and
+# it appears. Set showOverview / showApproach to false to hide text you want to
+# keep. See _template.md.
+overview: |
+
+showOverview: true
+
+approach: |
+
+showApproach: true
 ---
 
 My first experiment with 3D modelling and animation, in 3DS Max. In Japanese culture the wings of orizuru are said to carry souls up to paradise. Loving Japanese philosophy, I wanted to visualise the idea.

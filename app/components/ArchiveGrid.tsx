@@ -151,8 +151,8 @@ function ArchiveDetail({ p }: { p: ArchiveProject }) {
     <article>
       {/* Cover image is the tile's job — the panel opens on the title. */}
       {/* Title = main heading; one-liner (headline) = subtitle beneath it. */}
-      <h2 className="text-3xl font-medium leading-tight text-balance text-ink">{p.title}</h2>
-      {p.headline && <p className="kat-body-lg mt-2 text-ink-mid">{p.headline}</p>}
+      <h2 className="kat-body-2xl font-medium text-balance text-ink">{p.title}</h2>
+      {p.headline && <p className="kat-body-md mt-2 text-ink-mid">{p.headline}</p>}
       {meta && (
         <span className="kat-mono-sm mt-4 block uppercase tracking-wider text-ink-light">{meta}</span>
       )}
@@ -170,13 +170,32 @@ function ArchiveDetail({ p }: { p: ArchiveProject }) {
         </div>
       )}
 
-      <div className="mt-8 flex flex-col gap-4">
-        {p.description.map((para, i) => (
-          <p key={i} className="kat-body-lg text-ink-dark">
-            {para}
-          </p>
-        ))}
-      </div>
+      {/* The unlabelled body text, straight from below the front matter. */}
+      {p.description.length > 0 && (
+        <div className="mt-8 flex flex-col gap-4">
+          {p.description.map((para, i) => (
+            <p key={i} className="kat-body-md text-ink-dark">
+              {para}
+            </p>
+          ))}
+        </div>
+      )}
+
+      {/* Labelled sections (Overview, Approach). The loader has already
+          dropped any that are empty or switched off, so whatever arrives here
+          is meant to be on screen. */}
+      {p.sections.map((s) => (
+        <section key={s.label} className="mt-8">
+          <h3 className="kat-mono-sm uppercase tracking-wider text-ink-light">{s.label}</h3>
+          <div className="mt-3 flex flex-col gap-4">
+            {s.paragraphs.map((para, i) => (
+              <p key={i} className="kat-body-md text-ink-dark">
+                {para}
+              </p>
+            ))}
+          </div>
+        </section>
+      ))}
 
       {p.link && (
         <a
