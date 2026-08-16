@@ -22,8 +22,10 @@ import {
 const CONTENT_DIR = path.join(process.cwd(), "content", "archive");
 const PUBLIC_DIR = path.join(process.cwd(), "public");
 
-// True only if the image path points at a file that actually exists in /public.
-function imageExists(p: unknown): p is string {
+// True only if the path points at a file that actually exists in /public. Used
+// for images and video alike, so a path you haven't dropped the file in for yet
+// is simply ignored rather than rendering a broken asset.
+function assetExists(p: unknown): p is string {
   return typeof p === "string" && !!p.trim() && fs.existsSync(path.join(PUBLIC_DIR, p.trim().replace(/^\//, "")));
 }
 
@@ -91,9 +93,10 @@ export function getArchiveProjects(): ArchiveProject[] {
       showSkills: data.showSkills !== false,
       context: String(data.context ?? ""),
       year: data.year != null ? String(data.year) : "",
-      cover: imageExists(data.cover) ? String(data.cover).trim() : null,
-      images: toList(data.images).filter(imageExists),
-      illustrations: toList(data.illustrations).filter(imageExists),
+      cover: assetExists(data.cover) ? String(data.cover).trim() : null,
+      video: assetExists(data.video) ? String(data.video).trim() : null,
+      images: toList(data.images).filter(assetExists),
+      illustrations: toList(data.illustrations).filter(assetExists),
       link: data.link ? String(data.link) : undefined,
       order: typeof data.order === "number" ? data.order : 999,
       description: toParagraphs(content),

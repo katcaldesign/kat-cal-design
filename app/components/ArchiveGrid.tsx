@@ -91,6 +91,26 @@ function IllustrationStrip({ illustrations }: { illustrations: string[] }) {
   );
 }
 
+// ── Video — a single clip below the copy, for the film/animation projects. ──
+// Deliberately plain: native controls, nothing autoplaying. `preload="metadata"`
+// means the browser fetches only the header (a few KB) until someone presses
+// play, so a project with a heavy clip costs nothing to open. The poster is the
+// project's own cover, so the frame you clicked in the grid is the frame that
+// greets you here.
+function Video({ src, poster, title }: { src: string; poster: string | null; title: string }) {
+  return (
+    <video
+      src={src}
+      poster={poster ?? undefined}
+      controls
+      playsInline
+      preload="metadata"
+      aria-label={title}
+      className="aspect-video w-full border border-border bg-ink object-cover"
+    />
+  );
+}
+
 // ── Carousel — horizontal scroll-snap strip of landscape images. ────────────
 // CSS scroll-snap does the work (smooth, swipeable on mobile); the arrows just
 // scroll by one panel-width. Feed it the `images` array from a project.
@@ -195,6 +215,14 @@ function ArchiveDetail({ p }: { p: ArchiveProject }) {
           </div>
         </section>
       ))}
+
+      {/* Video sits under the copy, so you read what the piece is before
+          watching it. */}
+      {p.video && (
+        <div className="mt-8">
+          <Video src={p.video} poster={p.cover} title={p.title} />
+        </div>
+      )}
 
       {/* Gallery last, after all the copy, so the writing isn't split in two. */}
       {p.images.length > 0 && (
