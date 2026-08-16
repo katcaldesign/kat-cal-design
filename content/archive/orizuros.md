@@ -7,6 +7,7 @@ showSkills: true
 context: Elective, Glasgow School of Art
 year: 2019
 cover: /archive/orizuros.jpg
+video: /archive/orizuros.mp4
 images: []
 order: 6
 link:

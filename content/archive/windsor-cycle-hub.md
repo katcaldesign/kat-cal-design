@@ -7,6 +7,7 @@ showSkills: true
 context: Co-founded
 year: 2020
 cover: /archive/windsor-cycle-hub.png
+video: https://www.youtube.com/watch?v=JOYzOjxNzFk
 images: []
 order: 4
 link:
@@ -26,5 +27,3 @@ approach: |
 
 showApproach: true
 ---
-
-Body text

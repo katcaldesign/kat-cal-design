@@ -17,13 +17,16 @@ import {
   type ArchiveCategory,
   type ArchiveProject,
   type ArchiveSection,
+  type ArchiveVideo,
 } from "./archive";
 
 const CONTENT_DIR = path.join(process.cwd(), "content", "archive");
 const PUBLIC_DIR = path.join(process.cwd(), "public");
 
-// True only if the image path points at a file that actually exists in /public.
-function imageExists(p: unknown): p is string {
+// True only if the path points at a file that actually exists in /public. Used
+// for images and video alike, so a path you haven't dropped the file in for yet
+// is simply ignored rather than rendering a broken asset.
+function assetExists(p: unknown): p is string {
   return typeof p === "string" && !!p.trim() && fs.existsSync(path.join(PUBLIC_DIR, p.trim().replace(/^\//, "")));
 }
 
@@ -43,6 +46,34 @@ function toParagraphs(v: unknown): string[] {
     .split(/\n\s*\n/)
     .map((p) => p.replace(/\s+/g, " ").trim())
     .filter(Boolean);
+}
+
+/*
+  Work out what `video:` in the front matter is pointing at.
+
+  You write ONE line and the loader decides:
+  • starts with "/"  → a file in /public (used only if it's really there)
+  • anything else    → YouTube, whether you paste a full watch/share/embed URL
+                       or just the bare 11-character id
+
+  Hosting a clip yourself is fine when it's small, but the site is a static
+  export on GitHub Pages, which refuses files over 100MB and serves whatever
+  you commit at one fixed quality. So anything long or heavy goes on YouTube
+  and only its link lives in the repo.
+*/
+function toVideo(v: unknown): ArchiveVideo | null {
+  const raw = typeof v === "string" ? v.trim() : "";
+  if (!raw) return null;
+
+  if (raw.startsWith("/")) {
+    return assetExists(raw) ? { kind: "file", src: raw } : null;
+  }
+
+  // Pull the id out of whatever YouTube URL shape got pasted in, or accept an
+  // id on its own. YouTube ids are 11 characters of [A-Za-z0-9_-].
+  const id = raw.match(/(?:v=|\/embed\/|youtu\.be\/|\/shorts\/)([A-Za-z0-9_-]{11})/)?.[1]
+    ?? raw.match(/^[A-Za-z0-9_-]{11}$/)?.[0];
+  return id ? { kind: "youtube", src: id } : null;
 }
 
 /*
@@ -91,10 +122,11 @@ export function getArchiveProjects(): ArchiveProject[] {
       showSkills: data.showSkills !== false,
       context: String(data.context ?? ""),
       year: data.year != null ? String(data.year) : "",
-      cover: imageExists(data.cover) ? String(data.cover).trim() : null,
-      poster: imageExists(data.poster) ? String(data.poster).trim() : null,
-      images: toList(data.images).filter(imageExists),
-      illustrations: toList(data.illustrations).filter(imageExists),
+      cover: assetExists(data.cover) ? String(data.cover).trim() : null,
+      poster: assetExists(data.poster) ? String(data.poster).trim() : null,
+      video: toVideo(data.video),
+      images: toList(data.images).filter(assetExists),
+      illustrations: toList(data.illustrations).filter(assetExists),
       link: data.link ? String(data.link) : undefined,
       order: typeof data.order === "number" ? data.order : 999,
       description: toParagraphs(content),

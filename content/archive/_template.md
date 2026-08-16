@@ -9,6 +9,13 @@ year: 2023
 cover: /archive/your-image.jpg  # drop the file in /public/archive/ (blank = placeholder tile)
 poster:                         # optional tall hero image; on a big screen it sits BESIDE the copy
                                 # (and widens the panel to make room). Leave blank for a normal panel.
+
+# Optional clip below the copy (blank = no video). Either a file you host
+# yourself, /archive/your-clip.mp4 (H.264 mp4, keep it under ~10MB, poster comes
+# from the cover), or a YouTube link/id, https://youtu.be/dQw4w9WgXcQ. Anything
+# long or heavy should be YouTube: GitHub Pages refuses files over 100MB and
+# serves what you commit at one fixed quality.
+video: /archive/your-clip.mp4
 images: []                      # optional gallery you page through, e.g. [/archive/x-1.jpg, /archive/x-2.jpg]
                                 # keep every frame the same shape or the carousel jumps height as you page
 illustrations: []               # optional row of artwork above the copy; hovering one frame expands it

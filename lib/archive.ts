@@ -86,6 +86,22 @@ export type ArchiveSection = {
   paragraphs: string[];
 };
 
+/*
+  A project's optional video, shown under the copy.
+
+  Two kinds, because a portfolio video is either hosted somewhere that handles
+  the streaming for you, or it's a file sitting in /public:
+  • "youtube" — `src` is the bare video id, embedded through youtube-nocookie.
+  • "file"    — `src` is a path in /public, played by the browser's own player.
+
+  The loader works out which from what you write, so the markdown only ever has
+  one `video:` line. See lib/archive-loader.ts.
+*/
+export type ArchiveVideo = {
+  kind: "youtube" | "file";
+  src: string;
+};
+
 export type ArchiveProject = {
   slug: string;
   title: string; // short name, e.g. "design:ends"
@@ -97,6 +113,7 @@ export type ArchiveProject = {
   year: string;
   cover: string | null; // e.g. "/archive/brompton.jpg" — null until the image exists
   poster: string | null; // optional tall hero image; when present it sits beside the copy
+  video: ArchiveVideo | null; // optional clip under the copy (null when there isn't one)
   images: string[]; // optional gallery, shown as a paged carousel (paths that exist)
   illustrations: string[]; // optional artwork row, shown as the hover accordion
   link?: string;
