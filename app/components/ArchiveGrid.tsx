@@ -11,7 +11,13 @@
 
 import { useMemo, useRef, useState } from "react";
 import SidePanel from "./SidePanel";
-import { ARCHIVE_CATEGORIES, areaColorForSkill, type ArchiveCategory, type ArchiveProject } from "../../lib/archive";
+import {
+  ARCHIVE_CATEGORIES,
+  areaColorForSkill,
+  type ArchiveCategory,
+  type ArchiveProject,
+  type ArchiveVideo,
+} from "../../lib/archive";
 
 const FILTERS = ["All", ...ARCHIVE_CATEGORIES] as const;
 type Filter = (typeof FILTERS)[number];
@@ -92,15 +98,36 @@ function IllustrationStrip({ illustrations }: { illustrations: string[] }) {
 }
 
 // ── Video — a single clip below the copy, for the film/animation projects. ──
-// Deliberately plain: native controls, nothing autoplaying. `preload="metadata"`
-// means the browser fetches only the header (a few KB) until someone presses
-// play, so a project with a heavy clip costs nothing to open. The poster is the
-// project's own cover, so the frame you clicked in the grid is the frame that
-// greets you here.
-function Video({ src, poster, title }: { src: string; poster: string | null; title: string }) {
+// Deliberately plain: native controls, nothing autoplaying, square corners.
+//
+// A self-hosted file uses the browser's own player. `preload="metadata"` means
+// it fetches only the header (a few KB) until someone presses play, so a heavy
+// clip costs nothing to open, and the poster is the project's own cover, so the
+// frame you clicked in the grid is the frame that greets you here.
+//
+// A YouTube clip is an iframe instead, through youtube-nocookie so no tracking
+// cookie is set until play, and `loading="lazy"` so nothing is fetched from
+// YouTube until the panel is actually open. YouTube supplies its own thumbnail,
+// which is why the cover isn't used there.
+//
+// Both sit in the same 16:9 box, so panel height doesn't jump while loading.
+function Video({ video, poster, title }: { video: ArchiveVideo; poster: string | null; title: string }) {
+  if (video.kind === "youtube") {
+    return (
+      <iframe
+        src={`https://www.youtube-nocookie.com/embed/${video.src}?rel=0`}
+        title={`${title} video`}
+        loading="lazy"
+        allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+        allowFullScreen
+        className="aspect-video w-full border border-border bg-ink"
+      />
+    );
+  }
+
   return (
     <video
-      src={src}
+      src={video.src}
       poster={poster ?? undefined}
       controls
       playsInline
@@ -220,7 +247,7 @@ function ArchiveDetail({ p }: { p: ArchiveProject }) {
           watching it. */}
       {p.video && (
         <div className="mt-8">
-          <Video src={p.video} poster={p.cover} title={p.title} />
+          <Video video={p.video} poster={p.cover} title={p.title} />
         </div>
       )}
 
