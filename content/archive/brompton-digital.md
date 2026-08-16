@@ -1,17 +1,25 @@
 ---
 title: Brompton Digital
-headline: Initiation and research into Brompton's digital space
+headline: Ranking digital features by rider value and build feasibility
 categories: [UX, Design Research]
-skills: [User Research, Co-creation, Conceptual Modelling, Prototyping, Product Metrics]
+skills: [User Research, Co-creation, Storyboarding, Feature Prioritisation, Product Metrics]
 showSkills: true
 context: Brompton
 year: 2023
 cover: /archive/brompton-digital.png
-images: []
+images:
+  - /archive/brompton-digital/01-unboxing.png
+  - /archive/brompton-digital/02-commute.png
+  - /archive/brompton-digital/03-ride-data.png
+  - /archive/brompton-digital/04-error.png
 order: 2
 link:
 ---
 
-I initiated a project researching how digital services could add more value for Brompton's electric riders. The approach was inherently human-centred — creating value for both users and internal stakeholders, with a focus on newer, younger user groups.
+Brompton had no digital offer for its electric riders. I initiated this project to find out what one could be, and which parts were worth building first.
 
-Stakeholder workshops, competitor analysis, storyboarding and quantitative surveys shaped the direction, while a key requirement kept every suggested design action within Brompton's real capabilities.
+I mapped the rider journey end to end (unboxing, the daily commute, mid-ride, and the moments things go wrong), then used it to ideate and pressure-test service concepts as storyboards, before any of them cost engineering time.
+
+Stakeholder workshops then scored internal feasibility, while surveys and co-creation sessions quantified what riders actually valued, weighted toward the younger buyers Brompton wanted to reach.
+
+The result was a prioritised feature set, bounded by what the business could realistically ship, and a view of where digital could add commercial value rather than cost.

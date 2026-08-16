@@ -49,6 +49,8 @@ export const SKILL_AREA: Record<string, SkillArea> = {
   "Conceptual Modelling": "ux",
   "Wireframing": "ux",
   "Prototyping": "ux",
+  "Storyboarding": "ux",
+  "Feature Prioritisation": "ux",
   // UI
   "UI": "ui",
   "Visual Design": "ui",

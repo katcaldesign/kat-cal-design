@@ -61,9 +61,40 @@ function SkillPills({ skills }: { skills: string[] }) {
   );
 }
 
+// ── Illustration strip: decorative row of project artwork. ──────────────────
+// Flex accordion: hovering a frame grows it and compresses the others (the
+// .illo-* rules live in globals.css, next to the cat logo they borrow their
+// spring curve from). Below md it's a 2×2 grid, because there's no hover on
+// touch and four across a phone gives ~85px frames.
+//
+// aria-hidden because this is decoration: the artwork carries no information the
+// body copy doesn't already state, and `images` is a bare string[] with nowhere
+// to put alt text. Better to hide it than to announce four unlabelled images.
+function IllustrationStrip({ images }: { images: string[] }) {
+  return (
+    <div aria-hidden className="grid grid-cols-2 gap-2 md:flex md:h-40">
+      {images.map((src, i) => (
+        <div
+          key={src}
+          style={{ animationDelay: `${i * 70}ms` }}
+          className="illo-frame illo-enter aspect-[3/2] overflow-hidden rounded-lg border border-border md:aspect-auto md:h-full"
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={src} alt="" className="h-full w-full object-cover" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 // ── Carousel — horizontal scroll-snap strip of landscape images. ────────────
 // CSS scroll-snap does the work (smooth, swipeable on mobile); the arrows just
 // scroll by one panel-width. Feed it the `images` array from a project.
+//
+// Currently unused: `images` renders through IllustrationStrip above. Kept for a
+// future project with a real gallery, where paging beats an accordion. Swap the
+// call in ArchiveDetail. Delete both this and the disable below if that never lands.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function Carousel({ images }: { images: string[] }) {
   const scroller = useRef<HTMLDivElement>(null);
 
@@ -132,6 +163,13 @@ function ArchiveDetail({ p }: { p: ArchiveProject }) {
         </div>
       )}
 
+      {/* Artwork sits above the copy, as it did on the old Framer page. */}
+      {p.images.length > 0 && (
+        <div className="mt-8">
+          <IllustrationStrip images={p.images} />
+        </div>
+      )}
+
       <div className="mt-8 flex flex-col gap-4">
         {p.description.map((para, i) => (
           <p key={i} className="kat-body-lg text-ink-dark">
@@ -139,12 +177,6 @@ function ArchiveDetail({ p }: { p: ArchiveProject }) {
           </p>
         ))}
       </div>
-
-      {p.images.length > 0 && (
-        <div className="mt-8">
-          <Carousel images={p.images} />
-        </div>
-      )}
 
       {p.link && (
         <a
