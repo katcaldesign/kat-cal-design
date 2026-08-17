@@ -102,6 +102,27 @@ export type ArchiveVideo = {
   src: string;
 };
 
+/*
+  A titled note: a few words of heading, a sentence or two under it.
+
+  Two optional lists on a project are built from these, and both are static
+  (nothing to hover, nothing to page through):
+  • `process` renders as a row of steps across a ruled line, for describing how
+    you work rather than what you shipped.
+  • `methods` renders as a grid of small cards.
+
+  Each list carries its own heading, so a project can call them whatever fits.
+*/
+export type ArchiveNote = {
+  title: string;
+  text: string;
+};
+
+export type ArchiveNoteList = {
+  heading: string;
+  notes: ArchiveNote[];
+};
+
 export type ArchiveProject = {
   slug: string;
   title: string; // short name, e.g. "design:ends"
@@ -120,4 +141,6 @@ export type ArchiveProject = {
   order: number;
   description: string[]; // narrative (the body text), split into paragraphs
   sections: ArchiveSection[]; // Overview / Approach — empty ones already removed
+  process: ArchiveNoteList | null; // optional ruled row of steps (null when unused)
+  methods: ArchiveNoteList | null; // optional card grid (null when unused)
 };
