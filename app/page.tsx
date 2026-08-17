@@ -7,11 +7,10 @@ export default function Home() {
         Systems-focused product designer
       </p>
       <h1 className="kat-body-xl mt-4 font-medium text-balance text-ink">
-        Katie Calvert — designing calm, systematic products, and learning to build them.
+        Katie Calvert
       </h1>
       <p className="kat-body-md mt-6 text-ink-mid">
-        Currently Senior Product Designer at Ffern. This site is where I sharpen my craft in
-        public.
+        Currently Senior Product Designer at Ffern.
       </p>
 
       <div className="mt-8 flex items-center gap-6">

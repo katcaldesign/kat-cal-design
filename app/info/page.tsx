@@ -8,8 +8,7 @@ export default function About() {
         <h1 className="kat-body-xl mt-4 font-medium text-ink">Katie Calvert</h1>
         <p className="kat-body-md mt-6 text-ink-mid">
           I&apos;m a systems-focused product designer based in London, currently Senior Product
-          Designer at Ffern. I work across UX and increasingly UI — this site is where I&apos;m
-          sharpening my craft in public.
+          Designer at Ffern.
         </p>
       </section>
 
