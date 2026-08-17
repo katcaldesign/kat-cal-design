@@ -141,6 +141,11 @@ function Video({ video, poster, title }: { video: ArchiveVideo; poster: string |
 // ── Carousel — horizontal scroll-snap strip of landscape images. ────────────
 // CSS scroll-snap does the work (smooth, swipeable on mobile); the arrows just
 // scroll by one panel-width. Feed it the `images` array from a project.
+//
+// The smoothness comes from `behavior: "smooth"` in page() below, so there's no
+// `scroll-smooth` class here. Setting scroll-behavior in CSS as well, on a
+// snap-mandatory container, can leave Chromium cancelling the programmatic
+// scroll and re-snapping to where it started.
 function Carousel({ images }: { images: string[] }) {
   const scroller = useRef<HTMLDivElement>(null);
 
@@ -153,7 +158,7 @@ function Carousel({ images }: { images: string[] }) {
     <div className="relative">
       <div
         ref={scroller}
-        className="flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-smooth rounded-lg [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="flex snap-x snap-mandatory gap-3 overflow-x-auto rounded-lg [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         {images.map((src) => (
           // eslint-disable-next-line @next/next/no-img-element
@@ -216,32 +221,60 @@ function ArchiveDetail({ p }: { p: ArchiveProject }) {
         </div>
       )}
 
-      {/* The unlabelled body text, straight from below the front matter. */}
-      {p.description.length > 0 && (
-        <div className="mt-8 flex flex-col gap-4">
-          {p.description.map((para, i) => (
-            <p key={i} className="kat-body-md text-ink-dark">
-              {para}
-            </p>
-          ))}
-        </div>
-      )}
+      {/* Poster + writing.
 
-      {/* Labelled sections (Overview, Approach). The loader has already
-          dropped any that are empty or switched off, so whatever arrives here
-          is meant to be on screen. */}
-      {p.sections.map((s) => (
-        <section key={s.label} className="mt-8">
-          <h3 className="kat-mono-sm uppercase tracking-wider text-ink-light">{s.label}</h3>
-          <div className="mt-3 flex flex-col gap-4">
-            {s.paragraphs.map((para, i) => (
-              <p key={i} className="kat-body-md text-ink-dark">
-                {para}
-              </p>
+          Some projects (the splitboard boot, for one) lead with a tall poster
+          that carries the whole idea. Where one exists, it pairs with the copy
+          side by side rather than pushing it down the panel — but only at xl,
+          where the drawer widens to 1000px and both halves still get room to
+          breathe. Below that, and for every project WITHOUT a poster, this is
+          the same single stacked column as before. */}
+      {(p.poster || p.description.length > 0 || p.sections.length > 0) && (
+        <div
+          className={`mt-8 ${
+            p.poster ? "grid gap-8 xl:grid-cols-[1.15fr_1fr] xl:items-start xl:gap-10" : ""
+          }`}
+        >
+          {p.poster && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={p.poster}
+              alt={`${p.title} poster`}
+              className="w-full rounded-lg border border-border"
+            />
+          )}
+
+          {/* The copy column: body text first, then the labelled sections. */}
+          <div className="flex flex-col gap-8">
+            {/* The unlabelled body text, straight from below the front matter. */}
+            {p.description.length > 0 && (
+              <div className="flex flex-col gap-4">
+                {p.description.map((para, i) => (
+                  <p key={i} className="kat-body-md text-ink-dark">
+                    {para}
+                  </p>
+                ))}
+              </div>
+            )}
+
+            {/* Labelled sections (Overview, Approach). The loader has already
+                dropped any that are empty or switched off, so whatever arrives
+                here is meant to be on screen. */}
+            {p.sections.map((s) => (
+              <section key={s.label}>
+                <h3 className="kat-mono-sm uppercase tracking-wider text-ink-light">{s.label}</h3>
+                <div className="mt-3 flex flex-col gap-4">
+                  {s.paragraphs.map((para, i) => (
+                    <p key={i} className="kat-body-md text-ink-dark">
+                      {para}
+                    </p>
+                  ))}
+                </div>
+              </section>
             ))}
           </div>
-        </section>
-      ))}
+        </div>
+      )}
 
       {/* Video sits under the copy, so you read what the piece is before
           watching it. */}
@@ -320,7 +353,16 @@ export default function ArchiveGrid({ projects }: { projects: ArchiveProject[] }
         <p className="kat-body-md mt-8 text-ink-mid">Nothing in this category yet.</p>
       )}
 
-      <SidePanel open={!!active} onClose={() => setOpenSlug(null)} label={active?.title}>
+      {/* Only poster-led projects get the roomier drawer, because that's the
+          only layout with two columns to fill. Widening it for a project
+          without one would just stretch a single column of text past a
+          readable line length. */}
+      <SidePanel
+        open={!!active}
+        onClose={() => setOpenSlug(null)}
+        label={active?.title}
+        wide={!!active?.poster}
+      >
         {active && <ArchiveDetail p={active} />}
       </SidePanel>
     </>

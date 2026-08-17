@@ -123,6 +123,7 @@ export function getArchiveProjects(): ArchiveProject[] {
       context: String(data.context ?? ""),
       year: data.year != null ? String(data.year) : "",
       cover: assetExists(data.cover) ? String(data.cover).trim() : null,
+      poster: assetExists(data.poster) ? String(data.poster).trim() : null,
       video: toVideo(data.video),
       images: toList(data.images).filter(assetExists),
       illustrations: toList(data.illustrations).filter(assetExists),

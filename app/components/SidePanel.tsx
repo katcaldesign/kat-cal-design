@@ -25,11 +25,23 @@ export default function SidePanel({
   open,
   onClose,
   label,
+  wide = false,
   children,
 }: {
   open: boolean;
   onClose: () => void;
   label?: string;
+  /*
+    Opt a single opening into a roomier drawer. Some archive projects lead with
+    a tall poster that wants to sit BESIDE the writing, and two columns inside
+    the default 720px leaves ~300px each: too narrow to read the poster's
+    annotations, too narrow for a comfortable line of text. Only kicks in at xl,
+    where 1000px is still a drawer rather than the whole screen. Everything
+    else — WORK, and archive projects without a poster — keeps the default,
+    because widening a single column just stretches the text past a readable
+    line length.
+  */
+  wide?: boolean;
   children: React.ReactNode;
 }) {
   const panelRef = useRef<HTMLDivElement>(null);
@@ -85,6 +97,8 @@ export default function SidePanel({
         aria-label={label}
         tabIndex={-1}
         className={`absolute inset-x-0 bottom-0 flex max-h-[85vh] flex-col rounded-t-2xl border-t border-border bg-bg shadow-2xl outline-none transition-transform duration-300 ease-out md:inset-y-0 md:left-auto md:right-0 md:max-h-none md:w-[640px] md:max-w-[92vw] md:rounded-none md:border-l md:border-t-0 lg:w-[720px] ${
+          wide ? "xl:w-[1000px]" : ""
+        } ${
           open ? "translate-y-0 md:translate-x-0" : "translate-y-full md:translate-y-0 md:translate-x-full"
         }`}
       >
