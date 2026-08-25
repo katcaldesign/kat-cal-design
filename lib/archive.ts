@@ -102,6 +102,32 @@ export type ArchiveVideo = {
   src: string;
 };
 
+/*
+  A BLOCK is one strand of the project, shown as a card: a small heading, a
+  short piece of writing, and the artwork that proves it.
+
+  Sections (above) answer "what was this project and how did I approach it" in
+  prose. Blocks answer "what did I actually make" one strand at a time, so
+  Windsor Cycle Hub can show its branding, its website and its service design as
+  three separate pieces of work rather than one long column of text.
+
+  Media is either ONE still (`image`) or SEVERAL you page through (`images`,
+  rendered by the same carousel the gallery uses). A block can have neither and
+  still render, which is what lets you write the copy now and drop the artwork in
+  later.
+
+  `wide` spans the card across both columns and stands the copy beside the
+  artwork instead of above it. The loader turns it on by itself for any block
+  carrying a carousel, since a half-width card is too tight to page through.
+*/
+export type ArchiveBlock = {
+  title: string;
+  paragraphs: string[];
+  image: string | null;
+  images: string[];
+  wide: boolean;
+};
+
 export type ArchiveProject = {
   slug: string;
   title: string; // short name, e.g. "design:ends"
@@ -116,6 +142,8 @@ export type ArchiveProject = {
   video: ArchiveVideo | null; // optional clip under the copy (null when there isn't one)
   images: string[]; // optional gallery, shown as a paged carousel (paths that exist)
   illustrations: string[]; // optional artwork row, shown as the hover accordion
+  blocks: ArchiveBlock[]; // optional cards, one per strand of the work (see ArchiveBlock)
+  banner: string | null; // optional wide image that closes the panel, edge to edge
   link?: string;
   order: number;
   description: string[]; // narrative (the body text), split into paragraphs

@@ -225,14 +225,21 @@ body {
 @utility kat-body-xs { font-family: var(--font-sans); font-size: 0.625rem; line-height: 1.4; } /* 10px */
 
 /* Mono — Apercu Mono Pro */
-/* Mono labels are single-line uppercase, so line-height stays tight (1.1).
-   text-box trims the leftover cap-height/descender air — this is the CSS
-   equivalent of Figma's "Vertical trim". Chrome/Edge honour it; Safari
-   ignores it gracefully and just falls back to the line-height above. */
-@utility kat-mono-lg { font-family: var(--font-mono); font-size: 1rem;     line-height: 1.1; text-box: trim-both cap alphabetic; } /* 16px */
-@utility kat-mono-md { font-family: var(--font-mono); font-size: 0.875rem; line-height: 1.1; text-box: trim-both cap alphabetic; } /* 14px */
-@utility kat-mono-sm { font-family: var(--font-mono); font-size: 0.75rem;  line-height: 1.1; text-box: trim-both cap alphabetic; } /* 12px */
-@utility kat-mono-xs { font-family: var(--font-mono); font-size: 0.625rem; line-height: 1.1; text-box: trim-both cap alphabetic; } /* 10px */
+/* CAPS ONLY. Apercu Mono is a labelling face here, never reading text, and it's
+   only ever set in caps — so `text-transform: uppercase` lives in the style
+   itself rather than being remembered at each call site. Write the label in
+   whatever case reads best in the markup and it comes out caps on screen. Some
+   call sites still pass Tailwind's `uppercase` too; that's now a no-op, kept
+   because it does no harm.
+
+   Mono labels are single-line, so line-height stays tight (1.1). text-box trims
+   the leftover cap-height/descender air — this is the CSS equivalent of Figma's
+   "Vertical trim". Chrome/Edge honour it; Safari ignores it gracefully and just
+   falls back to the line-height above. */
+@utility kat-mono-lg { font-family: var(--font-mono); font-size: 1rem;     line-height: 1.1; text-transform: uppercase; text-box: trim-both cap alphabetic; } /* 16px */
+@utility kat-mono-md { font-family: var(--font-mono); font-size: 0.875rem; line-height: 1.1; text-transform: uppercase; text-box: trim-both cap alphabetic; } /* 14px */
+@utility kat-mono-sm { font-family: var(--font-mono); font-size: 0.75rem;  line-height: 1.1; text-transform: uppercase; text-box: trim-both cap alphabetic; } /* 12px */
+@utility kat-mono-xs { font-family: var(--font-mono); font-size: 0.625rem; line-height: 1.1; text-transform: uppercase; text-box: trim-both cap alphabetic; } /* 10px */
 
 /*
   COMPONENT — animated cat logo

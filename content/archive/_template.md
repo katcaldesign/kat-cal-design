@@ -33,6 +33,33 @@ showOverview: true
 approach: |
   How you went about it.
 showApproach: true
+
+# Blocks: a card per strand of the work, after the sections above. Sections say
+# what the project WAS; blocks show what you MADE, one piece at a time.
+#
+# Everything in a block is optional. A block with only a title and text renders
+# fine, so you can write the words now and drop the artwork in later. Use EITHER
+# `image` (one still) or `images` (several you page through as a carousel).
+#
+# Two cards sit side by side per row. A block with a carousel takes the whole row
+# on its own and stands its text beside the images, because paging through a
+# half-width card leaves them too small to read. Add `wide: true` to give a
+# single-image block that same full-width treatment.
+#
+# Delete the whole `blocks:` key on a project that doesn't need any.
+blocks:
+  - title: The thing you made
+    text: |
+      A short paragraph on it. A blank line inside starts a new paragraph, same
+      as the sections above.
+    image: /archive/your-image.jpg
+
+  - title: Something with several frames
+    text: |
+      Keep every frame the same shape or the carousel jumps height as you page.
+    images: [/archive/x-1.png, /archive/x-2.png]
+
+banner:                          # optional wide image closing the panel, edge to edge
 ---
 
 Narrative, one or two tight paragraphs. Keep it human and short. This sits

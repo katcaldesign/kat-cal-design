@@ -14,6 +14,7 @@ import path from "node:path";
 import matter from "gray-matter";
 import {
   ARCHIVE_CATEGORIES,
+  type ArchiveBlock,
   type ArchiveCategory,
   type ArchiveProject,
   type ArchiveSection,
@@ -98,6 +99,44 @@ function toSections(data: Record<string, unknown>): ArchiveSection[] {
   });
 }
 
+/*
+  Read the `blocks:` list: the cards that show one strand of the work each.
+
+  This is the one nested shape in the front matter, so it's the one place the
+  loader walks a list of objects rather than a list of strings. Everything is
+  optional inside a block, which is deliberate: a block with only a title and
+  copy renders perfectly well, so you can write the words today and drop the
+  artwork in whenever it's ready. A block with NOTHING in it is dropped, so a
+  half-finished entry never leaves an empty card on the page.
+
+  Missing image files are filtered out the same way they are everywhere else
+  (assetExists), so a path you haven't uploaded yet is ignored instead of
+  rendering as a broken image.
+*/
+function toBlocks(v: unknown): ArchiveBlock[] {
+  if (!Array.isArray(v)) return [];
+
+  return v.flatMap((entry): ArchiveBlock[] => {
+    if (typeof entry !== "object" || entry === null) return [];
+    const raw = entry as Record<string, unknown>;
+
+    const images = toList(raw.images).filter(assetExists);
+    const block: ArchiveBlock = {
+      title: String(raw.title ?? "").trim(),
+      paragraphs: toParagraphs(raw.text),
+      image: assetExists(raw.image) ? String(raw.image).trim() : null,
+      images,
+      // Full width if you asked for it, and always for a carousel: paging
+      // through images in a half-width card leaves them too small to read.
+      wide: raw.wide === true || images.length > 0,
+    };
+
+    const empty =
+      !block.title && !block.paragraphs.length && !block.image && !block.images.length;
+    return empty ? [] : [block];
+  });
+}
+
 export function getArchiveProjects(): ArchiveProject[] {
   const files = fs
     .readdirSync(CONTENT_DIR)
@@ -127,6 +166,8 @@ export function getArchiveProjects(): ArchiveProject[] {
       video: toVideo(data.video),
       images: toList(data.images).filter(assetExists),
       illustrations: toList(data.illustrations).filter(assetExists),
+      blocks: toBlocks(data.blocks),
+      banner: assetExists(data.banner) ? String(data.banner).trim() : null,
       link: data.link ? String(data.link) : undefined,
       order: typeof data.order === "number" ? data.order : 999,
       description: toParagraphs(content),
