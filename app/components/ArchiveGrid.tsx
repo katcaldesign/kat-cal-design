@@ -16,6 +16,7 @@ import {
   areaColorForSkill,
   type ArchiveBlock,
   type ArchiveCategory,
+  type ArchiveNoteList,
   type ArchiveProject,
   type ArchiveVideo,
 } from "../../lib/archive";
@@ -236,7 +237,7 @@ function Carousel({ images, inCard = false }: { images: string[]; inCard?: boole
 //
 // The artwork bleeds to the card's edges rather than sitting inset, which is why
 // the card carries `overflow-hidden` (it clips the image to the rounded corners)
-// and why the carousel is passed `flush` (the card already draws the border and
+// and why the carousel is passed `inCard` (the card already draws the border and
 // the rounding, so the strip shouldn't draw its own).
 function BlockCard({ block }: { block: ArchiveBlock }) {
   const media =
@@ -263,7 +264,7 @@ function BlockCard({ block }: { block: ArchiveBlock }) {
     </div>
   );
 
-  const card = "overflow-hidden rounded-lg border border-border bg-surface";
+  const card = "overflow-hidden rounded-card border border-border bg-surface";
 
   // Writing FIRST in the markup either way, so the wide card reads copy-then-
   // artwork when the columns collapse on a phone, and so a screen reader always
@@ -282,6 +283,58 @@ function BlockCard({ block }: { block: ArchiveBlock }) {
       {media}
       {copy}
     </div>
+  );
+}
+
+/*
+  ── Process — a ruled row of numbered steps. ───────────────────────────────
+
+  For the projects that are really about HOW someone works rather than what
+  they shipped. Each step hangs off a top rule, so the four of them read as one
+  line running left to right, the way the old Framer page did it.
+
+  Static by design: nothing here hides behind a hover or a click, because the
+  steps are the content, not a preview of it. Two across on a phone, four across
+  once the drawer is wide enough to give each one a readable column.
+*/
+function ProcessSteps({ list }: { list: ArchiveNoteList }) {
+  return (
+    <section>
+      <h3 className="kat-mono-sm uppercase tracking-wider text-ink-light">{list.heading}</h3>
+
+      <ol className="mt-5 grid grid-cols-1 gap-x-6 gap-y-7 sm:grid-cols-2 xl:grid-cols-4">
+        {list.notes.map((n, i) => (
+          <li key={n.title} className="border-t border-border pt-4">
+            {/* Zero-padded so the numbers keep a steady width down the column. */}
+            <span className="kat-mono-xs block uppercase tracking-wider text-ink-light">
+              {String(i + 1).padStart(2, "0")}
+            </span>
+            <h4 className="kat-body-md mt-3 font-medium text-ink">{n.title}</h4>
+            <p className="kat-body-md mt-2 text-ink-dark">{n.text}</p>
+          </li>
+        ))}
+      </ol>
+    </section>
+  );
+}
+
+// ── Methods — a static grid of small cards, one per method. ─────────────────
+// Same shape as the process row above, laid out as cards because these are a
+// list of things rather than a sequence.
+function MethodCards({ list }: { list: ArchiveNoteList }) {
+  return (
+    <section>
+      <h3 className="kat-mono-sm uppercase tracking-wider text-ink-light">{list.heading}</h3>
+
+      <div className="mt-5 grid gap-3 sm:grid-cols-2">
+        {list.notes.map((n) => (
+          <div key={n.title} className="rounded-card border border-border bg-surface p-5">
+            <h4 className="kat-body-md font-medium text-ink">{n.title}</h4>
+            <p className="kat-body-md mt-2 text-ink-dark">{n.text}</p>
+          </div>
+        ))}
+      </div>
+    </section>
   );
 }
 
@@ -391,11 +444,25 @@ function ArchiveDetail({ p }: { p: ArchiveProject }) {
         </div>
       )}
 
-      {/* Video sits between the writing and the cards: you read what the project
-          was, watch it, then go through the strands of work in detail. */}
+      {/* Video first among the content below the writing: the copy says what
+          the project was, then you watch it, then you go through the detail. */}
       {p.video && (
         <div className="mt-14">
           <Video video={p.video} poster={p.cover} title={p.title} />
+        </div>
+      )}
+
+      {/* Process and methods break down how the work was done. Either can be
+          absent, and no project uses them alongside blocks today. */}
+      {p.process && (
+        <div className="mt-14">
+          <ProcessSteps list={p.process} />
+        </div>
+      )}
+
+      {p.methods && (
+        <div className="mt-14">
+          <MethodCards list={p.methods} />
         </div>
       )}
 
@@ -488,15 +555,16 @@ export default function ArchiveGrid({ projects }: { projects: ArchiveProject[] }
         <p className="kat-body-md mt-8 text-ink-mid">Nothing in this category yet.</p>
       )}
 
-      {/* Only projects with two columns to fill get the roomier drawer: a poster
-          standing beside the copy, or a set of blocks laid out two-up. Widening
-          it for anything else would just stretch a single column of text past a
-          readable line length. */}
+      {/* The roomier drawer is for the three layouts that have something to
+          fill it with: a poster beside the copy, a row of process steps that
+          wants four columns, or blocks laid out two-up. Widening it for a plain
+          project would just stretch a single column of text past a readable
+          line length. */}
       <SidePanel
         open={!!active}
         onClose={() => setOpenSlug(null)}
         label={active?.title}
-        wide={!!active?.poster || (active?.blocks.length ?? 0) > 0}
+        wide={!!active?.poster || !!active?.process || (active?.blocks.length ?? 0) > 0}
       >
         {active && <ArchiveDetail p={active} />}
       </SidePanel>

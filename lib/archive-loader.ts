@@ -16,6 +16,8 @@ import {
   ARCHIVE_CATEGORIES,
   type ArchiveBlock,
   type ArchiveCategory,
+  type ArchiveNote,
+  type ArchiveNoteList,
   type ArchiveProject,
   type ArchiveSection,
   type ArchiveVideo,
@@ -102,12 +104,10 @@ function toSections(data: Record<string, unknown>): ArchiveSection[] {
 /*
   Read the `blocks:` list: the cards that show one strand of the work each.
 
-  This is the one nested shape in the front matter, so it's the one place the
-  loader walks a list of objects rather than a list of strings. Everything is
-  optional inside a block, which is deliberate: a block with only a title and
-  copy renders perfectly well, so you can write the words today and drop the
-  artwork in whenever it's ready. A block with NOTHING in it is dropped, so a
-  half-finished entry never leaves an empty card on the page.
+  Everything is optional inside a block, which is deliberate: a block with only a
+  title and copy renders perfectly well, so you can write the words today and
+  drop the artwork in whenever it's ready. A block with NOTHING in it is dropped,
+  so a half-finished entry never leaves an empty card on the page.
 
   Missing image files are filtered out the same way they are everywhere else
   (assetExists), so a path you haven't uploaded yet is ignored instead of
@@ -135,6 +135,38 @@ function toBlocks(v: unknown): ArchiveBlock[] {
       !block.title && !block.paragraphs.length && !block.image && !block.images.length;
     return empty ? [] : [block];
   });
+}
+
+/*
+  The two optional note lists (`process`, `methods`).
+
+  Each is a heading plus a list of `title: / text:` entries in the front matter:
+
+    processHeading: How I run research
+    process:
+      - title: Framing
+        text: What decision is on the table.
+
+  A list with no entries, or with no heading, doesn't render at all, so leaving
+  the fields out is the same as never adding them. Entries missing a title or
+  text are dropped rather than rendered half empty.
+
+  These carry no artwork, which is the difference from toBlocks above.
+*/
+function toNoteList(heading: unknown, list: unknown): ArchiveNoteList | null {
+  const label = typeof heading === "string" ? heading.trim() : "";
+  if (!label || !Array.isArray(list)) return null;
+
+  const notes = list.flatMap((item): ArchiveNote[] => {
+    if (!item || typeof item !== "object") return [];
+    const { title, text } = item as Record<string, unknown>;
+    const t = typeof title === "string" ? title.trim() : "";
+    // Collapse the line breaks you get from wrapping the text in the editor.
+    const body = typeof text === "string" ? text.replace(/\s+/g, " ").trim() : "";
+    return t && body ? [{ title: t, text: body }] : [];
+  });
+
+  return notes.length ? { heading: label, notes } : null;
 }
 
 export function getArchiveProjects(): ArchiveProject[] {
@@ -172,6 +204,8 @@ export function getArchiveProjects(): ArchiveProject[] {
       order: typeof data.order === "number" ? data.order : 999,
       description: toParagraphs(content),
       sections: toSections(data),
+      process: toNoteList(data.processHeading, data.process),
+      methods: toNoteList(data.methodsHeading, data.methods),
     };
   });
 
