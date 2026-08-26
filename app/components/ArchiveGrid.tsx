@@ -14,6 +14,7 @@ import SidePanel from "./SidePanel";
 import {
   ARCHIVE_CATEGORIES,
   areaColorForSkill,
+  type ArchiveBlock,
   type ArchiveCategory,
   type ArchiveNoteList,
   type ArchiveProject,
@@ -139,27 +140,55 @@ function Video({ video, poster, title }: { video: ArchiveVideo; poster: string |
   );
 }
 
-// ── Carousel — horizontal scroll-snap strip of landscape images. ────────────
+// ── Carousel — horizontal scroll-snap strip of images. ──────────────────────
 // CSS scroll-snap does the work (smooth, swipeable on mobile); the arrows just
-// scroll by one panel-width. Feed it the `images` array from a project.
+// scroll by one panel-width. Feed it the `images` array from a project, or from
+// one of its blocks. Frame shape is whatever the files are: landscape for a
+// gallery, square for the Instagram sets.
 //
 // The smoothness comes from `behavior: "smooth"` in page() below, so there's no
 // `scroll-smooth` class here. Setting scroll-behavior in CSS as well, on a
 // snap-mandatory container, can leave Chromium cancelling the programmatic
 // scroll and re-snapping to where it started.
-function Carousel({ images }: { images: string[] }) {
+//
+// `inCard` is the treatment for a strip living inside a block card (see
+// BlockCard). Two differences from the standalone gallery:
+//
+// • No rounding or border of its own, because the card already draws those. Left
+//   in, you'd get corners rounded twice over and a doubled-up border.
+// • Frames are narrower than the strip and snap to its START, so the next one
+//   sits half in view at the edge. That both signals there's more to page
+//   through and brings the square Instagram artwork down to a sensible size,
+//   rather than one frame filling the column edge to edge.
+//
+// No position dots on purpose. The artwork that goes through here is often an
+// Instagram carousel that already draws its own, and a second set sitting on top
+// of them reads as a bug.
+function Carousel({ images, inCard = false }: { images: string[]; inCard?: boolean }) {
   const scroller = useRef<HTMLDivElement>(null);
 
+  // Step by one FRAME, not one strip-width: with the peek above they're no
+  // longer the same thing. The distance between two frames' left edges already
+  // includes the gap, so it's the honest step whatever the widths are.
   function page(dir: 1 | -1) {
     const el = scroller.current;
-    if (el) el.scrollBy({ left: dir * el.clientWidth, behavior: "smooth" });
+    if (!el) return;
+    const [a, b] = [el.children[0], el.children[1]] as HTMLElement[];
+    const step = a && b ? b.offsetLeft - a.offsetLeft : el.clientWidth;
+    el.scrollBy({ left: dir * step, behavior: "smooth" });
   }
+
+  const frame = inCard
+    ? "w-[78%] snap-start"
+    : "w-full snap-center rounded-lg border border-border";
 
   return (
     <div className="relative">
       <div
         ref={scroller}
-        className="flex snap-x snap-mandatory gap-3 overflow-x-auto rounded-lg [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className={`flex snap-x snap-mandatory overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${
+          inCard ? "gap-2" : "gap-3 rounded-lg"
+        }`}
       >
         {images.map((src) => (
           // eslint-disable-next-line @next/next/no-img-element
@@ -167,7 +196,8 @@ function Carousel({ images }: { images: string[] }) {
             key={src}
             src={src}
             alt=""
-            className="w-full shrink-0 snap-center rounded-lg border border-border"
+            loading="lazy"
+            className={`shrink-0 ${frame}`}
           />
         ))}
       </div>
@@ -192,6 +222,66 @@ function Carousel({ images }: { images: string[] }) {
           </button>
         </>
       )}
+    </div>
+  );
+}
+
+// ── Blocks: one card per strand of the work. ────────────────────────────────
+// Sections (Overview, Approach) explain the project in prose. Blocks show what
+// was actually made, a piece at a time: the branding, the website, the service.
+//
+// Two shapes, one card. A normal block stacks its artwork above the writing and
+// takes half the row; a `wide` block spans the row and stands the writing beside
+// the artwork instead. Everything inside is optional, so a block whose image
+// hasn't been shot yet still reads as a finished card of writing.
+//
+// The artwork bleeds to the card's edges rather than sitting inset, which is why
+// the card carries `overflow-hidden` (it clips the image to the rounded corners)
+// and why the carousel is passed `inCard` (the card already draws the border and
+// the rounding, so the strip shouldn't draw its own).
+function BlockCard({ block }: { block: ArchiveBlock }) {
+  const media =
+    block.images.length > 0 ? (
+      <Carousel images={block.images} inCard />
+    ) : block.image ? (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img src={block.image} alt={block.title ? `${block.title} artwork` : ""} className="w-full" />
+    ) : null;
+
+  const copy = (
+    <div className="flex flex-col gap-4 p-6 md:p-8">
+      {/* Mono for the card headings, which means caps (the style enforces it).
+          It separates them from the sans body copy below and keeps them in the
+          same voice as the mono labels elsewhere in the panel. */}
+      {block.title && (
+        <h4 className="kat-mono-md tracking-wider text-ink">{block.title}</h4>
+      )}
+      {block.paragraphs.map((para, i) => (
+        <p key={i} className="kat-body-md text-ink-dark">
+          {para}
+        </p>
+      ))}
+    </div>
+  );
+
+  const card = "overflow-hidden rounded-card border border-border bg-surface";
+
+  // Writing FIRST in the markup either way, so the wide card reads copy-then-
+  // artwork when the columns collapse on a phone, and so a screen reader always
+  // meets the words before the picture.
+  if (block.wide) {
+    return (
+      <div className={`${card} md:col-span-2 md:grid md:grid-cols-2 md:items-center`}>
+        {copy}
+        {media}
+      </div>
+    );
+  }
+
+  return (
+    <div className={card}>
+      {media}
+      {copy}
     </div>
   );
 }
@@ -251,6 +341,18 @@ function MethodCards({ list }: { list: ArchiveNoteList }) {
 // ── Project detail inside the panel. ────────────────────────────────────────
 function ArchiveDetail({ p }: { p: ArchiveProject }) {
   const meta = [p.context, p.year].filter(Boolean).join(" · ");
+
+  /*
+    Stand Overview and Approach side by side instead of stacked.
+
+    Only worth doing when the panel is already in its roomier form AND the poster
+    isn't using the second column. A project carrying blocks gets the wide drawer
+    (see the SidePanel call at the bottom of this file), and at that width two
+    short sections stacked leave a lot of empty space to scroll past before the
+    cards begin. Below xl the drawer is narrower, so this drops back to one
+    column on its own.
+  */
+  const pairSections = !p.poster && p.blocks.length > 0 && p.sections.length > 1;
   return (
     <article>
       {/* Cover image is the tile's job — the panel opens on the title. */}
@@ -269,10 +371,11 @@ function ArchiveDetail({ p }: { p: ArchiveProject }) {
 
       {/* Artwork sits above the copy, as it did on the old Framer page. */}
       {p.illustrations.length > 0 && (
-        <div className="mt-8">
+        <div className="mt-14">
           <IllustrationStrip illustrations={p.illustrations} />
         </div>
       )}
+
 
       {/* Poster + writing.
 
@@ -284,7 +387,7 @@ function ArchiveDetail({ p }: { p: ArchiveProject }) {
           the same single stacked column as before. */}
       {(p.poster || p.description.length > 0 || p.sections.length > 0) && (
         <div
-          className={`mt-8 ${
+          className={`mt-14 ${
             p.poster ? "grid gap-8 xl:grid-cols-[1.15fr_1fr] xl:items-start xl:gap-10" : ""
           }`}
         >
@@ -298,7 +401,7 @@ function ArchiveDetail({ p }: { p: ArchiveProject }) {
           )}
 
           {/* The copy column: body text first, then the labelled sections. */}
-          <div className="flex flex-col gap-8">
+          <div className="flex flex-col gap-10">
             {/* The unlabelled body text, straight from below the front matter. */}
             {p.description.length > 0 && (
               <div className="flex flex-col gap-4">
@@ -313,49 +416,81 @@ function ArchiveDetail({ p }: { p: ArchiveProject }) {
             {/* Labelled sections (Overview, Approach). The loader has already
                 dropped any that are empty or switched off, so whatever arrives
                 here is meant to be on screen. */}
-            {p.sections.map((s) => (
-              <section key={s.label}>
-                <h3 className="kat-mono-sm uppercase tracking-wider text-ink-light">{s.label}</h3>
-                <div className="mt-3 flex flex-col gap-4">
-                  {s.paragraphs.map((para, i) => (
-                    <p key={i} className="kat-body-md text-ink-dark">
-                      {para}
-                    </p>
-                  ))}
-                </div>
-              </section>
-            ))}
+            {p.sections.length > 0 && (
+              <div
+                className={
+                  pairSections
+                    ? "grid gap-10 xl:grid-cols-2 xl:items-start xl:gap-12"
+                    : "flex flex-col gap-10"
+                }
+              >
+                {p.sections.map((s) => (
+                  <section key={s.label}>
+                    <h3 className="kat-mono-sm uppercase tracking-wider text-ink-light">
+                      {s.label}
+                    </h3>
+                    <div className="mt-3 flex flex-col gap-4">
+                      {s.paragraphs.map((para, i) => (
+                        <p key={i} className="kat-body-md text-ink-dark">
+                          {para}
+                        </p>
+                      ))}
+                    </div>
+                  </section>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}
 
-      {/* Process and methods sit under the writing: the copy says what the work
-          was, these two break down how it was done. Either can be absent. */}
+      {/* Video first among the content below the writing: the copy says what
+          the project was, then you watch it, then you go through the detail. */}
+      {p.video && (
+        <div className="mt-14">
+          <Video video={p.video} poster={p.cover} title={p.title} />
+        </div>
+      )}
+
+      {/* Process and methods break down how the work was done. Either can be
+          absent, and no project uses them alongside blocks today. */}
       {p.process && (
-        <div className="mt-10">
+        <div className="mt-14">
           <ProcessSteps list={p.process} />
         </div>
       )}
 
       {p.methods && (
-        <div className="mt-10">
+        <div className="mt-14">
           <MethodCards list={p.methods} />
         </div>
       )}
 
-      {/* Video sits under the copy, so you read what the piece is before
-          watching it. */}
-      {p.video && (
-        <div className="mt-8">
-          <Video video={p.video} poster={p.cover} title={p.title} />
+      {/* The strands of the work, after the writing that frames them.
+          items-start so a short card doesn't stretch to match a tall neighbour. */}
+      {p.blocks.length > 0 && (
+        <div className="mt-14 grid gap-5 md:grid-cols-2 md:items-start">
+          {p.blocks.map((b, i) => (
+            <BlockCard key={i} block={b} />
+          ))}
         </div>
       )}
 
       {/* Gallery last, after all the copy, so the writing isn't split in two. */}
       {p.images.length > 0 && (
-        <div className="mt-8">
+        <div className="mt-14">
           <Carousel images={p.images} />
         </div>
+      )}
+
+      {/* A wide graphic to close on, if the project has one. */}
+      {p.banner && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={p.banner}
+          alt={`${p.title} banner`}
+          className="mt-14 w-full rounded-lg border border-border"
+        />
       )}
 
       {p.link && (
@@ -363,7 +498,7 @@ function ArchiveDetail({ p }: { p: ArchiveProject }) {
           href={p.link}
           target="_blank"
           rel="noopener noreferrer"
-          className="kat-mono-sm mt-8 inline-flex uppercase tracking-wider text-link hover:text-link-hover"
+          className="kat-mono-sm mt-14 inline-flex uppercase tracking-wider text-link hover:text-link-hover"
         >
           View project ↗
         </a>
@@ -420,15 +555,16 @@ export default function ArchiveGrid({ projects }: { projects: ArchiveProject[] }
         <p className="kat-body-md mt-8 text-ink-mid">Nothing in this category yet.</p>
       )}
 
-      {/* The roomier drawer is for the two layouts that have something to fill
-          it with: a poster beside the copy, or a row of process steps that
-          wants four columns. Widening it for a plain project would just stretch
-          a single column of text past a readable line length. */}
+      {/* The roomier drawer is for the three layouts that have something to
+          fill it with: a poster beside the copy, a row of process steps that
+          wants four columns, or blocks laid out two-up. Widening it for a plain
+          project would just stretch a single column of text past a readable
+          line length. */}
       <SidePanel
         open={!!active}
         onClose={() => setOpenSlug(null)}
         label={active?.title}
-        wide={!!active?.poster || !!active?.process}
+        wide={!!active?.poster || !!active?.process || (active?.blocks.length ?? 0) > 0}
       >
         {active && <ArchiveDetail p={active} />}
       </SidePanel>
