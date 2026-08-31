@@ -44,6 +44,7 @@ export const SKILL_AREA: Record<string, SkillArea> = {
   "Academic Research": "research",
   "Usability Testing": "research",
   "Product Metrics": "research",
+  "Competitor Analysis": "research",
   // UX
   "Behavioural Design": "ux",
   "Conceptual Modelling": "ux",
