@@ -55,4 +55,7 @@ blocks:
         /archive/windsor-cycle-hub-rides-6.png,
         /archive/windsor-cycle-hub-rides-7.png,
       ]
+
+# The wide graphic the panel closes on.
+banner: /archive/windsor-cycle-hub-banner.png
 ---
