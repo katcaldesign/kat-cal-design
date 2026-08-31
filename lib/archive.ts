@@ -86,27 +86,6 @@ export type ArchiveSection = {
   paragraphs: string[];
 };
 
-/*
-  How the labelled items at the top of the panel are arranged.
-
-  Those items are Context, Year, Overview and Approach, in that order: the two
-  facts about the project followed by the two pieces of writing, all wearing the
-  same small label. They are the first thing you read, so how they sit matters.
-
-  • "stacked" (the default) runs them down one column, which suits a long
-    Overview and reads the same at every width.
-  • "grid" puts them two across, so the four become a 2x2: the facts on the top
-    row, the writing beneath. Worth it when the writing is short, since four
-    short items stacked leave a lot of empty panel to scroll past.
-
-  This is a choice per project, set with `sectionLayout:` in the markdown, NOT
-  something inferred from what else the project happens to carry. Two rules the
-  component still enforces on top of it: a project with a poster is always
-  stacked (the poster is already using the second column), and the grid only
-  opens up at xl, because below that the panel is too narrow for two readable
-  columns of text.
-*/
-export type SectionLayout = "stacked" | "grid";
 
 /*
   A project's optional video, shown under the copy.
@@ -194,7 +173,6 @@ export type ArchiveProject = {
   order: number;
   description: string[]; // narrative (the body text), split into paragraphs
   sections: ArchiveSection[]; // Overview / Approach — empty ones already removed
-  sectionLayout: SectionLayout; // stacked column or 2-across grid (see SectionLayout)
   process: ArchiveNoteList | null; // optional ruled row of steps (null when unused)
   methods: ArchiveNoteList | null; // optional card grid (null when unused)
 };

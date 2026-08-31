@@ -6,7 +6,7 @@
   component — because it uses node:fs.
 
   To add a project: copy content/archive/_template.md, fill it in, drop images
-  in /public/archive/, commit.
+  in /assets/archive/, commit.
 */
 
 import fs from "node:fs";
@@ -21,17 +21,34 @@ import {
   type ArchiveProject,
   type ArchiveSection,
   type ArchiveVideo,
-  type SectionLayout,
 } from "./archive";
 
 const CONTENT_DIR = path.join(process.cwd(), "content", "archive");
+const ASSETS_DIR = path.join(process.cwd(), "assets");
 const PUBLIC_DIR = path.join(process.cwd(), "public");
 
-// True only if the path points at a file that actually exists in /public. Used
-// for images and video alike, so a path you haven't dropped the file in for yet
-// is simply ignored rather than rendering a broken asset.
+const RASTER = /\.(png|jpe?g)$/i;
+
+/*
+  True only if the path in the front matter points at a file that's really
+  there, so a path you haven't dropped the file in for yet is quietly ignored
+  rather than rendering a broken asset.
+
+  Two trees to check, because the front matter path ("/archive/x.png") is a
+  logical id rather than a URL, and where the file lives depends on its type:
+
+  • a raster is a MASTER in /assets — never published, resized into
+    /public/_img at build time, and reached through the image loader
+  • anything else (the mp4, an SVG) is served straight out of /public
+
+  Get this wrong in the lenient direction and the symptom is confusing: the
+  project renders with no artwork at all, because every image silently fails
+  this check and the components fall back to their no-image layout.
+*/
 function assetExists(p: unknown): p is string {
-  return typeof p === "string" && !!p.trim() && fs.existsSync(path.join(PUBLIC_DIR, p.trim().replace(/^\//, "")));
+  if (typeof p !== "string" || !p.trim()) return false;
+  const rel = p.trim().replace(/^\//, "");
+  return fs.existsSync(path.join(RASTER.test(rel) ? ASSETS_DIR : PUBLIC_DIR, rel));
 }
 
 // Accept a YAML value that may be a single string or a list; return a clean array.
@@ -56,7 +73,7 @@ function toParagraphs(v: unknown): string[] {
   Work out what `video:` in the front matter is pointing at.
 
   You write ONE line and the loader decides:
-  • starts with "/"  → a file in /public (used only if it's really there)
+  • starts with "/"  → a self-hosted file in /public (used only if it's there)
   • anything else    → YouTube, whether you paste a full watch/share/embed URL
                        or just the bare 11-character id
 
@@ -100,17 +117,6 @@ function toSections(data: Record<string, unknown>): ArchiveSection[] {
     const paragraphs = toParagraphs(data[field]);
     return paragraphs.length ? [{ label, paragraphs }] : [];
   });
-}
-
-/*
-  Read `sectionLayout:` off the front matter.
-
-  Anything other than the word "grid" means stacked, so a project that says
-  nothing (or fumbles the spelling) gets the safe single column rather than a
-  layout it never asked for.
-*/
-function toSectionLayout(v: unknown): SectionLayout {
-  return String(v ?? "").trim().toLowerCase() === "grid" ? "grid" : "stacked";
 }
 
 /*
@@ -216,7 +222,6 @@ export function getArchiveProjects(): ArchiveProject[] {
       order: typeof data.order === "number" ? data.order : 999,
       description: toParagraphs(content),
       sections: toSections(data),
-      sectionLayout: toSectionLayout(data.sectionLayout),
       process: toNoteList(data.processHeading, data.process),
       methods: toNoteList(data.methodsHeading, data.methods),
     };

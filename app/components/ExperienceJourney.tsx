@@ -20,6 +20,7 @@
     detail: ["One or two lines about the role."],
 */
 
+import Image from "next/image";
 import { useState } from "react";
 
 type Entry = {
@@ -97,8 +98,9 @@ function RowContent({ entry, open }: { entry: Entry; open: boolean }) {
       <span
         className={`h-10 w-10 shrink-0 overflow-hidden rounded-lg ${entry.logoBg ?? "bg-surface"}`}
       >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={entry.logo} alt="" className="h-full w-full object-cover" />
+        {/* 40px on screen, so next/image fetches a ~96px file rather than the
+            1000px+ original each of these logos actually is. */}
+        <Image src={entry.logo} alt="" width={40} height={40} className="h-full w-full object-cover" />
       </span>
 
       {/* min-w-0 lets this column actually shrink; the lines wrap rather than

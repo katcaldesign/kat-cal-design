@@ -9,8 +9,11 @@
   sheet — the same one WORK uses).
 */
 
+import Image from "next/image";
 import { useMemo, useRef, useState } from "react";
+import imageUrl from "../../image-loader";
 import SidePanel from "./SidePanel";
+import { imageSize } from "../../lib/image-size";
 import {
   ARCHIVE_CATEGORIES,
   areaColorForSkill,
@@ -26,7 +29,11 @@ const FILTERS = ["All", ...ARCHIVE_CATEGORIES] as const;
 type Filter = (typeof FILTERS)[number];
 
 // ── One tile. Cover image (or placeholder); the title washes in on hover. ───
-function Tile({ p, onOpen }: { p: ArchiveProject; onOpen: () => void }) {
+//
+// `priority` on the first few: they're on screen the moment the page opens, so
+// there's nothing to gain by deferring them and a visible gap if we do. The
+// rest lazy-load as you scroll, which is next/image's default.
+function Tile({ p, onOpen, priority }: { p: ArchiveProject; onOpen: () => void; priority: boolean }) {
   return (
     <button
       type="button"
@@ -34,8 +41,35 @@ function Tile({ p, onOpen }: { p: ArchiveProject; onOpen: () => void }) {
       className="group relative aspect-square w-full overflow-hidden rounded-lg border border-border bg-surface text-left"
     >
       {p.cover ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={p.cover} alt={p.title} className="h-full w-full object-cover" />
+        /*
+          `fill` = stretch to the parent box, which the aspect-square button
+          already shapes. That's what lets a portrait and a landscape cover
+          both sit in a square tile without us knowing their proportions.
+
+          `sizes` tells the browser how wide the tile will be BEFORE any CSS has
+          been applied, so it can pick a file. The browser takes it literally,
+          which is why these are calc() expressions rather than round numbers: a
+          flat "288px" for everything under 640 would describe a 639px-wide
+          phone and hand a 375px one a file four times the pixels it can show.
+
+          Each line is the arithmetic the grid actually does — viewport, less
+          the sidebar and page padding, less the gaps, divided by the column
+          count. Top line is the max-w-6xl cap, where it stops growing.
+        */
+        <Image
+          src={p.cover}
+          alt={p.title}
+          fill
+          priority={priority}
+          sizes={[
+            "(min-width: 1392px) 256px", // capped: (1152 - 80 - 48) / 4
+            "(min-width: 1024px) calc(25vw - 92px)", // 4 across, sidebar + padding
+            "(min-width: 768px) calc(33.3vw - 118px)", // 3 across, sidebar appears
+            "(min-width: 640px) calc(33.3vw - 27px)", // 3 across, no sidebar yet
+            "calc(50vw - 32px)", // 2 across on a phone
+          ].join(", ")}
+          className="object-cover"
+        />
       ) : (
         <span className="absolute inset-0 flex items-center justify-center px-3 text-center kat-mono-xs uppercase tracking-wider text-ink-light">
           {p.title}
@@ -70,6 +104,62 @@ function SkillPills({ skills }: { skills: string[] }) {
   );
 }
 
+/*
+  ── How wide is the panel's content column? ────────────────────────────────
+
+  Every `sizes` string below is derived from this, and it matters more than it
+  looks. `sizes` is a promise to the browser about how wide an image will be
+  displayed, and the browser trusts it completely when choosing which file to
+  download. Overstate it and every image in the panel arrives a step or two
+  larger than it needed to be.
+
+  The catch is that the panel's width isn't a function of the viewport, so a
+  plain media query can't describe it: SidePanel is 640px at md, 720px at lg,
+  and 1000px at xl only when `wide` is set. Minus its 40px of padding each
+  side, that leaves these content widths — which is why `wide` has to be
+  threaded down here from ArchiveGrid rather than guessed at.
+*/
+type Column = { md: number; lg: number; xl: number };
+
+function column(wide: boolean): Column {
+  return { md: 560, lg: 640, xl: wide ? 920 : 640 };
+}
+
+/*
+  A `sizes` string for something taking `fraction` of that column — half for a
+  block card in the two-up grid, a bit over half for the poster beside its copy,
+  all of it for the gallery.
+
+  `mobileFraction` is separate because most of these multi-column layouts
+  collapse to ONE column on a phone, so the thing that took half the column now
+  takes all of it. Reusing the desktop fraction there would understate the
+  width, and understating is the worse mistake: the browser believes it and
+  fetches a file too small, which just looks blurry.
+*/
+function sizes(col: Column, fraction = 1, mobileFraction = fraction) {
+  const px = (n: number) => `${Math.round(n * fraction)}px`;
+  return [
+    `(min-width: 1280px) ${px(col.xl)}`,
+    `(min-width: 1024px) ${px(col.lg)}`,
+    `(min-width: 768px) ${px(col.md)}`,
+    `${Math.round(mobileFraction * 100)}vw`,
+  ].join(", ");
+}
+
+/*
+  ── The labelled items at the top of the panel ─────────────────────────────
+
+  Four of them, always in this order: Overview, Approach, Year, Context. The
+  writing first, then the two facts about the project, all wearing the same
+  small mono label.
+
+  `prose` separates the two kinds, because they behave differently as the panel
+  gets narrower. A fact is two or three words and stays readable at any width;
+  a paragraph needs a column wide enough to read, and gives one up first. See
+  PanelSections below.
+*/
+type PanelItem = ArchiveSection & { prose: boolean };
+
 // ── Illustration strip: decorative row of project artwork. ──────────────────
 // Reads `illustrations`, NOT `images`. The two are different things: `images`
 // is a gallery you page through (Carousel below), this is a fixed row of
@@ -83,20 +173,71 @@ function SkillPills({ skills }: { skills: string[] }) {
 // aria-hidden because this is decoration: the artwork carries no information the
 // body copy doesn't already state, and the field is a bare string[] with nowhere
 // to put alt text. Better to hide it than to announce four unlabelled images.
-function IllustrationStrip({ illustrations }: { illustrations: string[] }) {
+function IllustrationStrip({ illustrations, col }: { illustrations: string[]; col: Column }) {
   return (
     <div aria-hidden className="grid grid-cols-2 gap-2 md:flex md:h-40">
       {illustrations.map((src, i) => (
         <div
           key={src}
           style={{ animationDelay: `${i * 70}ms` }}
-          className="illo-frame illo-enter aspect-[3/2] overflow-hidden rounded-lg border border-border md:aspect-auto md:h-full"
+          // `relative` is what makes the fill image below work: it needs a
+          // positioned parent to stretch to.
+          className="illo-frame illo-enter relative aspect-[3/2] overflow-hidden rounded-lg border border-border md:aspect-auto md:h-full"
         >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={src} alt="" className="h-full w-full object-cover" />
+          {/* Four frames across, but the accordion lets the hovered one grow to
+              roughly half the row, so that's the width to promise. */}
+          <Image src={src} alt="" fill sizes={sizes(col, 0.5)} className="object-cover" />
         </div>
       ))}
     </div>
+  );
+}
+
+/*
+  ── Frame — a full-width image that keeps its own shape. ───────────────────
+
+  Used for everything in the panel that fills the column it's in: the gallery
+  frames, a block's artwork, the poster, the closing banner.
+
+  Why this exists rather than a plain <img>: an image with no stated dimensions
+  has NO HEIGHT until its file arrives, so the frame sits 2px tall and then
+  snaps open, shoving everything below it down the panel. next/image fixes that
+  if you give it the real pixel dimensions — which we don't have here, because
+  these paths come out of markdown as strings. So imageSize() reads them from
+  the manifest the build script wrote.
+
+  `width: 100%, height: auto` then lets it scale to the column while keeping the
+  proportions those numbers describe. If a file somehow isn't in the manifest we
+  fall back to a plain <img>, which loads fine and merely jumps as it used to.
+*/
+function Frame({
+  src,
+  alt,
+  className = "",
+  sizes,
+}: {
+  src: string;
+  alt: string;
+  className?: string;
+  sizes: string;
+}) {
+  const size = imageSize(src);
+
+  if (!size) {
+    // eslint-disable-next-line @next/next/no-img-element
+    return <img src={src} alt={alt} loading="lazy" className={`w-full ${className}`} />;
+  }
+
+  return (
+    <Image
+      src={src}
+      alt={alt}
+      width={size.width}
+      height={size.height}
+      sizes={sizes}
+      className={`w-full ${className}`}
+      style={{ height: "auto" }}
+    />
   );
 }
 
@@ -131,7 +272,13 @@ function Video({ video, poster, title }: { video: ArchiveVideo; poster: string |
   return (
     <video
       src={video.src}
-      poster={poster ?? undefined}
+      /*
+        A <video> poster is a single URL — there's no srcset for it — so we can't
+        let next/image choose. Calling the loader by hand gets the optimized copy
+        at a sensible width instead of the full-size original, which is the one
+        place on the site that would otherwise still serve a master file.
+      */
+      poster={poster ? imageUrl({ src: poster, width: 1280 }) : undefined}
       controls
       playsInline
       preload="metadata"
@@ -165,7 +312,15 @@ function Video({ video, poster, title }: { video: ArchiveVideo; poster: string |
 // No position dots on purpose. The artwork that goes through here is often an
 // Instagram carousel that already draws its own, and a second set sitting on top
 // of them reads as a bug.
-function Carousel({ images, inCard = false }: { images: string[]; inCard?: boolean }) {
+function Carousel({
+  images,
+  frameSizes,
+  inCard = false,
+}: {
+  images: string[];
+  frameSizes: string;
+  inCard?: boolean;
+}) {
   const scroller = useRef<HTMLDivElement>(null);
 
   // Step by one FRAME, not one strip-width: with the peek above they're no
@@ -183,6 +338,7 @@ function Carousel({ images, inCard = false }: { images: string[]; inCard?: boole
     ? "w-[78%] snap-start"
     : "w-full snap-center rounded-lg border border-border";
 
+
   return (
     <div className="relative">
       <div
@@ -192,14 +348,7 @@ function Carousel({ images, inCard = false }: { images: string[]; inCard?: boole
         }`}
       >
         {images.map((src) => (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            key={src}
-            src={src}
-            alt=""
-            loading="lazy"
-            className={`shrink-0 ${frame}`}
-          />
+          <Frame key={src} src={src} alt="" className={`shrink-0 ${frame}`} sizes={frameSizes} />
         ))}
       </div>
 
@@ -240,13 +389,18 @@ function Carousel({ images, inCard = false }: { images: string[]; inCard?: boole
 // the card carries `overflow-hidden` (it clips the image to the rounded corners)
 // and why the carousel is passed `inCard` (the card already draws the border and
 // the rounding, so the strip shouldn't draw its own).
-function BlockCard({ block }: { block: ArchiveBlock }) {
+function BlockCard({ block, col }: { block: ArchiveBlock; col: Column }) {
   const media =
     block.images.length > 0 ? (
-      <Carousel images={block.images} inCard />
+      // Half the column for the card, and the frame peeks at 78% of that —
+      // but one card per row on a phone, so 78% of the whole width there.
+      <Carousel images={block.images} frameSizes={sizes(col, 0.5 * 0.78, 0.78)} inCard />
     ) : block.image ? (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img src={block.image} alt={block.title ? `${block.title} artwork` : ""} className="w-full" />
+      <Frame
+        src={block.image}
+        alt={block.title ? `${block.title} artwork` : ""}
+        sizes={sizes(col, 0.5, 1)}
+      />
     ) : null;
 
   const copy = (
@@ -339,42 +493,93 @@ function MethodCards({ list }: { list: ArchiveNoteList }) {
   );
 }
 
+/*
+  ── The labelled items, in one of three arrangements ───────────────────────
+
+  Three layouts, chosen purely by how much width the items actually have:
+
+  1. NARROW   all four straight down, in order.
+  2. MEDIUM   Overview and Approach full width, one under the other, with Year
+              and Context paired on a row beneath them.
+  3. WIDE     a 2x2: Overview and Approach across the top, Year and Context
+              across the bottom.
+
+  All three are the same DOM in the same order, so nothing reorders on the way
+  between them: the facts pair up first, and the writing splits into columns only
+  once there's room for two readable measures.
+
+  The width that matters is the COPY COLUMN's, not the viewport's, so this is a
+  container query (`@container` + the `@sm:` / `@3xl:` variants) rather than a
+  media query. The panel is 640px wide at md, 720 at lg, 1000 when `wide`, and
+  the copy column is narrower again when a poster takes the other half of it.
+  A media query can't see any of that; measuring the element itself means the
+  poster projects fall into the medium layout on their own, with no special case
+  for them anywhere in here.
+
+  Thresholds, against the column widths in `column()` above:
+  • under @sm (384px) is a phone, where two of anything is too tight → narrow.
+  • a poster's column is ~409px, and the plain drawer gives 560-640px. Wide
+    enough to pair two short facts, not enough for two paragraphs → medium.
+  • the wide drawer gives 920px, so two columns are ~436px each → 2x2. @3xl
+    (768px) is the gate, which keeps 640 out of it: split there, each paragraph
+    would sit in 296px, and short lines make prose hard to read.
+*/
+function PanelSections({ items }: { items: PanelItem[] }) {
+  return (
+    <div className="@container">
+      <div className="grid grid-cols-1 gap-10 @sm:grid-cols-2 @sm:items-start @sm:gap-x-12">
+        {items.map((item) => (
+          <section
+            key={item.label}
+            // A paragraph holds the full width until @3xl; a fact never does,
+            // which is what turns the medium layout into the 2x2.
+            className={item.prose ? "@sm:col-span-2 @3xl:col-span-1" : ""}
+          >
+            <h3 className="kat-mono-sm uppercase tracking-wider text-ink-light">{item.label}</h3>
+            <div className="mt-3 flex flex-col gap-4">
+              {item.paragraphs.map((para, i) => (
+                <p key={i} className="kat-body-md text-ink-dark">
+                  {para}
+                </p>
+              ))}
+            </div>
+          </section>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ── Project detail inside the panel. ────────────────────────────────────────
-function ArchiveDetail({ p }: { p: ArchiveProject }) {
+function ArchiveDetail({ p, wide }: { p: ArchiveProject; wide: boolean }) {
+  const col = column(wide);
+
   /*
     Context and Year join Overview and Approach as labelled items.
 
     They used to sit as one small line under the headline, which meant the panel
     opened with a fact in one typographic voice and then repeated the same voice
     as the section labels further down. Folding them in gives four items wearing
-    one label style: the two facts, then the two pieces of writing.
+    one label style: the writing first, then the two facts.
 
     Built here rather than in the loader because it is a decision about the
     panel, not about the content. The markdown still just says `context:` and
     `year:`, and `p.sections` stays what it has always been: the narrative.
   */
-  const panelSections: ArchiveSection[] = [
-    ...(p.context ? [{ label: "Context", paragraphs: [p.context] }] : []),
-    ...(p.year ? [{ label: "Year", paragraphs: [p.year] }] : []),
-    ...p.sections,
+  const panelSections: PanelItem[] = [
+    ...p.sections.map((s) => ({ ...s, prose: true })),
+    ...(p.year ? [{ label: "Year", paragraphs: [p.year], prose: false }] : []),
+    ...(p.context ? [{ label: "Context", paragraphs: [p.context], prose: false }] : []),
   ];
-
-  /*
-    Two across, or one column down.
-
-    The project asks for it (`sectionLayout:` in the markdown) and this adds the
-    two conditions the content can't know about: a poster is already using the
-    second column, and one item has no one to stand beside. The Tailwind classes
-    hold the grid back to xl, so a narrow panel collapses to a column whatever
-    the project asked for.
-  */
-  const gridSections = p.sectionLayout === "grid" && !p.poster && panelSections.length > 1;
   return (
     <article>
       {/* Cover image is the tile's job — the panel opens on the title. */}
       {/* Title = main heading; one-liner (headline) = subtitle beneath it. */}
       <h2 className="kat-body-2xl font-medium text-balance text-ink">{p.title}</h2>
-      {p.headline && <p className="kat-body-md mt-2 text-ink-mid">{p.headline}</p>}
+      {/* Subtitle: 18px against the title's 28px. Big enough to read as a deck
+          rather than a caption, still clearly subordinate to the title. */}
+      {p.headline && <p className="kat-body-lg mt-2 text-ink-mid">{p.headline}</p>}
+
       {p.showSkills && p.skills.length > 0 && (
         <div className="mt-6">
           <SkillPills skills={p.skills} />
@@ -384,7 +589,7 @@ function ArchiveDetail({ p }: { p: ArchiveProject }) {
       {/* Artwork sits above the copy, as it did on the old Framer page. */}
       {p.illustrations.length > 0 && (
         <div className="mt-14">
-          <IllustrationStrip illustrations={p.illustrations} />
+          <IllustrationStrip illustrations={p.illustrations} col={col} />
         </div>
       )}
 
@@ -404,11 +609,12 @@ function ArchiveDetail({ p }: { p: ArchiveProject }) {
           }`}
         >
           {p.poster && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
+            <Frame
               src={p.poster}
               alt={`${p.title} poster`}
-              className="w-full rounded-lg border border-border"
+              className="rounded-lg border border-border"
+              // 1.15fr of a [1.15fr_1fr] pair below xl; stacked full-width above.
+              sizes={sizes(col, 1.15 / 2.15, 1)}
             />
           )}
 
@@ -435,30 +641,7 @@ function ArchiveDetail({ p }: { p: ArchiveProject }) {
                 beneath. `items-start` keeps a short Overview from stretching to
                 match a long Approach, and `gap-y` stays at the stacked spacing
                 so the two rows don't drift apart. */}
-            {panelSections.length > 0 && (
-              <div
-                className={
-                  gridSections
-                    ? "grid gap-10 xl:grid-cols-2 xl:items-start xl:gap-x-12 xl:gap-y-10"
-                    : "flex flex-col gap-10"
-                }
-              >
-                {panelSections.map((s) => (
-                  <section key={s.label}>
-                    <h3 className="kat-mono-sm uppercase tracking-wider text-ink-light">
-                      {s.label}
-                    </h3>
-                    <div className="mt-3 flex flex-col gap-4">
-                      {s.paragraphs.map((para, i) => (
-                        <p key={i} className="kat-body-md text-ink-dark">
-                          {para}
-                        </p>
-                      ))}
-                    </div>
-                  </section>
-                ))}
-              </div>
-            )}
+            {panelSections.length > 0 && <PanelSections items={panelSections} />}
           </div>
         </div>
       )}
@@ -490,7 +673,7 @@ function ArchiveDetail({ p }: { p: ArchiveProject }) {
       {p.blocks.length > 0 && (
         <div className="mt-14 grid gap-5 md:grid-cols-2 md:items-start">
           {p.blocks.map((b, i) => (
-            <BlockCard key={i} block={b} />
+            <BlockCard key={i} block={b} col={col} />
           ))}
         </div>
       )}
@@ -498,17 +681,17 @@ function ArchiveDetail({ p }: { p: ArchiveProject }) {
       {/* Gallery last, after all the copy, so the writing isn't split in two. */}
       {p.images.length > 0 && (
         <div className="mt-14">
-          <Carousel images={p.images} />
+          <Carousel images={p.images} frameSizes={sizes(col)} />
         </div>
       )}
 
       {/* A wide graphic to close on, if the project has one. */}
       {p.banner && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
+        <Frame
           src={p.banner}
           alt={`${p.title} banner`}
-          className="mt-14 w-full rounded-lg border border-border"
+          className="mt-14 rounded-lg border border-border"
+          sizes={sizes(col)}
         />
       )}
 
@@ -539,6 +722,15 @@ export default function ArchiveGrid({ projects }: { projects: ArchiveProject[] }
   );
   const active = projects.find((p) => p.slug === openSlug) ?? null;
 
+  /*
+    Does this opening get the roomier drawer? Computed once here because it's
+    needed in two places: SidePanel uses it to set its width, and ArchiveDetail
+    needs it to work out how wide its images will actually be displayed (see
+    `column` above). Deriving it twice would let the two drift apart, and the
+    images would quietly start fetching the wrong sizes.
+  */
+  const wide = !!active?.poster || !!active?.process || (active?.blocks.length ?? 0) > 0;
+
   return (
     <>
       {/* Filter chips — top aligned with the sidebar wordmark. */}
@@ -565,8 +757,8 @@ export default function ArchiveGrid({ projects }: { projects: ArchiveProject[] }
 
       {/* Tile grid */}
       <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-        {visible.map((p) => (
-          <Tile key={p.slug} p={p} onOpen={() => setOpenSlug(p.slug)} />
+        {visible.map((p, i) => (
+          <Tile key={p.slug} p={p} onOpen={() => setOpenSlug(p.slug)} priority={i < 4} />
         ))}
       </div>
 
@@ -583,14 +775,9 @@ export default function ArchiveGrid({ projects }: { projects: ArchiveProject[] }
         open={!!active}
         onClose={() => setOpenSlug(null)}
         label={active?.title}
-        wide={
-          !!active?.poster ||
-          !!active?.process ||
-          (active?.blocks.length ?? 0) > 0 ||
-          active?.sectionLayout === "grid"
-        }
+        wide={wide}
       >
-        {active && <ArchiveDetail p={active} />}
+        {active && <ArchiveDetail p={active} wide={wide} />}
       </SidePanel>
     </>
   );

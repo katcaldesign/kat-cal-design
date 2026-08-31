@@ -6,7 +6,7 @@ skills: [User Research, Prototyping]   # colour-coded automatically by area (see
 showSkills: true                # set false to hide the skill pills on lighter projects
 context: Personal project       # one short credibility line
 year: 2023
-cover: /archive/your-image.jpg  # drop the file in /public/archive/ (blank = placeholder tile)
+cover: /archive/your-image.jpg  # drop the file in /assets/archive/ (blank = placeholder tile)
 poster:                         # optional tall hero image; on a big screen it sits BESIDE the copy
                                 # (and widens the panel to make room). Leave blank for a normal panel.
 
@@ -22,17 +22,16 @@ illustrations: []               # optional row of artwork above the copy; hoveri
 order: 99                       # lower shows first
 link:                           # optional external URL
 
-# The labelled items at the top of the panel are Context, Year, Overview and
-# Approach: the two facts above (they show automatically, no extra key) followed
-# by the two pieces of writing below.
+# The labelled items at the top of the panel are Overview, Approach, Year and
+# Context, in that order. Year and Context show automatically from the fields
+# above, so there is no extra key: the only thing to write is the two sections
+# below.
 #
-# `sectionLayout` chooses how the four sit. Leave it out, or say "stacked", and
-# they run down one column, which suits a long Overview. Say "grid" and they go
-# two across: the facts on the top row, the writing beneath, and the panel
-# widens to make room. A project with a poster always stacks, because the poster
-# is using the second column, and the grid only opens up on a big screen.
-sectionLayout: stacked
-
+# How the four sit is not a choice per project. The panel measures its own copy
+# column and picks one of three arrangements, so a project reads the same
+# whether it opens in a narrow drawer, a wide one, or beside a poster. See
+# ArchiveGrid.tsx.
+#
 # Leave a section field out (or blank) and it doesn't show at all; keep the text
 # but set its show flag to false to hide it without deleting it. The `|` lets you
 # write across several lines; a blank line inside starts a new paragraph.
