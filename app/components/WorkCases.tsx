@@ -17,6 +17,7 @@
   we build the live artifacts next.
 */
 
+import Image from "next/image";
 import { useState } from "react";
 import SidePanel from "./SidePanel";
 
@@ -100,11 +101,12 @@ function CaseCard({ c, onOpen }: { c: Case; onOpen: () => void }) {
       {/* Image area — Katie's project art drops in here. Placeholder for now. */}
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-surface">
         {c.image ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <Image
             src={c.image}
             alt=""
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+            fill
+            sizes="(min-width: 640px) 380px, 100vw"
+            className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
           />
         ) : (
           <span className="absolute inset-0 flex items-center justify-center kat-mono-xs uppercase tracking-wider text-ink-light">

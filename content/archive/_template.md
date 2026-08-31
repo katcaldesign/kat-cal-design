@@ -6,7 +6,7 @@ skills: [User Research, Prototyping]   # colour-coded automatically by area (see
 showSkills: true                # set false to hide the skill pills on lighter projects
 context: Personal project       # one short credibility line
 year: 2023
-cover: /archive/your-image.jpg  # drop the file in /public/archive/ (blank = placeholder tile)
+cover: /archive/your-image.jpg  # drop the file in /assets/archive/ (blank = placeholder tile)
 poster:                         # optional tall hero image; on a big screen it sits BESIDE the copy
                                 # (and widens the panel to make room). Leave blank for a normal panel.
 
