@@ -11,10 +11,9 @@ images: []
 order: 10
 link:
 
-# Panel sections. Fill in both on every project: with Date and Context they make
-# up the four labelled items the panel opens on, and it reads best when every
-# project carries the same set. Set showOverview / showApproach to false to hide
-# text you want to keep. See _template.md.
+# Panel sections. Fill in both on every project: they are the panel's writing,
+# and it reads best when every project carries the same two. Set showOverview /
+# showApproach to false to hide text you want to keep. See _template.md.
 overview: |
   Somewhere between a hobby and a side hustle. Loving my access to a laser cutter, I started making personalised illustrated coasters and keyrings as gifts — then, after a few requests, set up an online shop and took a stall at Glasgow Christmas Market.
 

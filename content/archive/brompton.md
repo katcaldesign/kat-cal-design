@@ -11,10 +11,9 @@ images: []
 order: 3
 link:
 
-# Panel sections. Fill in both on every project: with Date and Context they make
-# up the four labelled items the panel opens on, and it reads best when every
-# project carries the same set. Set showOverview / showApproach to false to hide
-# text you want to keep. See _template.md.
+# Panel sections. Fill in both on every project: they are the panel's writing,
+# and it reads best when every project carries the same two. Set showOverview /
+# showApproach to false to hide text you want to keep. See _template.md.
 overview: |
   As a Design Researcher at Brompton, I initiated, designed and ran research to open new streams for the long-term product pipeline, synthesising findings into product briefs, requirements and roadmaps for Design, Engineering and Product.
 

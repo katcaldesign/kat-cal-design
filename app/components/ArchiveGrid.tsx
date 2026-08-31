@@ -146,24 +146,6 @@ function sizes(col: Column, fraction = 1, mobileFraction = fraction) {
   ].join(", ");
 }
 
-/*
-  ── The labelled items at the top of the panel ─────────────────────────────
-
-  Four of them, always in this order: Overview, Approach, Date, Context. The
-  writing first, then the two facts about the project, all wearing the same
-  small mono label.
-
-  The Date item reads off `year:` in the markdown, which is the field's name and
-  the usual value, but the label says Date because several projects span a range
-  ("2022-2024") and calling that a year reads wrong.
-
-  `prose` separates the two kinds, because they behave differently as the panel
-  gets narrower. A fact is two or three words and stays readable at any width;
-  a paragraph needs a column wide enough to read, and gives one up first. See
-  PanelSections below.
-*/
-type PanelItem = ArchiveSection & { prose: boolean };
-
 // ── Illustration strip: decorative row of project artwork. ──────────────────
 // Reads `illustrations`, NOT `images`. The two are different things: `images`
 // is a gallery you page through (Carousel below), this is a fixed row of
@@ -498,50 +480,32 @@ function MethodCards({ list }: { list: ArchiveNoteList }) {
 }
 
 /*
-  ── The labelled items, in one of three arrangements ───────────────────────
+  ── Overview and Approach: one column, or two ──────────────────────────────
 
-  Three layouts, chosen purely by how much width the items actually have:
-
-  1. NARROW   all four straight down, in order.
-  2. MEDIUM   Overview and Approach full width, one under the other, with Date
-              and Context paired on a row beneath them.
-  3. WIDE     a 2x2: Overview and Approach across the top, Date and Context
-              across the bottom.
-
-  All three are the same DOM in the same order, so nothing reorders on the way
-  between them: the facts pair up first, and the writing splits into columns only
-  once there's room for two readable measures.
+  One column of writing until there's room for two readable measures, then they
+  stand side by side.
 
   The width that matters is the COPY COLUMN's, not the viewport's, so this is a
-  container query (`@container` + the `@sm:` / `@3xl:` variants) rather than a
-  media query. The panel is 640px wide at md, 720 at lg, 1000 when `wide`, and
-  the copy column is narrower again when a poster takes the other half of it.
-  A media query can't see any of that; measuring the element itself means the
-  poster projects fall into the medium layout on their own, with no special case
-  for them anywhere in here.
+  container query (`@container` + the `@3xl:` variant) rather than a media query.
+  The panel is 640px wide at md, 720 at lg, 1000 when `wide`, and the copy column
+  is narrower again when a poster takes the other half of it. A media query can't
+  see any of that; measuring the element itself means the poster projects stay in
+  one column on their own, with no special case for them in here.
 
-  Thresholds, against the column widths in `column()` above:
-  • under @sm (384px) is a phone, where two of anything is too tight → narrow.
-  • a poster's column is ~409px, and the plain drawer gives 560-640px. Wide
-    enough to pair two short facts, not enough for two paragraphs → medium.
-  • the wide drawer gives 920px, so two columns are ~436px each → 2x2. @3xl
-    (768px) is the gate, which keeps 640 out of it: split there, each paragraph
-    would sit in 296px, and short lines make prose hard to read.
+  @3xl is 768px, which sets the gate against the column widths in `column()`
+  above: the wide drawer's 920px splits into two 436px columns, while the plain
+  drawer's 640px stays whole. Split at 640 and each paragraph would sit in 296px,
+  and short lines make prose hard to read.
 */
-function PanelSections({ items }: { items: PanelItem[] }) {
+function PanelSections({ sections }: { sections: ArchiveSection[] }) {
   return (
     <div className="@container">
-      <div className="grid grid-cols-1 gap-10 @sm:grid-cols-2 @sm:items-start @sm:gap-x-12">
-        {items.map((item) => (
-          <section
-            key={item.label}
-            // A paragraph holds the full width until @3xl; a fact never does,
-            // which is what turns the medium layout into the 2x2.
-            className={item.prose ? "@sm:col-span-2 @3xl:col-span-1" : ""}
-          >
-            <h3 className="kat-mono-sm uppercase tracking-wider text-ink-light">{item.label}</h3>
+      <div className="grid grid-cols-1 gap-10 @3xl:grid-cols-2 @3xl:items-start @3xl:gap-x-12">
+        {sections.map((s) => (
+          <section key={s.label}>
+            <h3 className="kat-mono-sm uppercase tracking-wider text-ink-light">{s.label}</h3>
             <div className="mt-3 flex flex-col gap-4">
-              {item.paragraphs.map((para, i) => (
+              {s.paragraphs.map((para, i) => (
                 <p key={i} className="kat-body-md text-ink-dark">
                   {para}
                 </p>
@@ -559,22 +523,14 @@ function ArchiveDetail({ p, wide }: { p: ArchiveProject; wide: boolean }) {
   const col = column(wide);
 
   /*
-    Context and Year join Overview and Approach as labelled items.
+    Context and year as one byline under the headline.
 
-    They used to sit as one small line under the headline, which meant the panel
-    opened with a fact in one typographic voice and then repeated the same voice
-    as the section labels further down. Folding them in gives four items wearing
-    one label style: the writing first, then the two facts.
-
-    Built here rather than in the loader because it is a decision about the
-    panel, not about the content. The markdown still just says `context:` and
-    `year:`, and `p.sections` stays what it has always been: the narrative.
+    They answer "what was this and when" before you commit to reading a
+    paragraph, which is the triage an archive needs. Deliberately NOT dressed as
+    labelled items alongside Overview and Approach: setting a year at the size of
+    a paragraph, with a heading over it, claims it matters as much as one.
   */
-  const panelSections: PanelItem[] = [
-    ...p.sections.map((s) => ({ ...s, prose: true })),
-    ...(p.year ? [{ label: "Date", paragraphs: [p.year], prose: false }] : []),
-    ...(p.context ? [{ label: "Context", paragraphs: [p.context], prose: false }] : []),
-  ];
+  const meta = [p.context, p.year].filter(Boolean).join(" · ");
   return (
     <article>
       {/* Cover image is the tile's job — the panel opens on the title. */}
@@ -583,6 +539,9 @@ function ArchiveDetail({ p, wide }: { p: ArchiveProject; wide: boolean }) {
       {/* Subtitle: 18px against the title's 28px. Big enough to read as a deck
           rather than a caption, still clearly subordinate to the title. */}
       {p.headline && <p className="kat-body-lg mt-2 text-ink-mid">{p.headline}</p>}
+      {meta && (
+        <span className="kat-mono-sm mt-4 block uppercase tracking-wider text-ink-light">{meta}</span>
+      )}
 
       {p.showSkills && p.skills.length > 0 && (
         <div className="mt-6">
@@ -606,7 +565,7 @@ function ArchiveDetail({ p, wide }: { p: ArchiveProject; wide: boolean }) {
           where the drawer widens to 1000px and both halves still get room to
           breathe. Below that, and for every project WITHOUT a poster, this is
           the same single stacked column as before. */}
-      {(p.poster || p.description.length > 0 || panelSections.length > 0) && (
+      {(p.poster || p.description.length > 0 || p.sections.length > 0) && (
         <div
           className={`mt-14 ${
             p.poster ? "grid gap-8 xl:grid-cols-[1.15fr_1fr] xl:items-start xl:gap-10" : ""
@@ -645,7 +604,7 @@ function ArchiveDetail({ p, wide }: { p: ArchiveProject; wide: boolean }) {
                 beneath. `items-start` keeps a short Overview from stretching to
                 match a long Approach, and `gap-y` stays at the stacked spacing
                 so the two rows don't drift apart. */}
-            {panelSections.length > 0 && <PanelSections items={panelSections} />}
+            {p.sections.length > 0 && <PanelSections sections={p.sections} />}
           </div>
         </div>
       )}

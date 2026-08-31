@@ -12,10 +12,9 @@ images: []
 order: 4
 link:
 
-# Panel sections. Fill in both on every project: with Date and Context they make
-# up the four labelled items the panel opens on, and it reads best when every
-# project carries the same set. Set showOverview / showApproach to false to hide
-# text you want to keep. See _template.md.
+# Panel sections. Fill in both on every project: they are the panel's writing,
+# and it reads best when every project carries the same two. Set showOverview /
+# showApproach to false to hide text you want to keep. See _template.md.
 overview: |
   In December 2020, amidst Covid lockdowns, I co-founded a community cycle hub in Windsor. We set it up as a CIO in Spring 2021, with the aim of increasing accessibility to cycling.
 

@@ -12,10 +12,9 @@ images: []
 order: 6
 link:
 
-# Panel sections. Fill in both on every project: with Date and Context they make
-# up the four labelled items the panel opens on, and it reads best when every
-# project carries the same set. Set showOverview / showApproach to false to hide
-# text you want to keep. See _template.md.
+# Panel sections. Fill in both on every project: they are the panel's writing,
+# and it reads best when every project carries the same two. Set showOverview /
+# showApproach to false to hide text you want to keep. See _template.md.
 overview: |
   My first experiment with 3D modelling and animation, in 3DS Max. In Japanese culture the wings of orizuru are said to carry souls up to paradise. Loving Japanese philosophy, I wanted to visualise the idea.
 

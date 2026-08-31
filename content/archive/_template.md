@@ -22,16 +22,15 @@ illustrations: []               # optional row of artwork above the copy; hoveri
 order: 99                       # lower shows first
 link:                           # optional external URL
 
-# The labelled items at the top of the panel are Overview, Approach, Date and
-# Context, in that order. Date (from `year:` above) and Context show
-# automatically, so there is no extra key: the only thing to write is the two
-# sections below. Fill in BOTH on every project, so the panel has the same
-# four items whatever it is describing.
+# Overview and Approach are the panel's writing, under a small label each.
+# Fill in BOTH on every project, so every panel carries the same two.
 #
-# How the four sit is not a choice per project. The panel measures its own copy
-# column and picks one of three arrangements, so a project reads the same
-# whether it opens in a narrow drawer, a wide one, or beside a poster. See
-# ArchiveGrid.tsx.
+# Context and year show as one byline under the headline, straight from the
+# fields above, so there is nothing to write for those here.
+#
+# How the two sit is not a choice per project. The panel measures its own copy
+# column: one column of writing until there is room for two readable measures,
+# then they stand side by side. See ArchiveGrid.tsx.
 #
 # Leave a section field out (or blank) and it doesn't show at all; keep the text
 # but set its show flag to false to hide it without deleting it. The `|` lets you
