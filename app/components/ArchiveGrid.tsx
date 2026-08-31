@@ -88,19 +88,41 @@ function Tile({ p, onOpen, priority }: { p: ArchiveProject; onOpen: () => void; 
   );
 }
 
-// ── Coloured skill pills — colour comes from each skill's area. ─────────────
-function SkillPills({ skills }: { skills: string[] }) {
+/*
+  ── Skill tags ──────────────────────────────────────────────────────────────
+
+  A neutral outlined tag with a coloured status dot, not a coloured pill.
+
+  Colour used to fill the whole tag, which put five saturated blocks against a
+  page whose whole premise is one accent used sparingly. Moving it into a 6px
+  dot keeps the grouping legible while costing a fraction of the visual weight,
+  and it lets the label sit in ink-mid where it is far easier to read than white
+  on a mid-tone fill.
+
+  Shape and size follow the rest of the labelling system: Apercu Mono caps at
+  the smallest step, 4px radius (a tighter member of the rounded-lg family the
+  cards use), and padding on the 4px grid. py-2 rather than py-1 because
+  kat-mono-xs is text-box trimmed, so the padding is all the vertical space
+  there is: there is no leading left to pad the label out.
+*/
+function SkillTags({ skills }: { skills: string[] }) {
   return (
-    <div className="flex flex-wrap gap-2">
+    <ul className="flex flex-wrap gap-2">
       {skills.map((s) => (
-        <span
+        <li
           key={s}
-          className={`kat-body-sm rounded-full px-3 py-1 font-medium text-white ${areaColorForSkill(s)}`}
+          className="flex items-center gap-2 rounded border border-border px-3 py-2"
         >
-          {s}
-        </span>
+          {/* Decorative: the dot repeats the grouping, it never carries the
+              only copy of anything, so it is hidden from screen readers. */}
+          <span
+            aria-hidden
+            className={`h-1.5 w-1.5 shrink-0 rounded-full ${areaColorForSkill(s)}`}
+          />
+          <span className="kat-mono-xs text-ink-mid">{s}</span>
+        </li>
       ))}
-    </div>
+    </ul>
   );
 }
 
@@ -545,7 +567,7 @@ function ArchiveDetail({ p, wide }: { p: ArchiveProject; wide: boolean }) {
 
       {p.showSkills && p.skills.length > 0 && (
         <div className="mt-6">
-          <SkillPills skills={p.skills} />
+          <SkillTags skills={p.skills} />
         </div>
       )}
 

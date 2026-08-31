@@ -23,50 +23,54 @@ export const ARCHIVE_CATEGORIES = [
 ] as const;
 export type ArchiveCategory = (typeof ARCHIVE_CATEGORIES)[number];
 
-// ── Skill areas → colour (the CSS var / Tailwind class per area) ────────────
-export type SkillArea = "research" | "ux" | "ui" | "service" | "making" | "other";
+// ── Skill areas → dot colour ────────────────────────────────────────────────
+// Five buckets, each owning one status-dot colour. A skill is registered once
+// below and inherits its bucket's dot everywhere it appears.
+export type SkillArea = "research" | "visual" | "tech" | "physical" | "video" | "other";
 
 // Tailwind bg-* classes generated from the --color-area-* tokens in globals.css.
 export const AREA_COLOR: Record<SkillArea, string> = {
   research: "bg-area-research",
-  ux: "bg-area-ux",
-  ui: "bg-area-ui",
-  service: "bg-area-service",
-  making: "bg-area-making",
+  visual: "bg-area-visual",
+  tech: "bg-area-tech",
+  physical: "bg-area-physical",
+  video: "bg-area-video",
   other: "bg-area-other",
 };
 
-// Which area each skill belongs to. Add a skill here and it's colour-coded
-// automatically. Anything not listed falls back to "other" (neutral).
+// Which bucket each skill belongs to. Add a skill here and it is dotted
+// automatically. Anything not listed falls back to "other" (neutral grey).
 export const SKILL_AREA: Record<string, SkillArea> = {
-  // Research
+  // Research and UX. The broadest bucket: everything from finding out what to
+  // build through to specifying it. Service work sits here too, since service
+  // design is a research and definition practice rather than a craft output.
   "User Research": "research",
   "Academic Research": "research",
   "Usability Testing": "research",
   "Product Metrics": "research",
-  // UX
-  "Behavioural Design": "ux",
-  "Conceptual Modelling": "ux",
-  "Wireframing": "ux",
-  "Prototyping": "ux",
-  "Storyboarding": "ux",
-  "Feature Prioritisation": "ux",
-  // UI
-  "UI": "ui",
-  "Visual Design": "ui",
-  "Branding": "ui",
-  "Illustration": "ui",
-  // Service
-  "Co-creation": "service",
-  "Service Blueprinting": "service",
-  "Service Design": "service",
-  // Making / Tech
-  "CAD": "making",
-  "Fabrication": "making",
-  "3D Modelling": "making",
-  "Animation": "making",
-  "Video Editing": "making",
-  "Web Development": "making",
+  "Behavioural Design": "research",
+  "Conceptual Modelling": "research",
+  "Feature Prioritisation": "research",
+  "Storyboarding": "research",
+  "Wireframing": "research",
+  "Prototyping": "research",
+  "Co-creation": "research",
+  "Service Blueprinting": "research",
+  "Service Design": "research",
+  // Visual design
+  "UI": "visual",
+  "Visual Design": "visual",
+  "Branding": "visual",
+  "Illustration": "visual",
+  // Tech and coding
+  "Web Development": "tech",
+  // Physical product
+  "CAD": "physical",
+  "Fabrication": "physical",
+  // Video
+  "3D Modelling": "video",
+  "Animation": "video",
+  "Video Editing": "video",
 };
 
 export function areaColorForSkill(skill: string): string {
