@@ -22,10 +22,11 @@ illustrations: []               # optional row of artwork above the copy; hoveri
 order: 99                       # lower shows first
 link:                           # optional external URL
 
-# The labelled items at the top of the panel are Overview, Approach, Year and
-# Context, in that order. Year and Context show automatically from the fields
-# above, so there is no extra key: the only thing to write is the two sections
-# below.
+# The labelled items at the top of the panel are Overview, Approach, Date and
+# Context, in that order. Date (from `year:` above) and Context show
+# automatically, so there is no extra key: the only thing to write is the two
+# sections below. Fill in BOTH on every project, so the panel has the same
+# four items whatever it is describing.
 #
 # How the four sit is not a choice per project. The panel measures its own copy
 # column and picks one of three arrangements, so a project reads the same

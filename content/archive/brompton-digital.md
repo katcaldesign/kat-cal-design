@@ -16,22 +16,22 @@ illustrations:
 order: 2
 link:
 
-# Panel sections. Blank means the section doesn't show at all; fill one in and
-# it appears. Set showOverview / showApproach to false to hide text you want to
-# keep. See _template.md.
+# Panel sections. Fill in both on every project: with Date and Context they make
+# up the four labelled items the panel opens on, and it reads best when every
+# project carries the same set. Set showOverview / showApproach to false to hide
+# text you want to keep. See _template.md.
 overview: |
+  Brompton had no digital offer for its electric riders. I initiated this project to find out what one could be, and which parts were worth building first.
+
+  The result was a prioritised feature set, bounded by what the business could realistically ship, and a view of where digital could add commercial value rather than cost.
 
 showOverview: true
 
 approach: |
+  I mapped the rider journey end to end (unboxing, the daily commute, mid-ride, and the moments things go wrong), then used it to ideate and pressure-test service concepts as storyboards, before any of them cost engineering time.
+
+  Stakeholder workshops then scored internal feasibility, while surveys and co-creation sessions quantified what riders actually valued, weighted toward the younger buyers Brompton wanted to reach.
 
 showApproach: true
 ---
 
-Brompton had no digital offer for its electric riders. I initiated this project to find out what one could be, and which parts were worth building first.
-
-I mapped the rider journey end to end (unboxing, the daily commute, mid-ride, and the moments things go wrong), then used it to ideate and pressure-test service concepts as storyboards, before any of them cost engineering time.
-
-Stakeholder workshops then scored internal feasibility, while surveys and co-creation sessions quantified what riders actually valued, weighted toward the younger buyers Brompton wanted to reach.
-
-The result was a prioritised feature set, bounded by what the business could realistically ship, and a view of where digital could add commercial value rather than cost.

@@ -149,9 +149,13 @@ function sizes(col: Column, fraction = 1, mobileFraction = fraction) {
 /*
   ── The labelled items at the top of the panel ─────────────────────────────
 
-  Four of them, always in this order: Overview, Approach, Year, Context. The
+  Four of them, always in this order: Overview, Approach, Date, Context. The
   writing first, then the two facts about the project, all wearing the same
   small mono label.
+
+  The Date item reads off `year:` in the markdown, which is the field's name and
+  the usual value, but the label says Date because several projects span a range
+  ("2022-2024") and calling that a year reads wrong.
 
   `prose` separates the two kinds, because they behave differently as the panel
   gets narrower. A fact is two or three words and stays readable at any width;
@@ -499,9 +503,9 @@ function MethodCards({ list }: { list: ArchiveNoteList }) {
   Three layouts, chosen purely by how much width the items actually have:
 
   1. NARROW   all four straight down, in order.
-  2. MEDIUM   Overview and Approach full width, one under the other, with Year
+  2. MEDIUM   Overview and Approach full width, one under the other, with Date
               and Context paired on a row beneath them.
-  3. WIDE     a 2x2: Overview and Approach across the top, Year and Context
+  3. WIDE     a 2x2: Overview and Approach across the top, Date and Context
               across the bottom.
 
   All three are the same DOM in the same order, so nothing reorders on the way
@@ -568,7 +572,7 @@ function ArchiveDetail({ p, wide }: { p: ArchiveProject; wide: boolean }) {
   */
   const panelSections: PanelItem[] = [
     ...p.sections.map((s) => ({ ...s, prose: true })),
-    ...(p.year ? [{ label: "Year", paragraphs: [p.year], prose: false }] : []),
+    ...(p.year ? [{ label: "Date", paragraphs: [p.year], prose: false }] : []),
     ...(p.context ? [{ label: "Context", paragraphs: [p.context], prose: false }] : []),
   ];
   return (
