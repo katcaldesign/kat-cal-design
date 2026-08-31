@@ -594,16 +594,9 @@ function ArchiveDetail({ p, wide }: { p: ArchiveProject; wide: boolean }) {
               </div>
             )}
 
-            {/* The labelled items: Context, Year, Overview, Approach. Anything
-                empty or switched off is already gone (the loader drops sections,
-                the array above drops missing facts), so whatever arrives here is
-                meant to be on screen.
-
-                Two across becomes a 2x2 with the usual four, since the grid
-                fills row by row: the facts land on the top row and the writing
-                beneath. `items-start` keeps a short Overview from stretching to
-                match a long Approach, and `gap-y` stays at the stacked spacing
-                so the two rows don't drift apart. */}
+            {/* Overview and Approach. The loader has already dropped any that
+                are empty or switched off, so whatever arrives here is meant to
+                be on screen. */}
             {p.sections.length > 0 && <PanelSections sections={p.sections} />}
           </div>
         </div>

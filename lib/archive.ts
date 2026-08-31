@@ -86,7 +86,6 @@ export type ArchiveSection = {
   paragraphs: string[];
 };
 
-
 /*
   A project's optional video, shown under the copy.
 
