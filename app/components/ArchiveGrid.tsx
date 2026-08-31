@@ -499,7 +499,9 @@ function ArchiveDetail({ p, wide }: { p: ArchiveProject; wide: boolean }) {
       {/* Cover image is the tile's job — the panel opens on the title. */}
       {/* Title = main heading; one-liner (headline) = subtitle beneath it. */}
       <h2 className="kat-body-2xl font-medium text-balance text-ink">{p.title}</h2>
-      {p.headline && <p className="kat-body-md mt-2 text-ink-mid">{p.headline}</p>}
+      {/* Subtitle: 18px against the title's 28px. Big enough to read as a deck
+          rather than a caption, still clearly subordinate to the title. */}
+      {p.headline && <p className="kat-body-lg mt-2 text-ink-mid">{p.headline}</p>}
       {meta && (
         <span className="kat-mono-sm mt-4 block uppercase tracking-wider text-ink-light">{meta}</span>
       )}

@@ -102,11 +102,12 @@ export default function SidePanel({
           open ? "translate-y-0 md:translate-x-0" : "translate-y-full md:translate-y-0 md:translate-x-full"
         }`}
       >
-        {/* Header row with the close affordance. Right-aligned on mobile (the
-            bottom sheet), left-aligned on desktop (the right drawer, so close is
-            nearest the screen edge you reach for). In normal flow, not absolute,
-            so it never overlaps the left-aligned content below. */}
-        <div className="flex shrink-0 justify-end px-6 pt-5 md:justify-start md:px-10 md:pt-6">
+        {/* Header row with the close affordance. Right-aligned at every size:
+            on the mobile sheet it sits in the top-right corner, and on the
+            desktop drawer it sits at the panel's outer edge, away from the
+            left-aligned content it would otherwise crowd. In normal flow, not
+            absolute, so it never overlaps the content below. */}
+        <div className="flex shrink-0 justify-end px-6 pt-5 md:px-10 md:pt-6">
           <button
             type="button"
             onClick={onClose}
