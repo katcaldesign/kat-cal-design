@@ -174,15 +174,24 @@
   --color-accent:      var(--color-chartreuse-500);
   --color-accent-hover: var(--color-chartreuse-600);
 
-  /* ARCHIVE SKILL-TAG AREAS — one colour per skill area. Skill pills are
-     filled with these (white text on top). A skill inherits its area's colour
-     via the SKILL_AREA registry in lib/archive.ts, so adding a skill never
-     needs a new colour. Vivid on purpose (Framer-style pills). */
-  --color-area-research: #6c5ce0; /* Research  — violet */
-  --color-area-ux:       #2d7dd2; /* UX        — blue   */
-  --color-area-ui:       #c64b8c; /* UI        — magenta*/
-  --color-area-service:  #1fa39a; /* Service   — teal   */
-  --color-area-making:   #c06e22; /* Making/Tech — amber */
+  /* ARCHIVE SKILL-TAG AREAS. Five buckets, one dot colour each. The tag itself
+     is neutral (outlined, ink-mid text); only a 6px dot carries the colour, so
+     these never have to work as a text background. A skill inherits its
+     bucket's colour via the SKILL_AREA registry in lib/archive.ts.
+
+     Saturated on purpose. A 6px mark needs MORE chroma than a large fill to
+     stay distinguishable, so muting these would defeat the point. Green and red
+     are deliberately absent: both are reserved for state (success/error) above,
+     and reusing them here would make a category look like a status.
+
+     Five hues is the practical ceiling at this size. Indigo and purple are the
+     closest pair, so they are assigned to the two buckets least likely to
+     appear on the same project. */
+  --color-area-research: #3f5bd0; /* Research and UX:  indigo     */
+  --color-area-visual:   #c0468a; /* Visual design:    magenta    */
+  --color-area-tech:     #14837c; /* Tech and coding:  teal       */
+  --color-area-physical: #b05f27; /* Physical product: terracotta */
+  --color-area-video:    #7a3fa6; /* Video:            purple     */
   --color-area-other:    var(--color-grey-500); /* unmapped skill fallback */
 
   /* ========================================================================
@@ -234,8 +243,8 @@ body {
 
    Mono labels are single-line, so line-height stays tight (1.1). text-box trims
    the leftover cap-height/descender air — this is the CSS equivalent of Figma's
-   "Vertical trim". Chrome/Edge honour it; Safari ignores it gracefully and just
-   falls back to the line-height above. */
+   "Vertical trim". Chrome, Edge and Safari all honour it; Firefox ignores it gracefully
+   and just falls back to the line-height above. */
 @utility kat-mono-lg { font-family: var(--font-mono); font-size: 1rem;     line-height: 1.1; text-transform: uppercase; text-box: trim-both cap alphabetic; } /* 16px */
 @utility kat-mono-md { font-family: var(--font-mono); font-size: 0.875rem; line-height: 1.1; text-transform: uppercase; text-box: trim-both cap alphabetic; } /* 14px */
 @utility kat-mono-sm { font-family: var(--font-mono); font-size: 0.75rem;  line-height: 1.1; text-transform: uppercase; text-box: trim-both cap alphabetic; } /* 12px */
