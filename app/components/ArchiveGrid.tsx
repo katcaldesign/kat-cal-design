@@ -9,8 +9,11 @@
   sheet — the same one WORK uses).
 */
 
+import Image from "next/image";
 import { useMemo, useRef, useState } from "react";
+import imageUrl from "../../image-loader";
 import SidePanel from "./SidePanel";
+import { imageSize } from "../../lib/image-size";
 import {
   ARCHIVE_CATEGORIES,
   areaColorForSkill,
@@ -25,7 +28,11 @@ const FILTERS = ["All", ...ARCHIVE_CATEGORIES] as const;
 type Filter = (typeof FILTERS)[number];
 
 // ── One tile. Cover image (or placeholder); the title washes in on hover. ───
-function Tile({ p, onOpen }: { p: ArchiveProject; onOpen: () => void }) {
+//
+// `priority` on the first few: they're on screen the moment the page opens, so
+// there's nothing to gain by deferring them and a visible gap if we do. The
+// rest lazy-load as you scroll, which is next/image's default.
+function Tile({ p, onOpen, priority }: { p: ArchiveProject; onOpen: () => void; priority: boolean }) {
   return (
     <button
       type="button"
@@ -33,8 +40,35 @@ function Tile({ p, onOpen }: { p: ArchiveProject; onOpen: () => void }) {
       className="group relative aspect-square w-full overflow-hidden rounded-lg border border-border bg-surface text-left"
     >
       {p.cover ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={p.cover} alt={p.title} className="h-full w-full object-cover" />
+        /*
+          `fill` = stretch to the parent box, which the aspect-square button
+          already shapes. That's what lets a portrait and a landscape cover
+          both sit in a square tile without us knowing their proportions.
+
+          `sizes` tells the browser how wide the tile will be BEFORE any CSS has
+          been applied, so it can pick a file. The browser takes it literally,
+          which is why these are calc() expressions rather than round numbers: a
+          flat "288px" for everything under 640 would describe a 639px-wide
+          phone and hand a 375px one a file four times the pixels it can show.
+
+          Each line is the arithmetic the grid actually does — viewport, less
+          the sidebar and page padding, less the gaps, divided by the column
+          count. Top line is the max-w-6xl cap, where it stops growing.
+        */
+        <Image
+          src={p.cover}
+          alt={p.title}
+          fill
+          priority={priority}
+          sizes={[
+            "(min-width: 1392px) 256px", // capped: (1152 - 80 - 48) / 4
+            "(min-width: 1024px) calc(25vw - 92px)", // 4 across, sidebar + padding
+            "(min-width: 768px) calc(33.3vw - 118px)", // 3 across, sidebar appears
+            "(min-width: 640px) calc(33.3vw - 27px)", // 3 across, no sidebar yet
+            "calc(50vw - 32px)", // 2 across on a phone
+          ].join(", ")}
+          className="object-cover"
+        />
       ) : (
         <span className="absolute inset-0 flex items-center justify-center px-3 text-center kat-mono-xs uppercase tracking-wider text-ink-light">
           {p.title}
@@ -69,6 +103,48 @@ function SkillPills({ skills }: { skills: string[] }) {
   );
 }
 
+/*
+  ── How wide is the panel's content column? ────────────────────────────────
+
+  Every `sizes` string below is derived from this, and it matters more than it
+  looks. `sizes` is a promise to the browser about how wide an image will be
+  displayed, and the browser trusts it completely when choosing which file to
+  download. Overstate it and every image in the panel arrives a step or two
+  larger than it needed to be.
+
+  The catch is that the panel's width isn't a function of the viewport, so a
+  plain media query can't describe it: SidePanel is 640px at md, 720px at lg,
+  and 1000px at xl only when `wide` is set. Minus its 40px of padding each
+  side, that leaves these content widths — which is why `wide` has to be
+  threaded down here from ArchiveGrid rather than guessed at.
+*/
+type Column = { md: number; lg: number; xl: number };
+
+function column(wide: boolean): Column {
+  return { md: 560, lg: 640, xl: wide ? 920 : 640 };
+}
+
+/*
+  A `sizes` string for something taking `fraction` of that column — half for a
+  block card in the two-up grid, a bit over half for the poster beside its copy,
+  all of it for the gallery.
+
+  `mobileFraction` is separate because most of these multi-column layouts
+  collapse to ONE column on a phone, so the thing that took half the column now
+  takes all of it. Reusing the desktop fraction there would understate the
+  width, and understating is the worse mistake: the browser believes it and
+  fetches a file too small, which just looks blurry.
+*/
+function sizes(col: Column, fraction = 1, mobileFraction = fraction) {
+  const px = (n: number) => `${Math.round(n * fraction)}px`;
+  return [
+    `(min-width: 1280px) ${px(col.xl)}`,
+    `(min-width: 1024px) ${px(col.lg)}`,
+    `(min-width: 768px) ${px(col.md)}`,
+    `${Math.round(mobileFraction * 100)}vw`,
+  ].join(", ");
+}
+
 // ── Illustration strip: decorative row of project artwork. ──────────────────
 // Reads `illustrations`, NOT `images`. The two are different things: `images`
 // is a gallery you page through (Carousel below), this is a fixed row of
@@ -82,20 +158,71 @@ function SkillPills({ skills }: { skills: string[] }) {
 // aria-hidden because this is decoration: the artwork carries no information the
 // body copy doesn't already state, and the field is a bare string[] with nowhere
 // to put alt text. Better to hide it than to announce four unlabelled images.
-function IllustrationStrip({ illustrations }: { illustrations: string[] }) {
+function IllustrationStrip({ illustrations, col }: { illustrations: string[]; col: Column }) {
   return (
     <div aria-hidden className="grid grid-cols-2 gap-2 md:flex md:h-40">
       {illustrations.map((src, i) => (
         <div
           key={src}
           style={{ animationDelay: `${i * 70}ms` }}
-          className="illo-frame illo-enter aspect-[3/2] overflow-hidden rounded-lg border border-border md:aspect-auto md:h-full"
+          // `relative` is what makes the fill image below work: it needs a
+          // positioned parent to stretch to.
+          className="illo-frame illo-enter relative aspect-[3/2] overflow-hidden rounded-lg border border-border md:aspect-auto md:h-full"
         >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={src} alt="" className="h-full w-full object-cover" />
+          {/* Four frames across, but the accordion lets the hovered one grow to
+              roughly half the row, so that's the width to promise. */}
+          <Image src={src} alt="" fill sizes={sizes(col, 0.5)} className="object-cover" />
         </div>
       ))}
     </div>
+  );
+}
+
+/*
+  ── Frame — a full-width image that keeps its own shape. ───────────────────
+
+  Used for everything in the panel that fills the column it's in: the gallery
+  frames, a block's artwork, the poster, the closing banner.
+
+  Why this exists rather than a plain <img>: an image with no stated dimensions
+  has NO HEIGHT until its file arrives, so the frame sits 2px tall and then
+  snaps open, shoving everything below it down the panel. next/image fixes that
+  if you give it the real pixel dimensions — which we don't have here, because
+  these paths come out of markdown as strings. So imageSize() reads them from
+  the manifest the build script wrote.
+
+  `width: 100%, height: auto` then lets it scale to the column while keeping the
+  proportions those numbers describe. If a file somehow isn't in the manifest we
+  fall back to a plain <img>, which loads fine and merely jumps as it used to.
+*/
+function Frame({
+  src,
+  alt,
+  className = "",
+  sizes,
+}: {
+  src: string;
+  alt: string;
+  className?: string;
+  sizes: string;
+}) {
+  const size = imageSize(src);
+
+  if (!size) {
+    // eslint-disable-next-line @next/next/no-img-element
+    return <img src={src} alt={alt} loading="lazy" className={`w-full ${className}`} />;
+  }
+
+  return (
+    <Image
+      src={src}
+      alt={alt}
+      width={size.width}
+      height={size.height}
+      sizes={sizes}
+      className={`w-full ${className}`}
+      style={{ height: "auto" }}
+    />
   );
 }
 
@@ -130,7 +257,13 @@ function Video({ video, poster, title }: { video: ArchiveVideo; poster: string |
   return (
     <video
       src={video.src}
-      poster={poster ?? undefined}
+      /*
+        A <video> poster is a single URL — there's no srcset for it — so we can't
+        let next/image choose. Calling the loader by hand gets the optimized copy
+        at a sensible width instead of the full-size original, which is the one
+        place on the site that would otherwise still serve a master file.
+      */
+      poster={poster ? imageUrl({ src: poster, width: 1280 }) : undefined}
       controls
       playsInline
       preload="metadata"
@@ -164,7 +297,15 @@ function Video({ video, poster, title }: { video: ArchiveVideo; poster: string |
 // No position dots on purpose. The artwork that goes through here is often an
 // Instagram carousel that already draws its own, and a second set sitting on top
 // of them reads as a bug.
-function Carousel({ images, inCard = false }: { images: string[]; inCard?: boolean }) {
+function Carousel({
+  images,
+  frameSizes,
+  inCard = false,
+}: {
+  images: string[];
+  frameSizes: string;
+  inCard?: boolean;
+}) {
   const scroller = useRef<HTMLDivElement>(null);
 
   // Step by one FRAME, not one strip-width: with the peek above they're no
@@ -182,6 +323,7 @@ function Carousel({ images, inCard = false }: { images: string[]; inCard?: boole
     ? "w-[78%] snap-start"
     : "w-full snap-center rounded-lg border border-border";
 
+
   return (
     <div className="relative">
       <div
@@ -191,14 +333,7 @@ function Carousel({ images, inCard = false }: { images: string[]; inCard?: boole
         }`}
       >
         {images.map((src) => (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            key={src}
-            src={src}
-            alt=""
-            loading="lazy"
-            className={`shrink-0 ${frame}`}
-          />
+          <Frame key={src} src={src} alt="" className={`shrink-0 ${frame}`} sizes={frameSizes} />
         ))}
       </div>
 
@@ -239,13 +374,18 @@ function Carousel({ images, inCard = false }: { images: string[]; inCard?: boole
 // the card carries `overflow-hidden` (it clips the image to the rounded corners)
 // and why the carousel is passed `inCard` (the card already draws the border and
 // the rounding, so the strip shouldn't draw its own).
-function BlockCard({ block }: { block: ArchiveBlock }) {
+function BlockCard({ block, col }: { block: ArchiveBlock; col: Column }) {
   const media =
     block.images.length > 0 ? (
-      <Carousel images={block.images} inCard />
+      // Half the column for the card, and the frame peeks at 78% of that —
+      // but one card per row on a phone, so 78% of the whole width there.
+      <Carousel images={block.images} frameSizes={sizes(col, 0.5 * 0.78, 0.78)} inCard />
     ) : block.image ? (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img src={block.image} alt={block.title ? `${block.title} artwork` : ""} className="w-full" />
+      <Frame
+        src={block.image}
+        alt={block.title ? `${block.title} artwork` : ""}
+        sizes={sizes(col, 0.5, 1)}
+      />
     ) : null;
 
   const copy = (
@@ -339,8 +479,9 @@ function MethodCards({ list }: { list: ArchiveNoteList }) {
 }
 
 // ── Project detail inside the panel. ────────────────────────────────────────
-function ArchiveDetail({ p }: { p: ArchiveProject }) {
+function ArchiveDetail({ p, wide }: { p: ArchiveProject; wide: boolean }) {
   const meta = [p.context, p.year].filter(Boolean).join(" · ");
+  const col = column(wide);
 
   /*
     Stand Overview and Approach side by side instead of stacked.
@@ -372,7 +513,7 @@ function ArchiveDetail({ p }: { p: ArchiveProject }) {
       {/* Artwork sits above the copy, as it did on the old Framer page. */}
       {p.illustrations.length > 0 && (
         <div className="mt-14">
-          <IllustrationStrip illustrations={p.illustrations} />
+          <IllustrationStrip illustrations={p.illustrations} col={col} />
         </div>
       )}
 
@@ -392,11 +533,12 @@ function ArchiveDetail({ p }: { p: ArchiveProject }) {
           }`}
         >
           {p.poster && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
+            <Frame
               src={p.poster}
               alt={`${p.title} poster`}
-              className="w-full rounded-lg border border-border"
+              className="rounded-lg border border-border"
+              // 1.15fr of a [1.15fr_1fr] pair below xl; stacked full-width above.
+              sizes={sizes(col, 1.15 / 2.15, 1)}
             />
           )}
 
@@ -471,7 +613,7 @@ function ArchiveDetail({ p }: { p: ArchiveProject }) {
       {p.blocks.length > 0 && (
         <div className="mt-14 grid gap-5 md:grid-cols-2 md:items-start">
           {p.blocks.map((b, i) => (
-            <BlockCard key={i} block={b} />
+            <BlockCard key={i} block={b} col={col} />
           ))}
         </div>
       )}
@@ -479,17 +621,17 @@ function ArchiveDetail({ p }: { p: ArchiveProject }) {
       {/* Gallery last, after all the copy, so the writing isn't split in two. */}
       {p.images.length > 0 && (
         <div className="mt-14">
-          <Carousel images={p.images} />
+          <Carousel images={p.images} frameSizes={sizes(col)} />
         </div>
       )}
 
       {/* A wide graphic to close on, if the project has one. */}
       {p.banner && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
+        <Frame
           src={p.banner}
           alt={`${p.title} banner`}
-          className="mt-14 w-full rounded-lg border border-border"
+          className="mt-14 rounded-lg border border-border"
+          sizes={sizes(col)}
         />
       )}
 
@@ -520,6 +662,15 @@ export default function ArchiveGrid({ projects }: { projects: ArchiveProject[] }
   );
   const active = projects.find((p) => p.slug === openSlug) ?? null;
 
+  /*
+    Does this opening get the roomier drawer? Computed once here because it's
+    needed in two places: SidePanel uses it to set its width, and ArchiveDetail
+    needs it to work out how wide its images will actually be displayed (see
+    `column` above). Deriving it twice would let the two drift apart, and the
+    images would quietly start fetching the wrong sizes.
+  */
+  const wide = !!active?.poster || !!active?.process || (active?.blocks.length ?? 0) > 0;
+
   return (
     <>
       {/* Filter chips — top aligned with the sidebar wordmark. */}
@@ -546,8 +697,8 @@ export default function ArchiveGrid({ projects }: { projects: ArchiveProject[] }
 
       {/* Tile grid */}
       <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-        {visible.map((p) => (
-          <Tile key={p.slug} p={p} onOpen={() => setOpenSlug(p.slug)} />
+        {visible.map((p, i) => (
+          <Tile key={p.slug} p={p} onOpen={() => setOpenSlug(p.slug)} priority={i < 4} />
         ))}
       </div>
 
@@ -564,9 +715,9 @@ export default function ArchiveGrid({ projects }: { projects: ArchiveProject[] }
         open={!!active}
         onClose={() => setOpenSlug(null)}
         label={active?.title}
-        wide={!!active?.poster || !!active?.process || (active?.blocks.length ?? 0) > 0}
+        wide={wide}
       >
-        {active && <ArchiveDetail p={active} />}
+        {active && <ArchiveDetail p={active} wide={wide} />}
       </SidePanel>
     </>
   );
