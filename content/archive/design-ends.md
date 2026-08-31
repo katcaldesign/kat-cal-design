@@ -4,7 +4,7 @@ headline: Designing an actionable Circular Design Tool
 categories: [Design Research, Service, UX]
 skills: [Academic Research, User Research, Co-creation, Service Blueprinting, Wireframing]
 showSkills: true
-context: MSc project
+context: Research project, Ellen MacArthur Foundation
 year: 2022
 cover: /archive/design-ends.jpg
 images:
