@@ -11,6 +11,11 @@ images: []
 order: 3
 link:
 
+# How the labelled items at the top of the panel sit: "grid" stands them two
+# across (Context / Year on the top row, Overview / Approach beneath), "stacked"
+# runs them down one column. Leave it out for stacked. See _template.md.
+sectionLayout: grid
+
 # Panel sections. Blank means the section doesn't show at all; fill one in and
 # it appears. Set showOverview / showApproach to false to hide text you want to
 # keep. See _template.md.

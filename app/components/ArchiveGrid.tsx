@@ -18,6 +18,7 @@ import {
   type ArchiveCategory,
   type ArchiveNoteList,
   type ArchiveProject,
+  type ArchiveSection,
   type ArchiveVideo,
 } from "../../lib/archive";
 
@@ -340,29 +341,40 @@ function MethodCards({ list }: { list: ArchiveNoteList }) {
 
 // ── Project detail inside the panel. ────────────────────────────────────────
 function ArchiveDetail({ p }: { p: ArchiveProject }) {
-  const meta = [p.context, p.year].filter(Boolean).join(" · ");
+  /*
+    Context and Year join Overview and Approach as labelled items.
+
+    They used to sit as one small line under the headline, which meant the panel
+    opened with a fact in one typographic voice and then repeated the same voice
+    as the section labels further down. Folding them in gives four items wearing
+    one label style: the two facts, then the two pieces of writing.
+
+    Built here rather than in the loader because it is a decision about the
+    panel, not about the content. The markdown still just says `context:` and
+    `year:`, and `p.sections` stays what it has always been: the narrative.
+  */
+  const panelSections: ArchiveSection[] = [
+    ...(p.context ? [{ label: "Context", paragraphs: [p.context] }] : []),
+    ...(p.year ? [{ label: "Year", paragraphs: [p.year] }] : []),
+    ...p.sections,
+  ];
 
   /*
-    Stand Overview and Approach side by side instead of stacked.
+    Two across, or one column down.
 
-    Only worth doing when the panel is already in its roomier form AND the poster
-    isn't using the second column. A project carrying blocks gets the wide drawer
-    (see the SidePanel call at the bottom of this file), and at that width two
-    short sections stacked leave a lot of empty space to scroll past before the
-    cards begin. Below xl the drawer is narrower, so this drops back to one
-    column on its own.
+    The project asks for it (`sectionLayout:` in the markdown) and this adds the
+    two conditions the content can't know about: a poster is already using the
+    second column, and one item has no one to stand beside. The Tailwind classes
+    hold the grid back to xl, so a narrow panel collapses to a column whatever
+    the project asked for.
   */
-  const pairSections = !p.poster && p.blocks.length > 0 && p.sections.length > 1;
+  const gridSections = p.sectionLayout === "grid" && !p.poster && panelSections.length > 1;
   return (
     <article>
       {/* Cover image is the tile's job — the panel opens on the title. */}
       {/* Title = main heading; one-liner (headline) = subtitle beneath it. */}
       <h2 className="kat-body-2xl font-medium text-balance text-ink">{p.title}</h2>
       {p.headline && <p className="kat-body-md mt-2 text-ink-mid">{p.headline}</p>}
-      {meta && (
-        <span className="kat-mono-sm mt-4 block uppercase tracking-wider text-ink-light">{meta}</span>
-      )}
-
       {p.showSkills && p.skills.length > 0 && (
         <div className="mt-6">
           <SkillPills skills={p.skills} />
@@ -385,7 +397,7 @@ function ArchiveDetail({ p }: { p: ArchiveProject }) {
           where the drawer widens to 1000px and both halves still get room to
           breathe. Below that, and for every project WITHOUT a poster, this is
           the same single stacked column as before. */}
-      {(p.poster || p.description.length > 0 || p.sections.length > 0) && (
+      {(p.poster || p.description.length > 0 || panelSections.length > 0) && (
         <div
           className={`mt-14 ${
             p.poster ? "grid gap-8 xl:grid-cols-[1.15fr_1fr] xl:items-start xl:gap-10" : ""
@@ -413,18 +425,25 @@ function ArchiveDetail({ p }: { p: ArchiveProject }) {
               </div>
             )}
 
-            {/* Labelled sections (Overview, Approach). The loader has already
-                dropped any that are empty or switched off, so whatever arrives
-                here is meant to be on screen. */}
-            {p.sections.length > 0 && (
+            {/* The labelled items: Context, Year, Overview, Approach. Anything
+                empty or switched off is already gone (the loader drops sections,
+                the array above drops missing facts), so whatever arrives here is
+                meant to be on screen.
+
+                Two across becomes a 2x2 with the usual four, since the grid
+                fills row by row: the facts land on the top row and the writing
+                beneath. `items-start` keeps a short Overview from stretching to
+                match a long Approach, and `gap-y` stays at the stacked spacing
+                so the two rows don't drift apart. */}
+            {panelSections.length > 0 && (
               <div
                 className={
-                  pairSections
-                    ? "grid gap-10 xl:grid-cols-2 xl:items-start xl:gap-12"
+                  gridSections
+                    ? "grid gap-10 xl:grid-cols-2 xl:items-start xl:gap-x-12 xl:gap-y-10"
                     : "flex flex-col gap-10"
                 }
               >
-                {p.sections.map((s) => (
+                {panelSections.map((s) => (
                   <section key={s.label}>
                     <h3 className="kat-mono-sm uppercase tracking-wider text-ink-light">
                       {s.label}
@@ -564,7 +583,12 @@ export default function ArchiveGrid({ projects }: { projects: ArchiveProject[] }
         open={!!active}
         onClose={() => setOpenSlug(null)}
         label={active?.title}
-        wide={!!active?.poster || !!active?.process || (active?.blocks.length ?? 0) > 0}
+        wide={
+          !!active?.poster ||
+          !!active?.process ||
+          (active?.blocks.length ?? 0) > 0 ||
+          active?.sectionLayout === "grid"
+        }
       >
         {active && <ArchiveDetail p={active} />}
       </SidePanel>

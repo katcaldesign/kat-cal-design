@@ -21,6 +21,7 @@ import {
   type ArchiveProject,
   type ArchiveSection,
   type ArchiveVideo,
+  type SectionLayout,
 } from "./archive";
 
 const CONTENT_DIR = path.join(process.cwd(), "content", "archive");
@@ -99,6 +100,17 @@ function toSections(data: Record<string, unknown>): ArchiveSection[] {
     const paragraphs = toParagraphs(data[field]);
     return paragraphs.length ? [{ label, paragraphs }] : [];
   });
+}
+
+/*
+  Read `sectionLayout:` off the front matter.
+
+  Anything other than the word "grid" means stacked, so a project that says
+  nothing (or fumbles the spelling) gets the safe single column rather than a
+  layout it never asked for.
+*/
+function toSectionLayout(v: unknown): SectionLayout {
+  return String(v ?? "").trim().toLowerCase() === "grid" ? "grid" : "stacked";
 }
 
 /*
@@ -204,6 +216,7 @@ export function getArchiveProjects(): ArchiveProject[] {
       order: typeof data.order === "number" ? data.order : 999,
       description: toParagraphs(content),
       sections: toSections(data),
+      sectionLayout: toSectionLayout(data.sectionLayout),
       process: toNoteList(data.processHeading, data.process),
       methods: toNoteList(data.methodsHeading, data.methods),
     };

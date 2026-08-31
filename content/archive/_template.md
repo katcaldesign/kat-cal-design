@@ -22,10 +22,20 @@ illustrations: []               # optional row of artwork above the copy; hoveri
 order: 99                       # lower shows first
 link:                           # optional external URL
 
-# Labelled sections in the panel. Leave a field out (or blank) and it doesn't
-# show at all; keep the text but set its show flag to false to hide it without
-# deleting it. The `|` lets you write across several lines; a blank line inside
-# starts a new paragraph.
+# The labelled items at the top of the panel are Context, Year, Overview and
+# Approach: the two facts above (they show automatically, no extra key) followed
+# by the two pieces of writing below.
+#
+# `sectionLayout` chooses how the four sit. Leave it out, or say "stacked", and
+# they run down one column, which suits a long Overview. Say "grid" and they go
+# two across: the facts on the top row, the writing beneath, and the panel
+# widens to make room. A project with a poster always stacks, because the poster
+# is using the second column, and the grid only opens up on a big screen.
+sectionLayout: stacked
+
+# Leave a section field out (or blank) and it doesn't show at all; keep the text
+# but set its show flag to false to hide it without deleting it. The `|` lets you
+# write across several lines; a blank line inside starts a new paragraph.
 overview: |
   What the project was and why it mattered.
 showOverview: true
