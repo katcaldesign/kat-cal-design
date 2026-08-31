@@ -11,18 +11,17 @@ images: []
 order: 11
 link:
 
-# Panel sections. Blank means the section doesn't show at all; fill one in and
-# it appears. Set showOverview / showApproach to false to hide text you want to
-# keep. See _template.md.
+# Panel sections. Fill in both on every project: they are the panel's writing,
+# and it reads best when every project carries the same two. Set showOverview /
+# showApproach to false to hide text you want to keep. See _template.md.
 overview: |
+  Summer 2020, back home with my brother — a keen brewing enthusiast — we started doing pilot brews, developing two recipes we loved and bottling them to send to friends and family through Covid.
 
 showOverview: true
 
 approach: |
+  I took on the graphics and the organising (and, yes, cleaning the mash tun); my brother was Head Brewer. Small 25-litre batches let us iterate fast.
 
 showApproach: true
 ---
 
-Summer 2020, back home with my brother — a keen brewing enthusiast — we started doing pilot brews, developing two recipes we loved and bottling them to send to friends and family through Covid.
-
-I took on the graphics and the organising (and, yes, cleaning the mash tun); my brother was Head Brewer. Small 25-litre batches let us iterate fast.

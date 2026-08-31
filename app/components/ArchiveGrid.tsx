@@ -21,6 +21,7 @@ import {
   type ArchiveCategory,
   type ArchiveNoteList,
   type ArchiveProject,
+  type ArchiveSection,
   type ArchiveVideo,
 } from "../../lib/archive";
 
@@ -478,22 +479,58 @@ function MethodCards({ list }: { list: ArchiveNoteList }) {
   );
 }
 
+/*
+  ── Overview and Approach: one column, or two ──────────────────────────────
+
+  One column of writing until there's room for two readable measures, then they
+  stand side by side.
+
+  The width that matters is the COPY COLUMN's, not the viewport's, so this is a
+  container query (`@container` + the `@3xl:` variant) rather than a media query.
+  The panel is 640px wide at md, 720 at lg, 1000 when `wide`, and the copy column
+  is narrower again when a poster takes the other half of it. A media query can't
+  see any of that; measuring the element itself means the poster projects stay in
+  one column on their own, with no special case for them in here.
+
+  @3xl is 768px, which sets the gate against the column widths in `column()`
+  above: the wide drawer's 920px splits into two 436px columns, while the plain
+  drawer's 640px stays whole. Split at 640 and each paragraph would sit in 296px,
+  and short lines make prose hard to read.
+*/
+function PanelSections({ sections }: { sections: ArchiveSection[] }) {
+  return (
+    <div className="@container">
+      <div className="grid grid-cols-1 gap-10 @3xl:grid-cols-2 @3xl:items-start @3xl:gap-x-12">
+        {sections.map((s) => (
+          <section key={s.label}>
+            <h3 className="kat-mono-sm uppercase tracking-wider text-ink-light">{s.label}</h3>
+            <div className="mt-3 flex flex-col gap-4">
+              {s.paragraphs.map((para, i) => (
+                <p key={i} className="kat-body-md text-ink-dark">
+                  {para}
+                </p>
+              ))}
+            </div>
+          </section>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ── Project detail inside the panel. ────────────────────────────────────────
 function ArchiveDetail({ p, wide }: { p: ArchiveProject; wide: boolean }) {
-  const meta = [p.context, p.year].filter(Boolean).join(" · ");
   const col = column(wide);
 
   /*
-    Stand Overview and Approach side by side instead of stacked.
+    Context and year as one byline under the headline.
 
-    Only worth doing when the panel is already in its roomier form AND the poster
-    isn't using the second column. A project carrying blocks gets the wide drawer
-    (see the SidePanel call at the bottom of this file), and at that width two
-    short sections stacked leave a lot of empty space to scroll past before the
-    cards begin. Below xl the drawer is narrower, so this drops back to one
-    column on its own.
+    They answer "what was this and when" before you commit to reading a
+    paragraph, which is the triage an archive needs. Deliberately NOT dressed as
+    labelled items alongside Overview and Approach: setting a year at the size of
+    a paragraph, with a heading over it, claims it matters as much as one.
   */
-  const pairSections = !p.poster && p.blocks.length > 0 && p.sections.length > 1;
+  const meta = [p.context, p.year].filter(Boolean).join(" · ");
   return (
     <article>
       {/* Cover image is the tile's job — the panel opens on the title. */}
@@ -557,33 +594,10 @@ function ArchiveDetail({ p, wide }: { p: ArchiveProject; wide: boolean }) {
               </div>
             )}
 
-            {/* Labelled sections (Overview, Approach). The loader has already
-                dropped any that are empty or switched off, so whatever arrives
-                here is meant to be on screen. */}
-            {p.sections.length > 0 && (
-              <div
-                className={
-                  pairSections
-                    ? "grid gap-10 xl:grid-cols-2 xl:items-start xl:gap-12"
-                    : "flex flex-col gap-10"
-                }
-              >
-                {p.sections.map((s) => (
-                  <section key={s.label}>
-                    <h3 className="kat-mono-sm uppercase tracking-wider text-ink-light">
-                      {s.label}
-                    </h3>
-                    <div className="mt-3 flex flex-col gap-4">
-                      {s.paragraphs.map((para, i) => (
-                        <p key={i} className="kat-body-md text-ink-dark">
-                          {para}
-                        </p>
-                      ))}
-                    </div>
-                  </section>
-                ))}
-              </div>
-            )}
+            {/* Overview and Approach. The loader has already dropped any that
+                are empty or switched off, so whatever arrives here is meant to
+                be on screen. */}
+            {p.sections.length > 0 && <PanelSections sections={p.sections} />}
           </div>
         </div>
       )}

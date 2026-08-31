@@ -23,9 +23,9 @@ images:
 order: 5
 link:
 
-# Panel sections. Blank means the section doesn't show at all; fill one in and
-# it appears. Set showOverview / showApproach to false to hide text you want to
-# keep. See _template.md.
+# Panel sections. Fill in both on every project: they are the panel's writing,
+# and it reads best when every project carries the same two. Set showOverview /
+# showApproach to false to hide text you want to keep. See _template.md.
 overview: |
   For my MSc Dissertation Project, I created a brief to look at increasing the efficiency of splitboarding. An initial exploratory stage led me to focus on a boot redesign.
 

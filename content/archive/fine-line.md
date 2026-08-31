@@ -11,18 +11,17 @@ images: []
 order: 10
 link:
 
-# Panel sections. Blank means the section doesn't show at all; fill one in and
-# it appears. Set showOverview / showApproach to false to hide text you want to
-# keep. See _template.md.
+# Panel sections. Fill in both on every project: they are the panel's writing,
+# and it reads best when every project carries the same two. Set showOverview /
+# showApproach to false to hide text you want to keep. See _template.md.
 overview: |
+  Somewhere between a hobby and a side hustle. Loving my access to a laser cutter, I started making personalised illustrated coasters and keyrings as gifts — then, after a few requests, set up an online shop and took a stall at Glasgow Christmas Market.
 
 showOverview: true
 
 approach: |
+  A lot of late nights drawing and optimising cut files to keep it efficient and error-free.
 
 showApproach: true
 ---
 
-Somewhere between a hobby and a side hustle. Loving my access to a laser cutter, I started making personalised illustrated coasters and keyrings as gifts — then, after a few requests, set up an online shop and took a stall at Glasgow Christmas Market.
-
-A lot of late nights drawing and optimising cut files to keep it efficient and error-free.
