@@ -389,7 +389,13 @@ function BlockCard({ block, col }: { block: ArchiveBlock; col: Column }) {
       />
     ) : null;
 
-  const copy = (
+  // A block can be artwork alone, for a photo that speaks for itself and would
+  // only be repeated by a caption. Skip the copy element entirely in that case:
+  // rendered empty it still carries its padding, so the card ends in a band of
+  // blank surface that reads as a caption someone forgot to write.
+  const hasCopy = Boolean(block.title) || block.paragraphs.length > 0;
+
+  const copy = hasCopy ? (
     <div className="flex flex-col gap-4 p-6 md:p-8">
       {/* Mono for the card headings, which means caps (the style enforces it).
           It separates them from the sans body copy below and keeps them in the
@@ -403,7 +409,7 @@ function BlockCard({ block, col }: { block: ArchiveBlock; col: Column }) {
         </p>
       ))}
     </div>
-  );
+  ) : null;
 
   const card = "overflow-hidden rounded-card border border-border bg-surface";
 
@@ -411,11 +417,15 @@ function BlockCard({ block, col }: { block: ArchiveBlock; col: Column }) {
   // artwork when the columns collapse on a phone, and so a screen reader always
   // meets the words before the picture.
   if (block.wide) {
-    return (
+    // With no writing to stand beside, the two-up grid would leave the artwork
+    // in one half and nothing in the other. Let it have the whole row instead.
+    return hasCopy ? (
       <div className={`${card} md:col-span-2 md:grid md:grid-cols-2 md:items-center`}>
         {copy}
         {media}
       </div>
+    ) : (
+      <div className={`${card} md:col-span-2`}>{media}</div>
     );
   }
 
