@@ -34,37 +34,27 @@ showApproach: true
 blocks:
   - title: Competitor analysis
     text: |
-      I mapped the connected bike landscape, then benchmarked a relevant subset against Bosch, Cowboy and VanMoof in detail.
-
-      The comparison was structured around what a rider can do rather than what an app has: lock the bike electronically, track it after a theft, diagnose an electrical fault, book a service. That framing set the baseline, because anything we built had to beat what a rider could already download for free.
-    image: /archive/brompton-digital/competitor-analysis.png
+      Benchmarked against Bosch, Cowboy and VanMoof, compared on what a rider can do rather than what an app has. The baseline was beating what riders could already download for free.
+    image: /archive/brompton-digital/brompton-digital-competitor-research.jpeg
 
   - title: Storyboarding and prototyping
     text: |
-      Concepts were drawn as storyboards: unboxing and setup, automatic against user-initiated ride logging, diagnosing a fault mid-ride, and getting home on a low battery.
-
-      Describing a feature as a situation rather than a screen let riders and stakeholders react to it before it cost engineering time, and each frame carried the open question I still needed answered. These were my lowest-fidelity prototypes, and the fastest way to retire a weak idea.
-    image: /archive/brompton-digital/storyboards.png
+      Concepts drawn as situations rather than screens, so riders and stakeholders could react before anything cost engineering time. My fastest way to retire a weak idea.
+    image: /archive/brompton-digital/brompton-digital-storyboard.jpeg
 
   - title: Stakeholder workshops
     text: |
-      1:1 interviews across the business shaped a workshop where engineering, product and service sized every candidate feature from S to XL on build complexity.
-
-      Feasibility then came from the people who would have to build and support the work, rather than from an estimate I had made on their behalf. It also surfaced the constraint sitting behind the sizes, how the bike and the phone stay connected, which set the ceiling on what several concepts could ever do.
-    image: /archive/brompton-digital/stakeholder-workshop.jpg
+      Engineering, product and service sized every candidate feature from S to XL on build complexity. Feasibility came from the people who would build and support it, not from my estimate.
+    image: /archive/brompton-digital/brompton-digital-tech-feasability.jpeg
 
   - title: Co-creation workshops and rider interviews
     text: |
-      Workshops with riders developed and evaluated the shortlist.
-
-      I wrote a workbook each participant completed individually alongside the group discussion, so I captured independent positions as well as the consensus the room arrived at.
-    image: /archive/brompton-digital/co-creation.jpg
+      Riders developed and evaluated the shortlist. A workbook each participant filled in individually captured independent positions alongside the group consensus.
+    image: /archive/brompton-digital/brompton-digital-co-creation.webp
 
   - title: Quantitative survey
     text: |
-      Three surveys sized and ranked the shortlisted functions. Rather than report each one as individually popular, I converted five-point interest ratings into a single weighted score that penalised negative responses, so functions could be ranked against each other.
-
-      On ride logging that put basic ride data and weekly distance clearly ahead, exporting to Strava, Garmin and Apple Health third, and power metrics at the bottom. The direction was integration with the platforms riders already used, not a tracking experience built from scratch.
-    image: /archive/brompton-digital/survey-ride-logging.png
+      Five-point interest ratings converted into one weighted score that penalised negative responses, so functions could be ranked against each other. On ride logging, basic data and platform export beat power metrics.
+    image: /archive/brompton-digital/brompton-digital-survey.jpeg
     wide: true
 ---

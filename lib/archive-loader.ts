@@ -27,7 +27,7 @@ const CONTENT_DIR = path.join(process.cwd(), "content", "archive");
 const ASSETS_DIR = path.join(process.cwd(), "assets");
 const PUBLIC_DIR = path.join(process.cwd(), "public");
 
-const RASTER = /\.(png|jpe?g)$/i;
+const RASTER = /\.(png|jpe?g|webp)$/i;
 
 /*
   True only if the path in the front matter points at a file that's really
