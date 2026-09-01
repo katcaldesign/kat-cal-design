@@ -20,41 +20,41 @@ link:
 # and it reads best when every project carries the same two. Set showOverview /
 # showApproach to false to hide text you want to keep. See _template.md.
 overview: |
-  Fewer than 30% of Brompton's electric riders had downloaded the companion app, and fewer than 10% used it regularly. I initiated this project to establish what the app should do for a rider, and which features were worth building first.
+  Brompton's electric bikes shipped with a companion app, but we estimated that under 30% of electric riders had downloaded it, and under 10% used it regularly. I set up this project to decide what the app should do next, and in what order to build it.
 
 showOverview: true
 
 approach: |
-  Every candidate feature was assessed on three criteria: value to the rider, commercial return, and whether Brompton could realistically build and maintain it. Each criterion was answered by a separate method, then scored on a common scale, so features could be ranked on evidence rather than preference.
+  I scored every candidate feature on three things: how much riders wanted it, what it returned to the business, and what it would cost to build and maintain. Each of the three came from a different method. Putting them on one scale let us compare features directly and agree an order.
 
-  Quantitative work was weighted toward younger riders, the group Brompton was trying to reach.
+  The quantitative work was weighted toward younger riders, who Brompton wanted to attract.
 
 showApproach: true
 
 blocks:
   - title: Competitor analysis
     text: |
-      Benchmarked against Bosch, Cowboy and VanMoof, compared on what a rider can do rather than what an app has. The baseline was beating what riders could already download for free.
+      I mapped the connected bike market, then compared Bosch, Cowboy and VanMoof in detail. I organised the comparison around rider capabilities, such as locking the bike, tracking it after a theft, or booking a service, so we could see which needs were already well served elsewhere.
     image: /archive/brompton-digital/brompton-digital-competitor-research.jpeg
 
   - title: Storyboarding and prototyping
     text: |
-      Concepts drawn as situations rather than screens, so riders and stakeholders could react before anything cost engineering time. My fastest way to retire a weak idea.
+      I drew each concept as a short storyboard: unboxing the bike, logging a ride, diagnosing a fault, getting home on a low battery. Showing people a situation instead of a screen got better feedback, and it let us drop the weaker concepts before any engineering time went into them.
     image: /archive/brompton-digital/brompton-digital-storyboard.jpeg
 
   - title: Stakeholder workshops
     text: |
-      Engineering, product and service sized every candidate feature from S to XL on build complexity. Feasibility came from the people who would build and support it, not from my estimate.
+      I interviewed people across engineering, product and service, then ran a workshop where they sized every candidate feature from S to XL. The estimates came from the teams who would build and support each feature, which made them much harder to argue with later.
     image: /archive/brompton-digital/brompton-digital-tech-feasability.jpeg
 
   - title: Co-creation workshops and rider interviews
     text: |
-      Riders developed and evaluated the shortlist. A workbook each participant filled in individually captured independent positions alongside the group consensus.
+      I ran workshops with riders to develop and test the shortlist. Each participant also filled in a workbook on their own, so I had their individual view as well as whatever the group settled on. Group sessions tend to converge, and the workbooks showed me where that had happened.
     image: /archive/brompton-digital/brompton-digital-co-creation.webp
 
   - title: Quantitative survey
     text: |
-      Five-point interest ratings converted into one weighted score that penalised negative responses, so functions could be ranked against each other. On ride logging, basic data and platform export beat power metrics.
+      Three surveys sized the shortlist. Interest ratings on their own made everything look popular, so I weighted the five-point scale, with negative weights on the bottom two options, to get a single score per feature. Riders wanted basic ride data and the ability to export to Strava, Garmin or Apple Health. Detailed power metrics scored consistently low.
     image: /archive/brompton-digital/brompton-digital-survey.jpeg
     wide: true
 ---

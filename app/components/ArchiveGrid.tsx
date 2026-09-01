@@ -405,7 +405,10 @@ function BlockCard({ block, col }: { block: ArchiveBlock; col: Column }) {
     </div>
   );
 
-  const card = "overflow-hidden rounded-card border border-border bg-surface";
+  // rounded-lg, not rounded-card: the tiles, illustration frames, carousel and
+  // banner in this panel are all rounded-lg, and the cards sat twice as round
+  // as everything beside them.
+  const card = "overflow-hidden rounded-lg border border-border bg-surface";
 
   // Writing FIRST in the markup either way, so the wide card reads copy-then-
   // artwork when the columns collapse on a phone, and so a screen reader always
