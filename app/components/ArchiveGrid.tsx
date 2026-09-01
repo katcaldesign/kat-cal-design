@@ -320,9 +320,30 @@ function Carousel({
     el.scrollBy({ left: dir * step, behavior: "smooth" });
   }
 
+  /*
+    Narrow enough that the NEXT frame is properly in view, not just hinted at.
+    A single frame filling the strip reads as one photo with two buttons parked
+    on it; two-and-a-bit reads as a sequence you can page, which is what a build
+    sequence like the weight rack's actually is. Wider below xl, where the
+    drawer is 640px and half of that is all the media column gets.
+
+    The width goes on a WRAPPER, not on the Frame. Frame renders `w-full` and
+    appends the caller's className after it, but the class ATTRIBUTE's order
+    decides nothing: both are single-class selectors, so whichever Tailwind
+    emits later in the stylesheet wins, and that's `w-full`. So `w-[60%]` on the
+    Frame was simply dead, and the peek this is here to produce never appeared.
+    (`xl:w-[46%]` did work, being in a media query, which is why the peek showed
+    up at xl and nowhere else.) Sizing the wrapper instead leaves nothing to
+    collide with, and Frame's `w-full` then fills it.
+  */
   const frame = inCard
-    ? "w-[78%] snap-start"
-    : "w-full snap-center rounded-lg border border-border";
+    ? "w-[60%] xl:w-[46%] snap-start"
+    : "w-full snap-center";
+
+  // Rounding and border stay on the image itself, so they clip the artwork
+  // rather than a box around it. A strip inside a card skips both: the card
+  // already draws them.
+  const media = inCard ? "" : "rounded-lg border border-border";
 
 
   return (
@@ -334,7 +355,9 @@ function Carousel({
         }`}
       >
         {images.map((src) => (
-          <Frame key={src} src={src} alt="" className={`shrink-0 ${frame}`} sizes={frameSizes} />
+          <div key={src} className={`shrink-0 ${frame}`}>
+            <Frame src={src} alt="" className={media} sizes={frameSizes} />
+          </div>
         ))}
       </div>
 
@@ -585,13 +608,33 @@ function ArchiveDetail({ p, wide }: { p: ArchiveProject; wide: boolean }) {
           }`}
         >
           {p.poster && (
-            <Frame
-              src={p.poster}
-              alt={`${p.title} poster`}
-              className="rounded-lg border border-border"
-              // 1.15fr of a [1.15fr_1fr] pair below xl; stacked full-width above.
-              sizes={sizes(col, 1.15 / 2.15, 1)}
-            />
+            /*
+              Capped while it's STACKED, uncapped once it stands beside the copy.
+
+              Both posters here are portrait (750x1000, 848x1200). Run one to the
+              full width of a 640px column and it's over 850px tall — a picture
+              that fills the screen and pushes the writing it's meant to
+              introduce clean out of view. At 260px it's 346px tall, which leaves
+              Overview and Approach on the fold beside it.
+
+              It also stops the `sizes` promise below being a lie. That string
+              claims ~300px at md and ~342px at lg, while the frame was really
+              rendering at full column width — so the browser believed it and
+              fetched a file too small for the space. Now the promise is a little
+              OVER the real 260px, which is the safe direction to be wrong in.
+
+              No cap on a phone: a portrait image at column width is the right
+              call there, and it's what the mobile `100vw` already promises.
+            */
+            <div className="md:max-w-[260px] xl:max-w-none">
+              <Frame
+                src={p.poster}
+                alt={`${p.title} poster`}
+                className="rounded-lg border border-border"
+                // 1.15fr of a [1.15fr_1fr] pair at xl; capped at 260px below it.
+                sizes={sizes(col, 1.15 / 2.15, 1)}
+              />
+            </div>
           )}
 
           {/* The copy column: body text first, then the labelled sections. */}
