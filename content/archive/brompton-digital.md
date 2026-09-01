@@ -20,14 +20,14 @@ link:
 # and it reads best when every project carries the same two. Set showOverview /
 # showApproach to false to hide text you want to keep. See _template.md.
 overview: |
-  Brompton's electric bikes shipped with a companion app, but we estimated that under 30% of electric riders had downloaded it, and under 10% used it regularly. I set up this project to decide what the app should do next, and in what order to build it.
+  Brompton's electric bikes shipped with a companion app. Under 30% of electric riders had downloaded it, and under 10% used it regularly. I set up this project to decide what the app should do next, and in what order to build it.
 
 showOverview: true
 
 approach: |
-  I scored every candidate feature on three things: how much riders wanted it, what it returned to the business, and what it would cost to build and maintain. Each of the three came from a different method. Putting them on one scale let us compare features directly and agree an order.
+  Low usage usually gets read as a usability problem. The bigger issue here was value: a rider had little reason to open the app in the first place. So the question was not how to improve it, but what it should be for.
 
-  The quantitative work was weighted toward younger riders, who Brompton wanted to attract.
+  Every candidate feature then had to survive three tests: rider value, commercial return, and what Brompton could realistically build and support. We weighted rider value toward younger buyers, who Brompton wanted to attract but did not yet have in numbers. The features that failed on only one test were the most useful, because they showed which constraint was holding them back.
 
 showApproach: true
 
