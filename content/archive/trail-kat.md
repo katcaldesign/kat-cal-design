@@ -7,6 +7,7 @@ showSkills: true
 context: Personal · YouTube
 year: 2021–2023
 cover: /archive/trail-kat.jpg
+video: https://www.youtube.com/watch?v=o6vinSsXUW4
 images: []
 order: 12
 link:
@@ -15,12 +16,12 @@ link:
 # and it reads best when every project carries the same two. Set showOverview /
 # showApproach to false to hide text you want to keep. See _template.md.
 overview: |
-  An outdoor YouTube channel I set up in 2021 — part exploring topics I care about, like gender differences and sustainability in outdoor gear, and part practising my video editing.
+  Something I started exploring in 2021: filming and editing outdoor trips as a way into topics I care about, like how women's gear gets designed and how quickly outdoor kit gets replaced. I cut a few videos to see whether it was a format worth carrying on with.
 
 showOverview: true
 
 approach: |
-  Experimental by design: a place to try different ways of visualising a story.
+  A place to practise editing with no brief and nothing riding on it. I tried different ways of telling the same story, cutting to music, leaning on voiceover, dropping in illustration, and watched which ones held up.
 
 showApproach: true
 ---
