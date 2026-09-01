@@ -130,6 +130,26 @@ export type ArchiveBlock = {
 };
 
 /*
+  A MOSAIC is a run of finished artwork laid out to tessellate, shown at full
+  size on the page.
+
+  It is the third way a project can show its work, and the one to reach for when
+  the artwork IS the output. Blocks (above) wrap each image in a card of writing,
+  because there the picture is evidence for an argument. A carousel hides all but
+  one frame behind a pair of arrows, which suits a build sequence where the
+  frames are steps in an order. Neither suits a run of posters that were each
+  made to be looked at: they want to be on the page, all at once, side by side.
+
+  The layout is a masonry flow rather than a grid, because these arrive in
+  whatever shape they were designed in: a portrait poster next to a landscape
+  photo next to a square one. A grid gives every cell the row's height, so a
+  landscape piece sitting beside a portrait one leaves a band of empty page under
+  it. Masonry lets each piece keep its own proportions and closes the gaps.
+
+  A bare list of paths, like `images` and `illustrations`. The artwork carries
+  its own words here, so there is nothing to caption.
+*/
+/*
   A titled note: a few words of heading, a sentence or two under it.
 
   Two optional lists on a project are built from these, and both are static
@@ -168,6 +188,7 @@ export type ArchiveProject = {
   images: string[]; // optional gallery, shown as a paged carousel (paths that exist)
   illustrations: string[]; // optional artwork row, shown as the hover accordion
   blocks: ArchiveBlock[]; // optional cards, one per strand of the work (see ArchiveBlock)
+  mosaic: string[]; // optional tessellating run of artwork (see the MOSAIC note above)
   banner: string | null; // optional wide image that closes the panel, edge to edge
   link?: string;
   order: number;
