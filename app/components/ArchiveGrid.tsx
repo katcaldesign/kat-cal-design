@@ -651,15 +651,10 @@ function ArchiveDetail({ p, wide }: { p: ArchiveProject; wide: boolean }) {
         </div>
       )}
 
-      {/* A wide graphic to close on, if the project has one. */}
-      {p.banner && (
-        <Frame
-          src={p.banner}
-          alt={`${p.title} banner`}
-          className="mt-14 rounded-lg border border-border"
-          sizes={sizes(col)}
-        />
-      )}
+      {/* A wide graphic to close on, if the project has one. Square corners, no
+          border: this one runs edge to edge, so the artwork ends where the panel
+          does rather than sitting in a frame like the block cards above. */}
+      {p.banner && <Frame src={p.banner} alt={`${p.title} banner`} className="mt-14" sizes={sizes(col)} />}
 
       {p.link && (
         <a

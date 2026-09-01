@@ -23,5 +23,9 @@ approach: |
   I took on the graphics and the organising (and, yes, cleaning the mash tun); my brother was Head Brewer. Small 25-litre batches let us iterate fast.
 
 showApproach: true
+
+# The logo closes the panel: the angler fish with a hop for a lure, the same
+# artwork as the tile you clicked to get here.
+banner: /archive/lopello.png
 ---
 
