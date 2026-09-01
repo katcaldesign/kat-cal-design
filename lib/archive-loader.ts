@@ -217,6 +217,7 @@ export function getArchiveProjects(): ArchiveProject[] {
       images: toList(data.images).filter(assetExists),
       illustrations: toList(data.illustrations).filter(assetExists),
       blocks: toBlocks(data.blocks),
+      mosaic: toList(data.mosaic).filter(assetExists),
       banner: assetExists(data.banner) ? String(data.banner).trim() : null,
       link: data.link ? String(data.link) : undefined,
       order: typeof data.order === "number" ? data.order : 999,

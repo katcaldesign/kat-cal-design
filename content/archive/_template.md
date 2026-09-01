@@ -68,6 +68,24 @@ blocks:
       Keep every frame the same shape or the carousel jumps height as you page.
     images: [/archive/x-1.png, /archive/x-2.png]
 
+# Mosaic: finished artwork straight on the page, tessellated, at full size.
+#
+# The third way to show work, for when the artwork IS the output: a run of
+# posters, flyers, printed pieces. Blocks wrap each image in a card of writing;
+# a carousel hides all but one behind arrows. Neither suits pieces that were
+# each made to be looked at.
+#
+# Laid out as masonry rather than a grid, so mixed shapes pack without leaving a
+# band of empty page under the short ones. Mixed shapes are welcome here, the
+# opposite of the carousel, which wants them all the same.
+#
+# Two catches. Reading order runs DOWN one column then down the next, not
+# left-to-right in pairs, so use blocks for anything that has to be read in
+# order. And the order you list them in decides how the columns pack: put the
+# tall pieces first and they head a column each, rather than stacking up in one
+# and leaving the other short.
+mosaic: []
+
 banner:                          # optional wide image closing the panel, edge to edge
 
 # Two optional static blocks, shown under the copy. Both need a heading AND at

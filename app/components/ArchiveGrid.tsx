@@ -464,6 +464,59 @@ function BlockCard({ block, col }: { block: ArchiveBlock; col: Column }) {
 }
 
 /*
+  ── Mosaic — finished artwork, tessellated, on the page. ───────────────────
+
+  For the projects whose output IS a set of pieces you're meant to look at: the
+  posters, the flyers, the printed card. Blocks put each image in a card of
+  writing and a carousel hides all but one behind arrows; neither is right when
+  the artwork is the point and there are five of them.
+
+  MASONRY, NOT A GRID, and the reason is the shapes. These arrive however they
+  were designed (a portrait poster, a landscape photo, a square one) and a grid
+  gives every cell in a row the height of the tallest thing in it. Put a
+  landscape piece beside a portrait one and you get a band of empty page under
+  the short one, which is exactly the raggedness this is meant to avoid.
+
+  CSS multi-column does the packing: each piece keeps its own proportions and the
+  browser balances the columns for us, so nothing here has to know how tall
+  anything is. `break-inside-avoid` is what stops a piece being sliced in half at
+  the foot of a column and continued at the top of the next one.
+
+  The cost of multi-column is reading ORDER: it runs DOWN the first column and
+  then down the second, not left-to-right in pairs. That's the right trade here,
+  where these are parallel pieces of work rather than a sequence, but it's the
+  thing to remember before reaching for this on something that has to be read in
+  order. Use blocks there.
+
+  The spacing between pieces is `mb-*` on the frames rather than a `gap`, since
+  the row gap of a grid has no equivalent in a column flow.
+*/
+function Mosaic({ images, title, col }: { images: string[]; title: string; col: Column }) {
+  return (
+    <div className="columns-1 gap-5 md:columns-2">
+      {images.map((src) => (
+        <div key={src} className="mb-5 break-inside-avoid">
+          <Frame
+            src={src}
+            /*
+              Nothing on the page names these individually, so they all share the
+              project's own alt text. That is the honest description available:
+              the artwork carries its words inside the image, where alt can't
+              reach, and inventing a different line per piece here would be
+              writing captions in a field nobody can see.
+            */
+            alt={`${title} artwork`}
+            className="rounded-lg border border-border"
+            // Half the column at md and up, all of it in the single column below.
+            sizes={sizes(col, 0.5, 1)}
+          />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/*
   ── Process — a ruled row of numbered steps. ───────────────────────────────
 
   For the projects that are really about HOW someone works rather than what
@@ -687,6 +740,14 @@ function ArchiveDetail({ p, wide }: { p: ArchiveProject; wide: boolean }) {
           {p.blocks.map((b, i) => (
             <BlockCard key={i} block={b} col={col} />
           ))}
+        </div>
+      )}
+
+      {/* The finished pieces, tessellated. Sits after any blocks, because a
+          block argues for a piece of work and this simply shows it. */}
+      {p.mosaic.length > 0 && (
+        <div className="mt-14">
+          <Mosaic images={p.mosaic} title={p.title} col={col} />
         </div>
       )}
 
