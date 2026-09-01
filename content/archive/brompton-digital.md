@@ -1,8 +1,8 @@
 ---
 title: Brompton Digital
-headline: Ranking digital features by rider value and build feasibility
+headline: Deciding what Brompton's e-bike app should do next
 categories: [UX, Design Research]
-skills: [User Research, Co-creation, Storyboarding, Feature Prioritisation, Product Metrics]
+skills: [User Research, Competitor Analysis, Storyboarding, Co-creation, Feature Prioritisation, Product Metrics]
 showSkills: true
 context: Brompton
 year: 2023
@@ -20,17 +20,39 @@ link:
 # and it reads best when every project carries the same two. Set showOverview /
 # showApproach to false to hide text you want to keep. See _template.md.
 overview: |
-  Brompton had no digital offer for its electric riders. I initiated this project to find out what one could be, and which parts were worth building first.
-
-  The result was a prioritised feature set, bounded by what the business could realistically ship, and a view of where digital could add commercial value rather than cost.
+  Brompton's electric bikes shipped with a companion app. Under 30% of electric riders had downloaded it, and under 10% used it regularly. I set up this project to decide what the app should do next, and in what order to build it.
 
 showOverview: true
 
 approach: |
-  I mapped the rider journey end to end (unboxing, the daily commute, mid-ride, and the moments things go wrong), then used it to ideate and pressure-test service concepts as storyboards, before any of them cost engineering time.
-
-  Stakeholder workshops then scored internal feasibility, while surveys and co-creation sessions quantified what riders actually valued, weighted toward the younger buyers Brompton wanted to reach.
+  I treated this as a question of value rather than a redesign: what would give a rider a reason to open the app at all. Every candidate feature then had to hold up on three counts: rider value, commercial return, and what Brompton could realistically build and support.
 
 showApproach: true
----
 
+blocks:
+  - title: Competitor analysis
+    text: |
+      I mapped the connected bike market, then compared Bosch, Cowboy and VanMoof in detail. I organised the comparison around rider capabilities, such as locking the bike, tracking it after a theft, or booking a service, so we could see which needs were already well served elsewhere.
+    image: /archive/brompton-digital/brompton-digital-competitor-research.jpeg
+
+  - title: Storyboarding and prototyping
+    text: |
+      I drew each concept as a short storyboard: unboxing the bike, logging a ride, diagnosing a fault, getting home on a low battery. Showing people a situation instead of a screen got better feedback, and it let us drop the weaker concepts before any engineering time went into them.
+    image: /archive/brompton-digital/brompton-digital-storyboard.jpeg
+
+  - title: Stakeholder workshops
+    text: |
+      I interviewed people across engineering, product and service, then ran a workshop where they sized every candidate feature from S to XL. The estimates came from the teams who would build and support each feature, which made them much harder to argue with later.
+    image: /archive/brompton-digital/brompton-digital-tech-feasability.jpeg
+
+  - title: Co-creation workshops and rider interviews
+    text: |
+      I ran workshops with riders to develop and test the shortlist. Each participant also filled in a workbook on their own, so I had their individual view as well as whatever the group settled on. Group sessions tend to converge, and the workbooks showed me where that had happened.
+    image: /archive/brompton-digital/brompton-digital-co-creation.webp
+
+  - title: Quantitative survey
+    text: |
+      Three surveys sized the shortlist, weighted toward the younger riders Brompton wanted to attract. Interest ratings on their own made everything look popular, so I weighted the five-point scale, with negative weights on the bottom two options, to get a single score per feature. Riders wanted basic ride data and the ability to export to Strava, Garmin or Apple Health. Detailed power metrics scored consistently low.
+    image: /archive/brompton-digital/brompton-digital-survey.jpeg
+    wide: true
+---

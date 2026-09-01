@@ -18,8 +18,8 @@
 export default function localImageLoader({ src, width }: { src: string; width: number }) {
   // SVGs are resolution-independent and never get optimized copies, so hand
   // them straight back untouched.
-  if (!/\.(png|jpe?g)$/i.test(src)) return src;
+  if (!/\.(png|jpe?g|webp)$/i.test(src)) return src;
 
-  const stem = src.replace(/\.(png|jpe?g)$/i, "");
+  const stem = src.replace(/\.(png|jpe?g|webp)$/i, "");
   return `/_img${stem}-${width}.webp`;
 }

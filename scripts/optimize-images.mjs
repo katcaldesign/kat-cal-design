@@ -90,7 +90,7 @@ const WIDTHS = [96, 320, 512, 900, 1280, 1600];
 
 // Only raster photos. SVGs are already tiny and resolution-independent, and
 // videos are the browser's problem, not ours.
-const RASTER = /\.(png|jpe?g)$/i;
+const RASTER = /\.(png|jpe?g|webp)$/i;
 
 /*
   Every image under assets/, as a path relative to it ("/archive/x.png").
