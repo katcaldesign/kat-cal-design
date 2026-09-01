@@ -25,9 +25,7 @@ overview: |
 showOverview: true
 
 approach: |
-  Low usage usually gets read as a usability problem. The bigger issue here was value: a rider had little reason to open the app in the first place. So the question was not how to improve it, but what it should be for.
-
-  Every candidate feature then had to survive three tests: rider value, commercial return, and what Brompton could realistically build and support. We weighted rider value toward younger buyers, who Brompton wanted to attract but did not yet have in numbers. The features that failed on only one test were the most useful, because they showed which constraint was holding them back.
+  I treated this as a question of value rather than a redesign: what would give a rider a reason to open the app at all. Every candidate feature then had to hold up on three counts: rider value, commercial return, and what Brompton could realistically build and support.
 
 showApproach: true
 
@@ -54,7 +52,7 @@ blocks:
 
   - title: Quantitative survey
     text: |
-      Three surveys sized the shortlist. Interest ratings on their own made everything look popular, so I weighted the five-point scale, with negative weights on the bottom two options, to get a single score per feature. Riders wanted basic ride data and the ability to export to Strava, Garmin or Apple Health. Detailed power metrics scored consistently low.
+      Three surveys sized the shortlist, weighted toward the younger riders Brompton wanted to attract. Interest ratings on their own made everything look popular, so I weighted the five-point scale, with negative weights on the bottom two options, to get a single score per feature. Riders wanted basic ride data and the ability to export to Strava, Garmin or Apple Health. Detailed power metrics scored consistently low.
     image: /archive/brompton-digital/brompton-digital-survey.jpeg
     wide: true
 ---
