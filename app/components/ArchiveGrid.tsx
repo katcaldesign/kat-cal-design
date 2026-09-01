@@ -320,14 +320,30 @@ function Carousel({
     el.scrollBy({ left: dir * step, behavior: "smooth" });
   }
 
-  // Narrow enough that the NEXT frame is properly in view, not just hinted at.
-  // A single frame filling the strip reads as one photo with two buttons parked
-  // on it; two-and-a-bit reads as a sequence you can page, which is what a build
-  // sequence like the weight rack's actually is. Wider below xl, where the
-  // drawer is 640px and half of that is all the media column gets.
+  /*
+    Narrow enough that the NEXT frame is properly in view, not just hinted at.
+    A single frame filling the strip reads as one photo with two buttons parked
+    on it; two-and-a-bit reads as a sequence you can page, which is what a build
+    sequence like the weight rack's actually is. Wider below xl, where the
+    drawer is 640px and half of that is all the media column gets.
+
+    The width goes on a WRAPPER, not on the Frame. Frame renders `w-full` and
+    appends the caller's className after it, but the class ATTRIBUTE's order
+    decides nothing: both are single-class selectors, so whichever Tailwind
+    emits later in the stylesheet wins, and that's `w-full`. So `w-[60%]` on the
+    Frame was simply dead, and the peek this is here to produce never appeared.
+    (`xl:w-[46%]` did work, being in a media query, which is why the peek showed
+    up at xl and nowhere else.) Sizing the wrapper instead leaves nothing to
+    collide with, and Frame's `w-full` then fills it.
+  */
   const frame = inCard
     ? "w-[60%] xl:w-[46%] snap-start"
-    : "w-full snap-center rounded-lg border border-border";
+    : "w-full snap-center";
+
+  // Rounding and border stay on the image itself, so they clip the artwork
+  // rather than a box around it. A strip inside a card skips both: the card
+  // already draws them.
+  const media = inCard ? "" : "rounded-lg border border-border";
 
 
   return (
@@ -339,7 +355,9 @@ function Carousel({
         }`}
       >
         {images.map((src) => (
-          <Frame key={src} src={src} alt="" className={`shrink-0 ${frame}`} sizes={frameSizes} />
+          <div key={src} className={`shrink-0 ${frame}`}>
+            <Frame src={src} alt="" className={media} sizes={frameSizes} />
+          </div>
         ))}
       </div>
 
