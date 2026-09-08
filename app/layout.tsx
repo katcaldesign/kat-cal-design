@@ -45,7 +45,7 @@ export default function RootLayout({
         <Sidebar />
         <div className="md:pl-60">
           {/* Generous canvas; each page constrains its own content width as
-              needed (home/info/work use their own max-w; archive uses the room
+              needed (info/work use their own max-w; archive uses the room
               for its contact-sheet grid). */}
           <main className="mx-auto w-full max-w-6xl px-6 py-14 md:px-10 md:py-20">
             {children}
