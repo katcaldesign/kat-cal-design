@@ -28,10 +28,10 @@ import CatLogo from "./CatLogo";
 
 // The nav is just data — one array. Reorder/rename here and both the rail and
 // the mobile bar update themselves. LABEL is what shows; HREF is the route
-// (folder name under app/, so URL and label now match).
+// (folder name under app/). "info" is the exception: it lives at the root,
+// since the site has no separate homepage.
 const NAV = [
-  { href: "/", label: "home" },
-  { href: "/info", label: "info" },
+  { href: "/", label: "info" },
   { href: "/work", label: "work" },
   { href: "/archive", label: "archive" },
 ];
