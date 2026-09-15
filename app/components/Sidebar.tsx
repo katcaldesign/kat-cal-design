@@ -24,15 +24,23 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { WORK_LOCKED } from "../../lib/site-config";
 import CatLogo from "./CatLogo";
+import LockIcon from "./LockIcon";
 
 // The nav is just data — one array. Reorder/rename here and both the rail and
 // the mobile bar update themselves. LABEL is what shows; HREF is the route
 // (folder name under app/). "info" is the exception: it lives at the root,
 // since the site has no separate homepage.
-const NAV = [
+//
+// LOCKED rows are still listed — the section exists, it just isn't open yet, so
+// showing it (padlocked) is more honest than hiding it. The flag lives in
+// lib/site-config.ts so the row and the page itself can never disagree.
+type NavItem = { href: string; label: string; locked?: boolean };
+
+const NAV: NavItem[] = [
   { href: "/", label: "info" },
-  { href: "/work", label: "work" },
+  { href: "/work", label: "work", locked: WORK_LOCKED },
   { href: "/archive", label: "archive" },
 ];
 
@@ -62,6 +70,36 @@ function NavRow({ href, label, active }: { href: string; label: string; active: 
         }`}
       />
     </Link>
+  );
+}
+
+// ── A locked nav row — same shape as NavRow, but it doesn't go anywhere ─────
+//
+// It is a <span>, not a <Link> or a <button>: there is no destination and no
+// action, so nothing should be focusable or clickable. Screen readers get the
+// state from aria-disabled plus the visually-hidden "coming soon" text —
+// the padlock alone is decorative (aria-hidden inside LockIcon).
+//
+// The hover behaviour: at rest the row is simply dimmer than its neighbours —
+// no icon, no caption, nothing competing with the two live rows. Point at it
+// and a "coming soon" tag plus the padlock fade in together at the right edge.
+// Both are always in the DOM at opacity-0, so nothing reflows on hover — the
+// same no-layout-shift trick the active dot uses above.
+function LockedRow({ label }: { label: string }) {
+  return (
+    <span
+      aria-disabled="true"
+      title="Coming soon — this section is locked for now"
+      className="kat-mono-sm group flex cursor-not-allowed items-center justify-between rounded-md px-3 py-2 uppercase tracking-wider text-ink-light transition-colors hover:bg-surface/40 hover:text-ink-mid"
+    >
+      <span>{label}</span>
+      <span className="flex items-center gap-1.5 opacity-0 transition-opacity group-hover:opacity-100">
+        <span className="kat-mono-xs normal-case tracking-normal">coming soon</span>
+        <LockIcon className="h-3 w-3" />
+      </span>
+      {/* Announced by screen readers, invisible on screen. */}
+      <span className="sr-only">coming soon, locked</span>
+    </span>
   );
 }
 
@@ -137,9 +175,13 @@ export default function Sidebar() {
         </Link>
 
         <nav className="mt-10 flex flex-col gap-1">
-          {nav.map((item) => (
-            <NavRow key={item.href} {...item} />
-          ))}
+          {nav.map((item) =>
+            item.locked ? (
+              <LockedRow key={item.href} label={item.label} />
+            ) : (
+              <NavRow key={item.href} href={item.href} label={item.label} active={item.active} />
+            ),
+          )}
         </nav>
 
         {/* Spacer — pushes the Connect group to the base of the rail. */}
@@ -166,18 +208,32 @@ export default function Sidebar() {
           <span className="kat-body-lg font-medium text-ink">kat calvert</span>
         </Link>
         <nav className="flex items-center gap-4">
-          {nav.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              aria-current={item.active ? "page" : undefined}
-              className={`kat-mono-xs uppercase tracking-wider transition-colors ${
-                item.active ? "text-ink" : "text-ink-mid hover:text-ink"
-              }`}
-            >
-              {item.label}
-            </Link>
-          ))}
+          {nav.map((item) =>
+            item.locked ? (
+              // No hover on touch, so the padlock is always visible here rather
+              // than fading in — it's the only cue a phone user gets.
+              <span
+                key={item.href}
+                aria-disabled="true"
+                className="kat-mono-xs flex items-center gap-1 uppercase tracking-wider text-ink-light"
+              >
+                {item.label}
+                <LockIcon className="h-2.5 w-2.5" />
+                <span className="sr-only">coming soon, locked</span>
+              </span>
+            ) : (
+              <Link
+                key={item.href}
+                href={item.href}
+                aria-current={item.active ? "page" : undefined}
+                className={`kat-mono-xs uppercase tracking-wider transition-colors ${
+                  item.active ? "text-ink" : "text-ink-mid hover:text-ink"
+                }`}
+              >
+                {item.label}
+              </Link>
+            ),
+          )}
         </nav>
       </header>
     </>
