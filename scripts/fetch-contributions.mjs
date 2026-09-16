@@ -17,7 +17,7 @@
   WHAT IT READS AND WRITES
   ------------------------
     env GH_CONTRIBUTIONS_TOKEN   a personal access token with `read:user`
-      -> lib/contributions-data.json   53 x 7 grid of levels, committed
+      -> lib/contributions-data.json   53 x 7 grid of raw counts, committed
 
   Runs automatically via the `prebuild` hook, and by hand with:
     npm run contributions
@@ -26,6 +26,11 @@
   committed JSON exactly as it found it and carries on. The build never fails
   because of this script. Only if the file is missing entirely does it invent a
   plausible year, so that a fresh clone still builds.
+
+  It stores RAW COUNTS, not colour levels. Turning a count into one of the
+  intensity steps is a display decision, so it lives with the display code in
+  lib/contributions.ts. Keeping it out of here means the ramp can be retuned
+  without refetching anything.
 
   WHY THE JSON IS COMMITTED rather than gitignored like `public/_img/`: it is
   the fallback. If the token expires or GitHub has a bad morning, the deploy
@@ -43,16 +48,6 @@ const LOGIN = "katcaldesign";
 const WEEKS = 53; // columns. GitHub shows a rolling year
 const DAYS = 7; //   rows. Sunday at the top
 
-/* GitHub's own four intensity steps, so the colours match what your profile
-   shows rather than thresholds we made up. NONE is the empty square. */
-const LEVELS = {
-  NONE: 0,
-  FIRST_QUARTILE: 1,
-  SECOND_QUARTILE: 2,
-  THIRD_QUARTILE: 3,
-  FOURTH_QUARTILE: 4,
-};
-
 const QUERY = `
   query($login: String!) {
     user(login: $login) {
@@ -64,7 +59,6 @@ const QUERY = `
               date
               weekday
               contributionCount
-              contributionLevel
             }
           }
         }
@@ -114,7 +108,6 @@ function toGrid(calendar) {
   const weeks = calendar.weeks.slice(-WEEKS);
   const missing = WEEKS - weeks.length;
 
-  const levels = [];
   const counts = [];
   const columnDates = [];
 
@@ -136,8 +129,9 @@ function toGrid(calendar) {
 
     for (let day = 0; day < DAYS; day++) {
       const match = days.find((d) => d.weekday === day);
-      levels.push(match ? String(LEVELS[match.contributionLevel] ?? 0) : ".");
-      counts.push(match ? match.contributionCount : 0);
+      /* null, not 0. A day with no commits and a cell that is not a day at all
+         look the same in a count but must not look the same on screen. */
+      counts.push(match ? match.contributionCount : null);
     }
   }
 
@@ -147,7 +141,6 @@ function toGrid(calendar) {
     fetchedAt: new Date().toISOString(),
     total: calendar.totalContributions,
     columnDates,
-    levels: levels.join(""),
     counts,
   };
 }
@@ -169,22 +162,14 @@ function inventYear() {
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
 
-  const levelFor = (count) => {
-    if (count === 0) return 0;
-    if (count <= 2) return 1;
-    if (count <= 4) return 2;
-    if (count <= 7) return 3;
-    return 4;
-  };
-
-  const levels = [];
   const counts = [];
   const columnDates = [];
   let total = 0;
 
   // Walk back from the most recent Sunday so the columns land on real dates.
-  const lastSunday = new Date();
-  lastSunday.setUTCHours(0, 0, 0, 0);
+  const today = new Date();
+  today.setUTCHours(0, 0, 0, 0);
+  const lastSunday = new Date(today);
   lastSunday.setUTCDate(lastSunday.getUTCDate() - lastSunday.getUTCDay());
 
   for (let week = 0; week < WEEKS; week++) {
@@ -193,14 +178,34 @@ function inventYear() {
     columnDates.push(sunday.toISOString().slice(0, 10));
 
     for (let day = 0; day < DAYS; day++) {
+      const date = new Date(sunday);
+      date.setUTCDate(date.getUTCDate() + day);
+
+      /* Days in the rest of this week have not happened, so they are not days
+         yet. Marking them null rather than 0 gives the stand-in the same ragged
+         bottom-right corner a real calendar has, and exercises that path
+         locally instead of only in production. */
+      if (date > today) {
+        counts.push(null);
+        continue;
+      }
+
       const progress = week / (WEEKS - 1);
-      let chance = Math.min(0.85, 0.16 + 0.95 * Math.pow(progress, 2.2));
+      let chance = Math.min(0.6, 0.06 + 0.5 * Math.pow(progress, 2.2));
       if (day === 0 || day === 6) chance *= 0.45; // weekends are quieter
 
-      const count = random() < chance ? 1 + Math.floor(Math.pow(random(), 3) * 8) : 0;
+      /* A long tail on purpose: most active days are one or two commits and a
+         handful are twenty-plus, which is the shape a real year has and what
+         the adaptive thresholds in lib/contributions.ts expect to work on.
+
+         The overall rate is also kept low enough that the year has fewer active
+         days than the word has lit cells (112). The animation moves the word's
+         squares into the year's, so with more targets than squares some cells
+         would have to appear out of nowhere at the end. A real year comfortably
+         clears that bar; the stand-in should not be the thing that breaks it. */
+      const count = random() < chance ? 1 + Math.floor(Math.pow(random(), 4) * 18) : 0;
       total += count;
       counts.push(count);
-      levels.push(String(levelFor(count)));
     }
   }
 
@@ -210,7 +215,6 @@ function inventYear() {
     fetchedAt: new Date().toISOString(),
     total,
     columnDates,
-    levels: levels.join(""),
     counts,
   };
 }

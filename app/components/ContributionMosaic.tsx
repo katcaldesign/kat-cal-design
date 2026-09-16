@@ -2,7 +2,7 @@
 
 /*
   ContributionMosaic: a GitHub contribution graph that spells WELCOME first,
-  then resolves into the real year.
+  then walks the word across the grid into the real year.
 
   ── The trick ───────────────────────────────────────────────────────────────
   A contribution graph is exactly SEVEN rows tall (Sunday to Saturday). A
@@ -10,38 +10,37 @@
   overlaid on the grid, it IS the grid: every lit pixel of "WELCOME" is a real
   cell, and the letters fill the full height with nothing left over.
 
-  ── Nothing moves ───────────────────────────────────────────────────────────
-  The single most important idea in this file: no square ever changes position.
-  Every cell is fixed in the grid and only ever switches STATE, like a bulb in a
-  departure board or a dot in a dot matrix display. The illusion of movement
-  comes entirely from cells turning on and off in the right order.
+  ── Nothing slides ──────────────────────────────────────────────────────────
+  The single most important idea in this file: no square is ever between two
+  cells. A square travels by switching off in one cell and on in the next, like
+  a bulb in a departure board or a dot in a dot matrix display. It moves, but it
+  moves in whole cells, one per frame.
 
-  That is a deliberate choice over the smoother alternative, where the lit
-  squares of the word slide across to their real dates. Sliding looks liquid and
-  a bit precious. Switching looks like hardware. A wave of noise crossing the
-  board and settling into data reads as a machine resolving, which is the right
-  register for a contribution graph.
+  That is a deliberate choice over a CSS transform sliding the squares across.
+  Sliding looks liquid and a bit precious. Switching looks like hardware, which
+  is the right register for a contribution graph. It is also why there is not a
+  single CSS transition on the cells: anything easing between two states would
+  put the softness back.
 
-  It is also why there is not a single CSS transition on the cells. Anything
-  that eases between two colours would reintroduce the softness we are trying to
-  avoid. Every change here is one frame to the next, hard.
+  ── Where the squares go ────────────────────────────────────────────────────
+  Every lit cell of the word is given a real day to travel to, and it walks
+  there a cell at a time. Nothing appears out of nowhere: each square of the
+  finished graph is a square that was part of the word a moment earlier.
+
+  The word has 112 lit cells and a year has fewer active days than that, so
+  targets are shared: roughly two squares converge on each day. The first to
+  arrive deposits the day's colour and the rest simply go out on arrival, which
+  reads as the word pouring into the year and draining away.
 
   ── How the timeline works ──────────────────────────────────────────────────
   A single interval ticks every TICK milliseconds and rebuilds the whole
   display: an array of 371 small numbers, one per cell, each saying what that
   cell shows this frame. Render is then dumb, just a lookup from number to
   colour class.
-
-  Two sweeps run left to right across the columns:
-    1. the word lights up, each cell stuttering briefly before it holds
-    2. a band of noise crosses the board, and behind it the real year is left
-
-  Every cell scrambles on the second pass, not just the lit ones, so the whole
-  grid comes alive rather than only the letters.
 */
 
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { buildMosaic, DAYS, PADDING, WEEKS } from "../../lib/contributions";
+import { buildMosaic, DAYS, MAX_LEVEL, PADDING, WEEKS } from "../../lib/contributions";
 
 const MOSAIC = buildMosaic();
 
@@ -52,17 +51,19 @@ const MOSAIC = buildMosaic();
   these are the only numbers that control the feel.
 
   TICK is the one worth playing with first. It is the frame rate of the whole
-  thing, and it is deliberately slow: about 18 frames a second. Smooth it out to
-  16ms and the flicker turns into a shimmer and stops reading as switching. The
-  chunkiness IS the effect.
+  thing, and it is deliberately slow: about 18 frames a second. It is also the
+  travel speed, because a square advances one cell per tick. Smooth it out to
+  16ms and the flicker turns into a shimmer and the walk turns into a glide.
+  The chunkiness IS the effect.
 */
-const TICK = 55; //          ms per frame of the display
-const WORD_SWEEP = 20; //     added delay per column as the word lights up
-const WORD_STUTTER = 200; //  how long a cell flickers before it holds on
-const HOLD = 1200; //         how long the finished word sits there, readable
-const RESOLVE_SWEEP = 22; //  added delay per column as the year resolves
-const SCRAMBLE = 320; //      how long a cell shows noise before its real level
-const BLINK = 0.012; //       chance per cell per frame of a blink while holding
+const TICK = 55; //            ms per frame, and one cell of travel
+const WORD_SWEEP = 20; //      added delay per column as the word lights up
+const WORD_STUTTER = 200; //   how long a cell flickers before it holds on
+const HOLD = 1200; //          how long the finished word sits there, readable
+const DEPART_STAGGER = 16; //  added delay per column, so the word peels apart
+const MAX_STEPS = 22; //       cap on travel time, in ticks
+const MIN_STEPS = 5; //        floor, so a short hop is still readable
+const BLINK = 0.012; //        chance per cell per frame of a blink while held
 
 /*
   CELL COLOURS, written out in full, never built by string concatenation.
@@ -71,8 +72,11 @@ const BLINK = 0.012; //       chance per cell per frame of a blink while holding
   is found and generated, while `bg-chartreuse-${step}` is invisible to it and
   silently produces no CSS. A lookup array is the standard way round that.
 
-  Index 0 to 4 are GitHub's own intensity steps. Index 5 is the word, in the
-  accent, so the letters read as one solid mark rather than as data.
+  SIX steps rather than GitHub's four. GitHub buckets by quartile, and on a
+  skewed year that put 43 of 52 active days on the same pale colour. The
+  thresholds in lib/contributions.ts are worked out from the year in hand
+  instead, which spreads the same days 12/13/8/6/5/8, so the ramp is actually
+  used. More steps are only worth having if the data reaches them.
 
   These are CHARTREUSE, not green, which is a deliberate departure from the
   GitHub original: globals.css reserves the green ramp for positive STATE and
@@ -82,15 +86,21 @@ const BLINK = 0.012; //       chance per cell per frame of a blink while holding
 const CELL_CLASS = [
   "bg-grey-100", //       0: nothing that day
   "bg-chartreuse-200", // 1
-  "bg-chartreuse-400", // 2
-  "bg-chartreuse-600", // 3
-  "bg-chartreuse-800", // 4: busiest
-  "bg-accent", //         5: lit as part of the word
+  "bg-chartreuse-300", // 2
+  "bg-chartreuse-400", // 3
+  "bg-chartreuse-600", // 4
+  "bg-chartreuse-700", // 5
+  "bg-chartreuse-900", // 6: busiest
+  "bg-accent", //         7: a square of the word, lit or in transit
 ];
 
 const OFF = 0;
-const WORD = 5;
-const BLANK = -1; // not a real day, draw nothing at all
+const WORD = MAX_LEVEL + 1; // the last entry above
+const BLANK = -1; //          not a real day, draw nothing at all
+
+/* Grid position and flat array index are two views of the same thing. The
+   cells array is week-major, so the index is just the arithmetic. */
+const at = (week: number, day: number) => week * DAYS + day;
 
 /*
   Per-cell jitter, from a hash rather than Math.random().
@@ -105,66 +115,149 @@ function jitter(week: number, day: number) {
   return ((h >>> 0) % 1000) / 1000;
 }
 
-type Plan = {
-  level: number; // the real data level for this cell, or BLANK
-  isWord: boolean;
-  lightAt: number; // when it joins the word
-  settleAt: number; // when it locks to its real level
+/* Ease in and out, so a square leans into its journey and settles at the end
+   rather than crossing at a flat rate. Applied to the PATH, not to time: it
+   changes which cells the square visits, which is what bunches its steps up at
+   both ends. */
+const smooth = (t: number) => t * t * (3 - 2 * t);
+
+type Mover = {
+  from: number; // index of its cell in the word
+  path: number[]; // the cells it passes through, ending on its target
+  lightAt: number;
+  departAt: number;
+  arriveAt: number;
 };
 
-/*
-  Work out, once, when every cell does what. Pure arithmetic over the grid, so
-  the per-frame code below stays a set of comparisons and nothing has to be
-  recalculated 18 times a second.
-*/
+type Deposit = { index: number; level: number; at: number };
+
 function buildPlan() {
-  const lit = MOSAIC.cells.filter((c) => c.isWord);
+  const cells = MOSAIC.cells;
+  const word = cells.filter((c) => c.isWord);
+  const days = cells.filter((c) => c.level > 0);
+
+  const firstWordWeek = Math.min(...word.map((c) => c.week));
   const wordEnd =
-    Math.max(...lit.map((c) => c.week * WORD_SWEEP + jitter(c.week, c.day) * 140)) +
+    Math.max(...word.map((c) => c.week * WORD_SWEEP + jitter(c.week, c.day) * 140)) +
     WORD_STUTTER;
-  const resolveStart = wordEnd + HOLD;
+  const migrateStart = wordEnd + HOLD;
 
-  const plan: Plan[] = MOSAIC.cells.map((cell) => ({
-    level: cell.level === PADDING ? BLANK : cell.level,
-    isWord: cell.isWord,
-    lightAt: cell.week * WORD_SWEEP + jitter(cell.week, cell.day) * 140,
-    settleAt:
-      resolveStart +
-      SCRAMBLE +
-      cell.week * RESOLVE_SWEEP +
-      jitter(cell.day, cell.week) * 160,
-  }));
+  const movers: Mover[] = word.map((cell, i) => {
+    /* Spread the squares evenly over the days rather than pairing one to one:
+       there are always more squares than days. Both lists are in column order,
+       so square i maps to roughly the day at the same position along the grid
+       and the paths mostly run short and parallel instead of crossing.
 
-  return { plan, end: Math.max(...plan.map((p) => p.settleAt)) + TICK };
+       A year with no activity at all has nothing to send them to, so a square
+       targets its own cell: the word appears, then goes out, leaving an empty
+       grid. Unlikely, but a fetch that comes back empty should not be a blank
+       page with an error in it. */
+    const target = days.length > 0 ? days[Math.floor((i * days.length) / word.length)] : cell;
+
+    const span = Math.max(
+      Math.abs(target.week - cell.week),
+      Math.abs(target.day - cell.day),
+    );
+    const steps = Math.max(MIN_STEPS, Math.min(MAX_STEPS, span));
+
+    const path: number[] = [];
+    for (let step = 1; step <= steps; step++) {
+      const e = smooth(step / steps);
+      path.push(
+        at(
+          Math.round(cell.week + (target.week - cell.week) * e),
+          Math.round(cell.day + (target.day - cell.day) * e),
+        ),
+      );
+    }
+
+    const departAt = migrateStart + (cell.week - firstWordWeek) * DEPART_STAGGER;
+
+    return {
+      from: at(cell.week, cell.day),
+      path,
+      lightAt: cell.week * WORD_SWEEP + jitter(cell.week, cell.day) * 140,
+      departAt,
+      arriveAt: departAt + steps * TICK, // one cell of the path per tick
+    };
+  });
+
+  /* A day lights up the moment the FIRST square reaches it. Later arrivals at
+     the same day add nothing and just go out. */
+  const earliest = new Map<number, number>();
+  movers.forEach((mover) => {
+    const index = mover.path[mover.path.length - 1];
+    const best = earliest.get(index);
+    if (best === undefined || mover.arriveAt < best) earliest.set(index, mover.arriveAt);
+  });
+
+  const finish = Math.max(...movers.map((m) => m.arriveAt));
+
+  const deposits: Deposit[] = days.map((cell) => {
+    const index = at(cell.week, cell.day);
+    return {
+      index,
+      level: cell.level,
+      /* A day nothing was sent to can only appear on its own, so it waits until
+         the migration is over rather than popping up mid-flight. With a real
+         year this never happens, since the word has more squares than the year
+         has days, but a shorter word would make it possible. */
+      at: earliest.get(index) ?? finish,
+    };
+  });
+
+  return { movers, deposits, migrateStart, end: finish + TICK };
 }
 
 /* Computed once when the module loads, not inside the component. It depends on
    nothing but the data, it is pure arithmetic with no randomness in it, and so
    it produces the same answer on the build machine as in the browser. */
-const { plan: PLAN, end: END } = buildPlan();
+const { movers: MOVERS, deposits: DEPOSITS, migrateStart: MIGRATE, end: END } = buildPlan();
 
 /* The two states that need no animation to reach: everything dark, and the
    finished graph. Precomputed because they are also what we fall back to before
    the animation starts and when motion is switched off. */
-const EMPTY = PLAN.map((cell) => (cell.level === BLANK ? BLANK : OFF));
-const SETTLED = PLAN.map((cell) => cell.level);
+/* Typed explicitly: TypeScript would otherwise infer the narrow `(-1 | 0)[]`
+   from the two literals here, and frameAt writes every level into a copy. */
+const EMPTY: number[] = MOSAIC.cells.map((c) => (c.level === PADDING ? BLANK : OFF));
+const SETTLED: number[] = MOSAIC.cells.map((c) => (c.level === PADDING ? BLANK : c.level));
 
-/* What a cell shows at time `t`. The order of these checks is the animation. */
-function valueAt(cell: Plan, t: number) {
-  if (cell.level === BLANK) return BLANK; // never a day, never lights
+/* What the whole grid shows at time `t`. Rebuilt from scratch each frame, which
+   is simpler to reason about than working out what changed, and cheap at 371
+   cells. */
+function frameAt(t: number) {
+  const out = EMPTY.slice();
 
-  // Past its settle time: this is just the graph now.
-  if (t >= cell.settleAt) return cell.level;
-
-  // Inside the noise band that sweeps across ahead of the settle.
-  if (t >= cell.settleAt - SCRAMBLE) {
-    return Math.random() < 0.25 ? OFF : 1 + Math.floor(Math.random() * 4);
+  // The word assembling, before anything moves.
+  if (t < MIGRATE) {
+    for (const mover of MOVERS) {
+      if (t < mover.lightAt) continue;
+      const settling = t < mover.lightAt + WORD_STUTTER;
+      const on = settling ? Math.random() < 0.5 : Math.random() > BLINK;
+      if (on) out[mover.from] = WORD;
+    }
+    return out;
   }
 
-  // Still in the word phase.
-  if (!cell.isWord || t < cell.lightAt) return OFF;
-  if (t < cell.lightAt + WORD_STUTTER) return Math.random() < 0.5 ? WORD : OFF;
-  return Math.random() < BLINK ? OFF : WORD; // the odd bulb dropping out
+  // Days that have already been reached.
+  for (const deposit of DEPOSITS) {
+    if (t >= deposit.at) out[deposit.index] = deposit.level;
+  }
+
+  /* Squares in transit are drawn last, so one passing over a day that has
+     already landed reads as crossing in front of it rather than disappearing
+     behind it. */
+  for (const mover of MOVERS) {
+    if (t >= mover.arriveAt) continue; // arrived, its day is lit instead
+    if (t < mover.departAt) {
+      out[mover.from] = WORD; // still waiting its turn to leave
+      continue;
+    }
+    const step = Math.min(mover.path.length - 1, Math.floor((t - mover.departAt) / TICK));
+    out[mover.path[step]] = WORD;
+  }
+
+  return out;
 }
 
 /*
@@ -237,7 +330,7 @@ export default function ContributionMosaic() {
   }, [play, run, still]);
 
   /* The projector. One interval, rebuilding the whole display each tick, until
-     the last cell has settled. Re-running whenever `run` changes is what makes
+     the last square has arrived. Re-running whenever `run` changes is what makes
      replay work: the effect tears the old interval down and starts a new one
      from t=0. */
   useEffect(() => {
@@ -247,11 +340,11 @@ export default function ContributionMosaic() {
     const id = window.setInterval(() => {
       const t = performance.now() - started;
       if (t >= END) {
-        setFrame(SETTLED); // lock to the real thing, no lingering noise
+        setFrame(SETTLED); // lock to the real thing, no lingering flicker
         window.clearInterval(id);
         return;
       }
-      setFrame(PLAN.map((cell) => valueAt(cell, t)));
+      setFrame(frameAt(t));
     }, TICK);
 
     return () => window.clearInterval(id);
@@ -334,10 +427,10 @@ export default function ContributionMosaic() {
         ))}
       </div>
 
-      {/* The legend, straight from the original. */}
+      {/* The legend. Seven swatches now: empty plus the six steps. */}
       <div className="mt-3 flex items-center justify-end gap-1.5">
         <span className="kat-mono-xs text-ink-light">Less</span>
-        {CELL_CLASS.slice(0, 5).map((className, level) => (
+        {CELL_CLASS.slice(0, MAX_LEVEL + 1).map((className, level) => (
           <span key={level} className={`h-2.5 w-2.5 rounded-[2px] ${className}`} />
         ))}
         <span className="kat-mono-xs text-ink-light">More</span>
