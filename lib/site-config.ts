@@ -11,4 +11,4 @@
   Flip this to false when the case studies are ready. Nothing else to change:
   the real page content is still sitting in app/work/page.tsx underneath.
 */
-export const WORK_LOCKED = true;
+export const WORK_LOCKED = false;

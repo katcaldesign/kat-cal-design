@@ -374,5 +374,9 @@
   "/logos/zinc.png": {
     "width": 1200,
     "height": 1200
+  },
+  "/work/sign-in-cover.png": {
+    "width": 1679,
+    "height": 1259
   }
 }

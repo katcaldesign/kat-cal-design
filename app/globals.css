@@ -191,7 +191,15 @@
   --font-sans: var(--font-brand-sans), ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-mono: var(--font-brand-mono), ui-monospace, "SF Mono", Menlo, monospace;
 
-  --radius-card: 1rem;
+  /*
+    One radius for every panel on the site: cards, drawers, video frames.
+
+    It was 1rem, which left cards sitting twice as round as the archive tiles
+    beside them (those are rounded-lg, 8px). ArchiveGrid had already worked
+    around that locally by opting its cards out of this token; 8px here fixes
+    the cause instead, and the whole site now shares one corner.
+  */
+  --radius-card: 0.5rem;
 }
 
 /* Base document defaults — warm sand ground, warm ink, sans body. */
