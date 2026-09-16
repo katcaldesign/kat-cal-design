@@ -197,7 +197,7 @@ export default function SignInCase({ c }: { c: Case }) {
             width={880}
             height={450}
             title="Mobile or email"
-            note="One toggle, two routes to the same account. The field swaps in place."
+            note="Mobile and Email are both rendered (inactive one display:none), so switching modes preserves each flow's typed digits, errors and OTP state with zero re-animation."
           />
           <Interaction
             src="/work/number.mp4"
@@ -211,7 +211,7 @@ export default function SignInCase({ c }: { c: Case }) {
             width={880}
             height={720}
             title="Passcode"
-            note="Six auto-advancing boxes. The banner above carries the result, sent then verified."
+            note="Six native inputs with auto-advance, backspace-steps-back, arrow nav, and paste/iOS-autofill distribution."
           />
 
           {/* Awaiting footage: the country picker was never opened in the take
