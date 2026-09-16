@@ -96,7 +96,11 @@ export default function SidePanel({
         aria-modal="true"
         aria-label={label}
         tabIndex={-1}
-        className={`absolute inset-x-0 bottom-0 flex max-h-[85vh] flex-col rounded-t-2xl border-t border-border bg-bg shadow-2xl outline-none transition-transform duration-300 ease-out md:inset-y-0 md:left-auto md:right-0 md:max-h-none md:w-[640px] md:max-w-[92vw] md:rounded-none md:border-l md:border-t-0 lg:w-[720px] ${
+        /* rounded-t-card, not a raw Tailwind step: the sheet's top edge is the
+           same corner as the cards it opens from, so it follows the same token
+           and can't drift away from them. Desktop stays square, since that edge
+           is flush against the side of the screen. */
+        className={`absolute inset-x-0 bottom-0 flex max-h-[85vh] flex-col rounded-t-card border-t border-border bg-bg shadow-2xl outline-none transition-transform duration-300 ease-out md:inset-y-0 md:left-auto md:right-0 md:max-h-none md:w-[640px] md:max-w-[92vw] md:rounded-none md:border-l md:border-t-0 lg:w-[720px] ${
           wide ? "xl:w-[1000px]" : ""
         } ${
           open ? "translate-y-0 md:translate-x-0" : "translate-y-full md:translate-y-0 md:translate-x-full"
