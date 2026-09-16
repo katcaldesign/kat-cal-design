@@ -1,5 +1,6 @@
 import { Fragment } from "react";
-import LoopVideo from "./LoopVideo";
+import type { Case } from "../../../lib/work";
+import LoopVideo from "../../components/LoopVideo";
 
 /*
   Ffern sign-in — the case detail, rendered inside the WORK drawer.
@@ -22,12 +23,26 @@ import LoopVideo from "./LoopVideo";
   how wide it is instead, which is the only measurement that matters here.
 */
 
-// One label/value row in the header.
-const META: [string, string][] = [
-  ["Org", "Ffern"],
-  ["Tools", "Figma, React"],
-  ["Year", "2025"],
-];
+/*
+  The label/value rows in the header.
+
+  Org and Year are read off the case rather than written out here. The index in
+  WorkCases.tsx already states both to build the card, and a fact kept in two
+  places is a fact that will eventually disagree with itself.
+
+  Tools stays local. It describes how THIS case was made, nothing else on the
+  page uses it, and one case wanting a field is not enough to put it in the
+  shared schema.
+*/
+const TOOLS = "Figma, React";
+
+function metaRows(c: Case): [string, string][] {
+  return [
+    ["Org", c.org],
+    ["Tools", TOOLS],
+    ["Year", c.year],
+  ];
+}
 
 /*
   The grid: 12 columns, 24px gutters.
@@ -83,7 +98,7 @@ function Interaction({
   );
 }
 
-export default function SignInCase() {
+export default function SignInCase({ c }: { c: Case }) {
   return (
     <article className="@container">
       {/*
@@ -135,7 +150,7 @@ export default function SignInCase() {
             added later, instead of every row shifting to accommodate it.
           */}
           <dl className="mt-10 grid grid-cols-[5rem_1fr] gap-x-6 gap-y-3">
-            {META.map(([label, value]) => (
+            {metaRows(c).map(([label, value]) => (
               <Fragment key={label}>
                 <dt className="kat-body-md text-ink-light">{label}</dt>
                 <dd className="kat-body-md text-ink">{value}</dd>

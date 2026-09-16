@@ -19,42 +19,9 @@
 
 import Image from "next/image";
 import { useState } from "react";
+import type { Case } from "../../lib/work";
+import SignInCase from "../work/_cases/sign-in";
 import SidePanel from "./SidePanel";
-import SignInCase from "./SignInCase";
-
-type Case = {
-  id: string;
-  kicker: string; // "Strategy" / "Craft" — small overlay label on the card
-  title: string;
-  tags: string[]; // skill tags on the card (Katie will tune these)
-  image?: string; // card art — placeholder until supplied
-  // ── panel detail ──
-  thesis: string; // one line
-  role: string;
-  org: string;
-  year: string;
-  artifactLabel: string; // placeholder until the real artifact is built
-  moves: string[]; // 2–3 tight highlights
-  /*
-    A case that has been properly built out supplies its own body, rendered in
-    the panel in place of the generic thesis/artifact/moves layout below. Cases
-    still being written leave it off and get the fallback, so the index never
-    waits on every case being finished.
-
-    `wide` opens that case in the roomier drawer: a built-out case carries a
-    grid and a row of clips, which the default 720px cannot lay out.
-  */
-  Detail?: () => React.ReactNode;
-  wide?: boolean;
-  /*
-    Kept out of the index while the case is still being written.
-
-    A flag rather than deleting or commenting out the case: the copy below is
-    the thinking so far, and it should survive being hidden. Drop the line to
-    put a case back on the page.
-  */
-  draft?: boolean;
-};
 
 const CASES: Case[] = [
   {
@@ -213,7 +180,7 @@ function CaseCard({ c, onOpen }: { c: Case; onOpen: () => void }) {
 
 // ── The case detail rendered inside the panel. ──────────────────────────────
 function CaseDetail({ c }: { c: Case }) {
-  if (c.Detail) return <c.Detail />;
+  if (c.Detail) return <c.Detail c={c} />;
 
   return (
     <article>
