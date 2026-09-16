@@ -1,4 +1,5 @@
 import ExperienceJourney from "./components/ExperienceJourney";
+import ContributionMosaic from "./components/ContributionMosaic";
 
 /*
   The landing page IS the info page. There's no separate homepage any more, so
@@ -19,6 +20,10 @@ export default function Info() {
 
       <div className="mt-12">
         <ExperienceJourney />
+      </div>
+
+      <div className="mt-8">
+        <ContributionMosaic />
       </div>
     </div>
   );

@@ -8,6 +8,16 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: ["main"]
+  # Rebuild every morning so the contribution graph on the info page keeps up
+  # with reality. The site is a static export, so the only way the numbers
+  # change is if the site is built again. 06:00 UTC, nothing depends on the
+  # exact time, and GitHub runs scheduled jobs late when it is busy.
+  #
+  # WORTH KNOWING: GitHub disables scheduled workflows in a public repo after
+  # 60 days with no activity. It emails first, and one click in the Actions tab
+  # turns it back on. Any push resets the clock.
+  schedule:
+    - cron: "0 6 * * *"
   # Lets you re-run the deploy by hand from the Actions tab if ever needed.
   workflow_dispatch:
 
@@ -37,7 +47,21 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # GH_CONTRIBUTIONS_TOKEN is a repo secret: a personal access token with
+      # the `read:user` scope. scripts/fetch-contributions.mjs uses it to pull
+      # the real contribution calendar from GitHub's GraphQL API.
+      #
+      # It cannot be named GITHUB_something, because GitHub reserves that
+      # prefix for its own secrets. And the automatic GITHUB_TOKEN that Actions
+      # provides is scoped to this repository, not to your profile, so it
+      # cannot read the calendar either.
+      #
+      # Without the secret the script leaves the committed JSON alone and the
+      # build carries on, so a fork or a revoked token costs a stale graph
+      # rather than a failed deploy.
       - name: Build static site
+        env:
+          GH_CONTRIBUTIONS_TOKEN: ${{ secrets.GH_CONTRIBUTIONS_TOKEN }}
         run: npm run build
 
       - name: Upload site to Pages
