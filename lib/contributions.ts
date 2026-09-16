@@ -25,15 +25,84 @@ export const DAYS = 7; //   rows. Sunday at the top, like GitHub
 export const SOURCE = data.source;
 
 /*
+  THE INTENSITY STEPS
+  -------------------
+  Six, not GitHub's four, and the thresholds are worked out from the year in
+  hand rather than fixed.
+
+  This matters more than it sounds. GitHub buckets a contribution calendar by
+  quartile, and a real year is heavily skewed: many days of one or two commits,
+  a handful of twenty-plus. Under quartiles almost everything lands on the
+  palest step. On the first live fetch, 43 of 52 active days came out identical
+  and the graph read as one flat tone.
+
+  So the steps are quantiles of the ACTIVE days only. Each of the six gets
+  roughly a sixth of the days that had any activity, whatever the shape of the
+  year. The same 52 days that GitHub splits 43/4/3/2 come out 12/13/8/6/5/8.
+
+  The trade is that the colours no longer match github.com exactly. A day shown
+  two steps up here might be one step up there. The graph is still true to the
+  counts, it is just scaled to this year rather than to GitHub's quartiles.
+*/
+export const MAX_LEVEL = 6;
+
+/*
   One square of the grid.
 
-  `level` is GitHub's own intensity step, 0 (nothing that day) to 4 (busiest).
-  PADDING is the exception: the calendar year does not begin on a Sunday and
-  today is rarely a Saturday, so a few cells in the first and last columns are
-  not days at all. They are drawn as nothing, which is what gives a real
-  contribution graph its ragged top-left and bottom-right corners.
+  `level` is 0 (nothing that day) to MAX_LEVEL (busiest). PADDING is the
+  exception: the calendar year does not begin on a Sunday and today is rarely a
+  Saturday, so a few cells in the first and last columns are not days at all.
+  They are drawn as nothing, which is what gives a real contribution graph its
+  ragged top-left and bottom-right corners.
 */
 export const PADDING = -1;
+
+/*
+  Where one step ends and the next begins, read off the sorted active days.
+
+  Take the count a sixth of the way through the list, then two sixths, and so
+  on. Five boundaries, six steps.
+
+  The nudge at the end is the part worth understanding. Ties can land two
+  boundaries on the same count: a quiet year where half the active days are a
+  single commit produces marks of [1, 1, 1, 2, 10], and the steps between the
+  repeated 1s can never contain anything, because no count is both greater than
+  1 and not greater than 1. Two of the six colours would then never appear.
+
+  So when a boundary repeats, it moves up to the next count that actually
+  occurs. [1, 1, 1, 2, 10] becomes [1, 2, 3, 4, 10]. Buckets come out less even,
+  which is the honest result, but every step is reachable. If the year genuinely
+  has fewer distinct counts than steps, the top boundaries stay equal and the
+  darkest colours go unused, which is also the honest result.
+*/
+function thresholds(counts: (number | null)[]) {
+  const active = counts.filter((c): c is number => c !== null && c > 0).sort((a, b) => a - b);
+  if (active.length === 0) return [];
+
+  const distinct = [...new Set(active)];
+  const marks: number[] = [];
+
+  for (let step = 1; step < MAX_LEVEL; step++) {
+    const index = Math.min(active.length - 1, Math.floor((active.length * step) / MAX_LEVEL));
+    let mark = active[index];
+
+    const previous = marks[marks.length - 1];
+    if (previous !== undefined && mark <= previous) {
+      mark = distinct.find((c) => c > previous) ?? previous;
+    }
+
+    marks.push(mark);
+  }
+
+  return marks;
+}
+
+function levelFor(count: number, marks: number[]) {
+  if (count <= 0) return 0;
+  let level = 1;
+  for (const mark of marks) if (count > mark) level++;
+  return Math.min(level, MAX_LEVEL);
+}
 
 export type Cell = {
   week: number;
@@ -122,26 +191,26 @@ function monthLabels() {
 
 export function buildMosaic() {
   const word = buildWordCells();
+  const marks = thresholds(data.counts);
   const cells: Cell[] = [];
 
-  /* The levels string is week-major: seven characters per column, columns left
-     to right. Reading it in that order builds the grid in the same order a CSS
+  /* The counts array is week-major: seven entries per column, columns left to
+     right. Reading it in that order builds the grid in the same order a CSS
      grid with `grid-auto-flow: column` fills itself, so the component can map
      straight over this array with no index arithmetic. */
   for (let week = 0; week < WEEKS; week++) {
     for (let day = 0; day < DAYS; day++) {
-      const index = week * DAYS + day;
-      const mark = data.levels[index];
+      const count = data.counts[week * DAYS + day];
 
       cells.push({
         week,
         day,
-        level: mark === "." ? PADDING : Number(mark),
-        count: data.counts[index] ?? 0,
+        level: count === null ? PADDING : levelFor(count, marks),
+        count: count ?? 0,
         isWord: word.has(`${week},${day}`),
       });
     }
   }
 
-  return { cells, total: data.total, months: monthLabels() };
+  return { cells, total: data.total, months: monthLabels(), marks };
 }
