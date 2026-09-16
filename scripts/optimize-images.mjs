@@ -58,7 +58,8 @@ const MANIFEST = path.join(ROOT, "lib", "image-manifest.json");
   requirement is wasted — everything rounds up past it to the next one. So each
   step here is a size the site genuinely asks for, doubled for retina screens:
 
-    96     logo squares                    (40px  x2 = 80)
+    96     logo squares on a 2x screen     (48px  x2)
+    144    logo squares on a 3x phone      (48px  x3)
     320    a tile on a 375px phone         (156px x2 = 312)
     512    a tile on desktop               (256px x2)
     900    a full-width frame on a phone   (375px x2 = 750), and the work cards
@@ -86,7 +87,19 @@ const MANIFEST = path.join(ROOT, "lib", "image-manifest.json");
   one holding the mobile case up. Take it out and phones jump from 900 to 1280
   for every full-width frame — the exact saving this pipeline exists for.
 */
-const WIDTHS = [96, 320, 512, 900, 1280, 1600];
+const WIDTHS = [96, 144, 320, 512, 900, 1280, 1600];
+
+/*
+  Quality is a function of what the artwork IS, not just how big it is.
+
+  q78 is tuned for photographs, where WebP's lossy pass has grain and gradients
+  to hide in. Logos have neither: they're flat colour with hard edges, and three
+  of these have type set INSIDE the artwork. At 96px, q78 was spending about
+  1.1kB per logo and smearing every letterform. The extra few kB here is the
+  cheapest quality win on the site — seven files, once.
+*/
+const LOGO_QUALITY = 95;
+const PHOTO_QUALITY = 78;
 
 // Only raster photos. SVGs are already tiny and resolution-independent, and
 // videos are the browser's problem, not ours.
@@ -171,12 +184,12 @@ for (const rel of sources) {
       is. A few duplicate bytes in the build output is a fair price for never
       serving a 404.
 
-      quality 78 is the sweet spot for this artwork: visually indistinguishable
-      from the original at these sizes, roughly a tenth of the bytes.
+      Quality is picked per source tree (see LOGO_QUALITY above): photos take
+      the lossy pass well, flat logo artwork with type in it does not.
     */
     await sharp(srcPath)
       .resize({ width: w, withoutEnlargement: true })
-      .webp({ quality: 78 })
+      .webp({ quality: rel.startsWith("/logos/") ? LOGO_QUALITY : PHOTO_QUALITY })
       .toFile(outPaths[i]);
   }
   generated += 1;

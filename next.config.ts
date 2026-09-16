@@ -30,6 +30,11 @@ const nextConfig: NextConfig = {
       viewport (tiles, logos); `deviceSizes` is for full-width ones. Next
       requires every imageSize to be smaller than the smallest deviceSize.
 
+      144 exists for 3x phones. A 48px logo tile needs 96 device pixels at 2x
+      and 144 at 3x, and without a step there the best on offer was 96, which
+      the phone then upscaled by 1.5 — which is exactly what "the logos look
+      pixelated on my phone" was.
+
       One non-obvious thing, because it bit us while tuning this ladder: the
       SMALLEST deviceSize is not just a size, it's a floor. For any image whose
       `sizes` mentions a vw unit, Next offers only the widths at or above
@@ -38,7 +43,7 @@ const nextConfig: NextConfig = {
       viewport-relative image on the site and can silently push phones onto much
       larger files. Check what the srcsets actually contain before cutting one.
     */
-    imageSizes: [96, 320, 512],
+    imageSizes: [96, 144, 320, 512],
     deviceSizes: [900, 1280, 1600],
   },
 };
