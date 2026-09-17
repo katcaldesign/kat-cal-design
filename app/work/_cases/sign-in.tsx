@@ -107,17 +107,25 @@ export default function SignInCase({ c }: { c: Case }) {
       {/*
         Header on the 12 column grid.
 
-        Not a two-up split. The title is indented to column 3 and the writing
-        runs from column 7 to column 10, so the row carries a two column margin
-        on BOTH sides and the content sits symmetrically inside the grid rather
-        than running out to the edges.
+        Not a two-up split. Read across the 12 columns it is 4, 1, 5, 2: a four
+        column title from column 1, a single column of air, five columns of
+        writing, and a two column margin held at the right edge.
+
+        The title starts at column 1 so it shares a left edge with the hero
+        panel and the detail cards below, which is what reads as one page;
+        indenting it made it look like a separate block that had drifted.
+
+        The gap is one column rather than two because the writing needs the
+        width more than the two blocks need separating: a single column of air
+        is already past the point where the eye reads them as one paragraph,
+        and the column it gives back buys the prose a longer measure.
       */}
       <header className={GRID}>
-        <h2 className="kat-body-xl col-span-12 font-medium text-balance text-ink @4xl:col-span-4 @4xl:col-start-3">
+        <h2 className="kat-body-xl col-span-12 font-medium text-balance text-ink @4xl:col-span-4">
           Ffern sign-in component
         </h2>
 
-        <div className="col-span-12 mt-6 @4xl:col-span-4 @4xl:col-start-7 @4xl:mt-0">
+        <div className="col-span-12 mt-6 @4xl:col-span-5 @4xl:col-start-6 @4xl:mt-0">
           <p className="kat-body-md text-ink-dark">
             {/*
               The underline does the work on its own, with no colour: the link
