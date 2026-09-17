@@ -197,14 +197,14 @@ export default function SignInCase({ c }: { c: Case }) {
             width={880}
             height={450}
             title="Mobile or email"
-            note="Mobile and Email are both rendered (inactive one display:none), so switching modes preserves each flow's typed digits, errors and OTP state with zero re-animation."
+            note="Mobile and Email are both rendered (inactive one display:none), so switching modes preserves each flow's typed digits, errors and OTP state with no re-animation."
           />
           <Interaction
             src="/work/number.mp4"
             width={880}
             height={450}
             title="Number validation"
-            note="The submit control holds its place from the first digit, and only comes to full strength once the number validates."
+            note="Country flag becomes visible only when user starts entering their mobile, to maintain an intial neutral aesthetic. On number validation submit button becomes active"
           />
           <Interaction
             src="/work/passcode.mp4"
