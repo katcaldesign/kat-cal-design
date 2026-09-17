@@ -236,7 +236,7 @@ export default function SignInCase({ c }: { c: Case }) {
             title="Country picker"
             note={
               <>
-                A native <code className="kat-code">select</code> rather than a custom list, so it
+                A native <code className="kat-code">select</code>  rather than a custom list, so it
                 arrives with type-to-jump, keyboard nav and the platform&rsquo;s own menu. Dial code
                 and number formatting follow the selected country.
               </>
