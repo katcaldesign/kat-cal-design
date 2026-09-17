@@ -223,21 +223,22 @@ export default function SignInCase({ c }: { c: Case }) {
             note="Six native inputs with auto-advance, backspace-steps-back, arrow nav, and paste/iOS-autofill distribution."
           />
 
-          {/* Awaiting footage: the country picker was never opened in the take
-              these clips are cut from. Slot is here so the layout is settled. */}
-          <figure className="col-span-12 flex flex-col @lg:col-span-6">
-            <div className="flex aspect-[880/450] items-center justify-center rounded-card border border-dashed border-border-dark bg-surface">
-              <span className="kat-mono-xs uppercase tracking-wider text-ink-light">
-                clip to come
-              </span>
-            </div>
-            <figcaption className="mt-4">
-              <h4 className="kat-mono-sm uppercase tracking-wider text-ink">Country picker</h4>
-              <p className="kat-body-md mt-2 text-ink-mid">
-                Dial code and number formatting follow the selected country.
-              </p>
-            </figcaption>
-          </figure>
+          {/* Taller crop than the other detail clips: the open menu is drawn by
+              the OS, runs past the bottom of the recording, and can't be cut
+              shorter without losing the thing the card is about. */}
+          <Interaction
+            src="/work/country.mp4"
+            width={880}
+            height={720}
+            title="Country picker"
+            note={
+              <>
+                A native <code className="kat-code">select</code> rather than a custom list, so it
+                arrives with type-to-jump, keyboard nav and the platform&rsquo;s own menu. Dial code
+                and number formatting follow the selected country.
+              </>
+            }
+          />
         </div>
       </section>
     </article>
