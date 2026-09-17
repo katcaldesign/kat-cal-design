@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist } from "next/font/google";
+import { Geist, JetBrains_Mono } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
 import Sidebar from "./components/Sidebar";
@@ -11,6 +11,28 @@ import Sidebar from "./components/Sidebar";
 const geist = Geist({
   subsets: ["latin"],
   variable: "--font-brand-sans",
+  display: "swap",
+});
+
+/*
+  Code face. A THIRD family, not a reuse of either of the two above.
+
+  Apercu Mono is a labelling face: it sets the caps mono labels and carries the
+  site's character. It was never drawn to be read as code, and at snippet size
+  its wide, even letterforms make `display:none` look like a design element
+  rather than like something you could paste into a stylesheet.
+
+  JetBrains Mono is drawn for exactly that job: a slashed zero, `1 l I` cut to
+  be told apart, and brackets spaced to stay countable when nested. On Google
+  Fonts, so next/font self-hosts it the same way it does Geist.
+
+  Latin only, weight 400 only. A code snippet is never bold or italic here, and
+  every extra weight is another file a visitor downloads.
+*/
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  weight: ["400"],
+  variable: "--font-brand-code",
   display: "swap",
 });
 
@@ -36,7 +58,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${geist.variable} ${apercuMono.variable} h-full`}>
+    <html lang="en" className={`${geist.variable} ${apercuMono.variable} ${jetbrainsMono.variable} h-full`}>
       <body className="min-h-full">
         {/* Sidebar renders its own fixed left RAIL (desktop) + TOP BAR (mobile).
             It sits outside the content flow, so the content column just needs a

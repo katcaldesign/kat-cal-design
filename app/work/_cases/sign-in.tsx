@@ -1,4 +1,4 @@
-import { Fragment } from "react";
+import { Fragment, type ReactNode } from "react";
 import type { Case } from "../../../lib/work";
 import LoopVideo from "../../components/LoopVideo";
 
@@ -83,7 +83,10 @@ function Interaction({
   width: number;
   height: number;
   title: string;
-  note: string;
+  /* ReactNode, not string, so a note can set a term in <code>. A plain string
+     would force the markup up into the caller as a second prop, or back down
+     into a parser here — both to say one word is code. */
+  note: ReactNode;
 }) {
   return (
     <figure className="col-span-12 flex flex-col @lg:col-span-6">
@@ -197,7 +200,13 @@ export default function SignInCase({ c }: { c: Case }) {
             width={880}
             height={450}
             title="Mobile or email"
-            note="Mobile and Email are both rendered (inactive one display:none), so switching modes preserves each flow's typed digits, errors and OTP state with no re-animation."
+            note={
+              <>
+                Mobile and Email are both rendered (inactive one{" "}
+                <code className="kat-code">display:none</code>), so switching modes preserves each
+                flow&rsquo;s typed digits, errors and OTP state with no re-animation.
+              </>
+            }
           />
           <Interaction
             src="/work/number.mp4"
