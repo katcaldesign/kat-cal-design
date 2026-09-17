@@ -202,10 +202,16 @@ export default function SignInCase({ c }: { c: Case }) {
         </div>
       </div>
 
+      {/*
+        A rule rather than a "Detail" heading. The cards below announce
+        themselves, so the label was naming a section nobody needed named. The
+        line still does the one useful job the heading did, which is separating
+        the full flow above from the close-ups below.
+      */}
       <section className="mt-16">
-        <h3 className="kat-mono-sm uppercase tracking-wider text-ink-light">Detail</h3>
+        <hr className="border-0 border-t border-border" />
 
-        <div className={`mt-8 items-start gap-y-14 ${GRID}`}>
+        <div className={`mt-12 items-start gap-y-14 ${GRID}`}>
           <Interaction
             src="/work/toggle.mp4"
             width={880}
@@ -232,6 +238,17 @@ export default function SignInCase({ c }: { c: Case }) {
             height={720}
             title="Passcode"
             note="Six native inputs with auto-advance, backspace-steps-back, arrow nav, and paste/iOS-autofill distribution."
+          />
+
+          {/* Cut from a separate desktop recording, cropped to the same 880px
+              width as the others so the component sits at one scale across the
+              set rather than shrinking in this card. */}
+          <Interaction
+            src="/work/passcode-error.mp4"
+            width={880}
+            height={716}
+            title="Specified error states"
+            note="Errors surface through the same split-flap status control, flipping to PASSCODE INCORRECT or ERROR with a reset link beneath. An incorrect code clears and remounts the boxes so they refocus ready for a retry, and all actual auth-error handling lives in the container, not the presentational component."
           />
 
           {/* Taller crop than the other detail clips: the open menu is drawn by
