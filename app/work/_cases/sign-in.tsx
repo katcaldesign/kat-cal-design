@@ -169,11 +169,17 @@ export default function SignInCase({ c }: { c: Case }) {
         The video is held to its TRUE size rather than stretched to the column,
         and the panel around it carries the weight instead.
 
-        The reason is fixed by the recording and can't be designed around: the
-        component was captured at 699 pixels across, so on a 2x screen it is
-        pixel-exact at about 350 CSS px and blurrier at every size above that.
-        Filling the column would upscale it by half again, which reads as a low
-        quality video when the file is actually clean.
+        The reason is the file's resolution: the clip carries the component at
+        about 700 pixels across, so on a 2x screen it is pixel-exact at roughly
+        350 CSS px and blurrier at every size above that. Filling the column
+        would upscale it by half again, which reads as a low quality video when
+        the file is actually clean.
+
+        The source recording holds more than the published file does: the
+        component is 1078 pixels across in it. Republishing at a higher
+        resolution would let the panel go to max-w-xl and stay pixel-exact.
+        Sharpness is the same either way; it only buys a larger, more readable
+        frame, which is not what this panel is for.
 
         The panel is sand because the capture's own background IS sand, within a
         point per channel. The two surfaces meet invisibly, so the component
