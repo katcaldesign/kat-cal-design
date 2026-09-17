@@ -204,6 +204,10 @@
      ======================================================================== */
   --font-sans: var(--font-brand-sans), ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-mono: var(--font-brand-mono), ui-monospace, "SF Mono", Menlo, monospace;
+  /* Separate from --font-mono on purpose. Apercu Mono labels and JetBrains Mono
+     snippets are two jobs, and one variable serving both means neither can
+     change without moving the other. */
+  --font-code: var(--font-brand-code), ui-monospace, "SF Mono", Menlo, monospace;
 
   /*
     One radius for every panel on the site: cards, drawers, video frames.
@@ -263,27 +267,38 @@ body {
 @utility kat-mono-sm { font-family: var(--font-mono); font-size: 0.75rem;  line-height: 1.1; text-transform: uppercase; text-box: trim-both cap alphabetic; } /* 12px */
 @utility kat-mono-xs { font-family: var(--font-mono); font-size: 0.625rem; line-height: 1.1; text-transform: uppercase; text-box: trim-both cap alphabetic; } /* 10px */
 
-/* Code — Apercu Mono with its case intact.
+/* Code — JetBrains Mono, a third family beside Geist and Apercu Mono.
 
-   Deliberately NOT a kat-mono-* step. Those are caps-only labels, and a
-   snippet has to keep the case it was written in: `display:none` is not
-   `DISPLAY:NONE`. Same family, different job, so it gets its own style
-   rather than an exception carved into an existing one.
+   Deliberately NOT a kat-mono-* step, for two reasons. Those steps force
+   text-transform: uppercase, and a snippet has to keep the case it was
+   written in: `display:none` is not `DISPLAY:NONE`. And they are set in
+   Apercu Mono, which is a labelling face. Three text roles, three families:
+   Geist reads, Apercu Mono labels, JetBrains Mono quotes code.
 
    Sized in em, not rem, unlike every other step here. The rest of the scale
    SETS a size because each one owns a block of text; this one BORROWS the
    size of whatever body step it's sitting inside, so one class reads
-   correctly in kat-body-md and kat-body-lg without a variant for each. 0.9
-   rather than 1 because Apercu Mono's x-height runs larger than Geist's at
-   the same nominal size, so matched numbers read as a size jump.
+   correctly in kat-body-md and kat-body-lg without a variant for each.
+
+   0.925 rather than 1, and the number is measured rather than guessed.
+   JetBrains Mono's x-height is 0.55 of its em; Geist's is 0.53. So at a
+   matched size the snippet's lowercase stands about 4% proud of the body
+   text, which reads as a size jump, and dropping a full eighth to 0.875
+   overshoots to 9% short. At 0.925 the code x-height lands at 96% of the
+   body's: a shade under, which is what you want, because mono advance widths
+   are wider and a snippet set to exact x-height parity reads as larger than
+   the text around it.
+
+   Re-measure if the code face is ever swapped. This number belongs to the
+   JetBrains Mono / Geist pairing, not to inline code in general.
 
    Vertical padding on an inline element overflows its line rather than
    pushing the next one away, so the pill sits inside body leading without
    opening the paragraph up. break-word stops a long token like
    `border-border-dark` from widening the drawer on a phone. */
 @utility kat-code {
-  font-family: var(--font-mono);
-  font-size: 0.9em;
+  font-family: var(--font-code);
+  font-size: 0.925em;
   color: var(--color-code);
   background: var(--color-code-bg);
   border: 1px solid var(--color-code-border);
