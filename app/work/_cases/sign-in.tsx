@@ -133,8 +133,11 @@ export default function SignInCase({ c }: { c: Case }) {
             >
               Sign-in
             </a>{" "}
-            for Ffern&rsquo;s member portal. A mobile number or email address, verified with a
-            one-time passcode, into the member&rsquo;s Ledger account.
+            for Ffern&rsquo;s member portal. A member sign-in with a native six-digit OTP field,
+            built without third-party libraries. A tactile segmented control lets users switch clearly between mobile and email,
+            the status button uses a split-flap flip-clock treatment for its state changes,
+            and the boxes slide in and out as one block, all via CSS transitions driven by React state.
+            The field locks into a read-only submitting state once the code is entered.
           </p>
 
           {/*
