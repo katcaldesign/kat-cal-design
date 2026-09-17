@@ -19,7 +19,7 @@
   it reusable.
 */
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export default function SidePanel({
   open,
@@ -45,6 +45,16 @@ export default function SidePanel({
   children: React.ReactNode;
 }) {
   const panelRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  /*
+    Whether the content has been scrolled at all. The close control floats over
+    the content rather than sitting in a header bar, so it needs to know when
+    something has passed beneath it: at the top it's just a label on the panel's
+    own background, and the moment content slides under it, it earns a glassy
+    tag so it stays readable against whatever is there.
+  */
+  const [scrolled, setScrolled] = useState(false);
 
   // Side effects that only matter while the panel is OPEN: close on Escape,
   // lock background scroll, and move focus into the panel for keyboard/screen-
@@ -64,6 +74,10 @@ export default function SidePanel({
 
     // Send focus into the panel once it's open.
     panelRef.current?.focus();
+
+    // Every opening starts at the top. Rewinding the scroll area also fires its
+    // scroll handler, which is what puts the tag back to bare.
+    if (scrollRef.current) scrollRef.current.scrollTop = 0;
 
     return () => {
       document.removeEventListener("keydown", onKey);
@@ -106,23 +120,38 @@ export default function SidePanel({
           open ? "translate-y-0 md:translate-x-0" : "translate-y-full md:translate-y-0 md:translate-x-full"
         }`}
       >
-        {/* Header row with the close affordance. Right-aligned at every size:
-            on the mobile sheet it sits in the top-right corner, and on the
-            desktop drawer it sits at the panel's outer edge, away from the
-            left-aligned content it would otherwise crowd. In normal flow, not
-            absolute, so it never overlaps the content below. */}
-        <div className="flex shrink-0 justify-end px-6 pt-5 md:px-10 md:pt-6">
-          <button
-            type="button"
-            onClick={onClose}
-            className="kat-mono-xs -mx-2 rounded-md px-2 py-1 uppercase tracking-wider text-ink-mid transition-colors hover:bg-surface hover:text-ink"
-          >
-            ✕ Close
-          </button>
-        </div>
+        {/*
+          Close affordance. It FLOATS over the content (absolute) instead of
+          living in a header row, because a row in normal flow needs its own
+          opaque background, and that reads as a bar cutting across the top of
+          the panel while you scroll. Floating it means the content runs
+          uninterrupted to the panel's top edge, and the button carries its own
+          backdrop only when it needs one. Right-aligned at every size: on the
+          mobile sheet that's the top-right corner, on the desktop drawer it's
+          the panel's outer edge, away from the left-aligned content.
+        */}
+        <button
+          type="button"
+          onClick={onClose}
+          className={`kat-mono-xs absolute right-4 top-4 z-10 rounded-[6px] p-2 uppercase tracking-wider text-ink-mid transition-[background-color,border-color,color,backdrop-filter] duration-200 hover:text-ink md:right-8 md:top-5 ${
+            scrolled
+              ? "border border-border/40 bg-bg/60 backdrop-blur-md hover:bg-bg/80"
+              : "border border-transparent hover:bg-surface"
+          }`}
+        >
+          ✕ Close
+        </button>
 
-        {/* Scrollable content area. Generous padding for the archival feel. */}
-        <div className="grow overflow-y-auto px-6 pb-14 pt-4 md:px-10">{children}</div>
+        {/* Scrollable content area. Generous padding for the archival feel. The
+            top padding clears the floating close tag, so content starts below it
+            at rest and only passes under it once you scroll. */}
+        <div
+          ref={scrollRef}
+          onScroll={(e) => setScrolled(e.currentTarget.scrollTop > 4)}
+          className="grow overflow-y-auto px-6 pb-14 pt-14 md:px-10 md:pt-16"
+        >
+          {children}
+        </div>
       </div>
     </div>
   );
