@@ -170,16 +170,24 @@ export default function SignInCase({ c }: { c: Case }) {
         and the panel around it carries the weight instead.
 
         The reason is the file's resolution: the clip carries the component at
-        about 700 pixels across, so on a 2x screen it is pixel-exact at roughly
-        350 CSS px and blurrier at every size above that. Filling the column
-        would upscale it by half again, which reads as a low quality video when
-        the file is actually clean.
+        753 pixels across, so on a 2x screen it is pixel-exact at the 374 CSS px
+        the panel gives it, and blurrier at every size above that. Filling the
+        column would upscale it by half again, which reads as a low quality
+        video when the file is actually clean.
 
-        The source recording holds more than the published file does: the
-        component is 1078 pixels across in it. Republishing at a higher
-        resolution would let the panel go to max-w-xl and stay pixel-exact.
-        Sharpness is the same either way; it only buys a larger, more readable
-        frame, which is not what this panel is for.
+        The file is 896 wide because that is EXACTLY what this box needs: 448
+        CSS px at 2x. That matters more than the number being large. At 880 the
+        browser was resampling every frame up by 1.8% to reach 896, which cost
+        about 6% of the edge contrast on the text, measured on the rendered
+        frame. Matching the box beats both a smaller file and a bigger one: the
+        same frame published at 4x and scaled back down still measures softer
+        than one that needs no resampling at all.
+
+        So this width is tied to max-w-md above. If the panel changes, the file
+        has to be re-exported at twice the new CSS width or the text goes soft.
+
+        The four detail clips below are 880 into a 372 CSS px column, which is a
+        downscale, so they are not affected by this.
 
         The panel is sand because the capture's own background IS sand, within a
         point per channel. The two surfaces meet invisibly, so the component
@@ -190,8 +198,8 @@ export default function SignInCase({ c }: { c: Case }) {
         <div className="mx-auto max-w-md">
           <LoopVideo
             src="/work/flow.mp4"
-            width={880}
-            height={720}
+            width={896}
+            height={734}
             label="The full sign-in flow, from mobile number to verified"
           />
         </div>
