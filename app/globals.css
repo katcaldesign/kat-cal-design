@@ -155,6 +155,20 @@
   --color-error-mid: var(--color-red-200); /* mid tone (border) */
   --color-error-bg: var(--color-red-50);  /* soft fill         */
 
+  /* code (3) — inline snippets set in reading text.
+
+     Red rather than ink so a snippet is legible as code at a glance, before
+     the mono face registers. It points at red-700, NOT at --color-error:
+     error is a STATE, and a token borrowed across meanings is a token that
+     traps you the day errors move to orange and every snippet moves with
+     them. Two roles, two names, both free to change on their own.
+
+     The fill is the quietest step that still separates from the drawer's
+     grey-50 ground, with a step-darker border to give the pill an edge. */
+  --color-code:        var(--color-red-700);  /* snippet text   */
+  --color-code-bg:     var(--color-grey-75);  /* snippet fill   */
+  --color-code-border: var(--color-grey-200); /* snippet border */
+
   /* feedback/disabled (4) */
   --color-disabled-surface: var(--color-grey-100); /* * my 4th (confirm) */
   --color-disabled-bg:      var(--color-grey-75);  /* disabled bg     */
@@ -248,6 +262,35 @@ body {
 @utility kat-mono-md { font-family: var(--font-mono); font-size: 0.875rem; line-height: 1.1; text-transform: uppercase; text-box: trim-both cap alphabetic; } /* 14px */
 @utility kat-mono-sm { font-family: var(--font-mono); font-size: 0.75rem;  line-height: 1.1; text-transform: uppercase; text-box: trim-both cap alphabetic; } /* 12px */
 @utility kat-mono-xs { font-family: var(--font-mono); font-size: 0.625rem; line-height: 1.1; text-transform: uppercase; text-box: trim-both cap alphabetic; } /* 10px */
+
+/* Code — Apercu Mono with its case intact.
+
+   Deliberately NOT a kat-mono-* step. Those are caps-only labels, and a
+   snippet has to keep the case it was written in: `display:none` is not
+   `DISPLAY:NONE`. Same family, different job, so it gets its own style
+   rather than an exception carved into an existing one.
+
+   Sized in em, not rem, unlike every other step here. The rest of the scale
+   SETS a size because each one owns a block of text; this one BORROWS the
+   size of whatever body step it's sitting inside, so one class reads
+   correctly in kat-body-md and kat-body-lg without a variant for each. 0.9
+   rather than 1 because Apercu Mono's x-height runs larger than Geist's at
+   the same nominal size, so matched numbers read as a size jump.
+
+   Vertical padding on an inline element overflows its line rather than
+   pushing the next one away, so the pill sits inside body leading without
+   opening the paragraph up. break-word stops a long token like
+   `border-border-dark` from widening the drawer on a phone. */
+@utility kat-code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  color: var(--color-code);
+  background: var(--color-code-bg);
+  border: 1px solid var(--color-code-border);
+  border-radius: 0.25rem;
+  padding: 0.1em 0.35em;
+  overflow-wrap: break-word;
+}
 
 /*
   COMPONENT — animated cat logo
