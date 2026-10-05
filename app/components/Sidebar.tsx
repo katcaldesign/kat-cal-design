@@ -165,11 +165,12 @@ export default function Sidebar() {
   return (
     <>
       {/* ── DESKTOP RAIL (md and up) ─────────────────────────────────────── */}
-      <aside className="fixed inset-y-0 left-0 z-40 hidden w-60 flex-col border-r border-border bg-bg px-4 py-6 md:flex">
+      {/* cat-logo-trigger sits on the whole rail, so pointing anywhere in the
+          side panel slips the cat's glasses down (animation in globals.css). */}
+      <aside className="cat-logo-trigger fixed inset-y-0 left-0 z-40 hidden w-60 flex-col border-r border-border bg-bg px-4 py-6 md:flex">
         {/* Identity — cat logo (64px, brand spec) stacked above the wordmark so
-            it sits comfortably in the narrow rail. cat-logo-trigger drives the
-            glasses animation defined in globals.css. */}
-        <Link href="/" className="cat-logo-trigger flex flex-col items-start gap-2 px-3">
+            it sits comfortably in the narrow rail. */}
+        <Link href="/" className="flex flex-col items-start gap-2 px-3">
           <CatLogo className="h-16 w-16" />
           <span className="kat-body-xl font-medium text-ink">kat calvert</span>
         </Link>

@@ -320,7 +320,8 @@ body {
   COMPONENT — animated cat logo
   -----------------------------
   At REST the glasses sit up covering the eyes (translateY(-55) lifts them from
-  their drawn position onto the eyes). On hover/focus of the logo lockup they
+  their drawn position onto the eyes). On hover of the trigger (the whole desktop
+  rail, or the logo lockup in the mobile bar), or keyboard focus inside it, they
   slip back DOWN to translateY(0) — the artwork's drawn position — revealing the
   eyes. The lift is always applied (so even reduced-motion users see the glasses
   on); only the transition + the slip-down are gated behind prefers-reduced-motion.
@@ -333,7 +334,8 @@ body {
     transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
   .cat-logo-trigger:hover .cat-glasses,
-  .cat-logo-trigger:focus-visible .cat-glasses {
+  .cat-logo-trigger:focus-visible .cat-glasses,
+  .cat-logo-trigger:has(:focus-visible) .cat-glasses {
     transform: translate(-3.85px, -0.5px); /* hover: Figma slid-down end — down AND right of rest */
   }
 }
