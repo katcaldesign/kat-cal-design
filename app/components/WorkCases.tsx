@@ -20,8 +20,12 @@
 import Image from "next/image";
 import { useState } from "react";
 import type { Case } from "../../lib/work";
+import DesignSystemCase from "../work/_cases/design-system";
+import DesignSystemCover from "../work/_cases/design-system-cover";
 import SignInCase from "../work/_cases/sign-in";
+import LockIcon from "./LockIcon";
 import LoopVideo from "./LoopVideo";
+import PinModal from "./PinModal";
 import SidePanel from "./SidePanel";
 
 const CASES: Case[] = [
@@ -81,6 +85,36 @@ const CASES: Case[] = [
     wide: true,
   },
   {
+    id: "design-system",
+    kicker: "Systems",
+    title: "Ffern design system for agents",
+    /*
+      Ffern's summer 26 citrus loop under the Ffern wordmark and the system's
+      name. Portrait, like the sign-in phone cover, so the two cards in the
+      row share a height.
+    */
+    Cover: DesignSystemCover,
+    locked: true,
+    /*
+      The copy below is a first pass by Claude, written from the "before" state
+      Katie supplied. Replace it once the after is written.
+    */
+    tags: ["Design systems", "AI agents", "Figma → code"],
+    thesis:
+      "Took ownership of Ffern's design system and rebuilt it so Figma, Storybook and AI agents work from one source.",
+    role: "Senior Product Designer",
+    org: "Ffern",
+    year: "2026",
+    artifactLabel: "Design system: Figma and Storybook, before and after",
+    moves: [
+      "Matched 291 Storybook components against the Figma library",
+      "Redrew the icon set on a single 24×24 grid",
+      "Moved documentation to where engineers and agents read it",
+    ],
+    Detail: DesignSystemCase,
+    wide: true,
+  },
+  {
     id: "assembly",
     draft: true,
     kicker: "0 → 1",
@@ -116,9 +150,11 @@ function CaseCard({ c, onOpen }: { c: Case; onOpen: () => void }) {
         is clipped to the picture and never spills over the caption below.
       */}
       <div
-        className={`relative w-full overflow-hidden bg-ink/2 ${c.coverVideo ? "aspect-[4/5]" : "aspect-[4/3]"}`}
+        className={`relative w-full overflow-hidden bg-ink/2 ${c.Cover || c.coverVideo ? "aspect-[4/5]" : "aspect-[4/3]"}`}
       >
-        {c.coverVideo ? (
+        {c.Cover ? (
+          <c.Cover />
+        ) : c.coverVideo ? (
           <PhoneCover video={c.coverVideo} />
         ) : c.image ? (
           <Image
@@ -151,7 +187,18 @@ function CaseCard({ c, onOpen }: { c: Case; onOpen: () => void }) {
         what happens to be behind it to stay readable.
       */}
       <div className="mt-2 flex flex-col gap-2">
-        <h2 className="kat-body-md text-balance text-ink">{c.title}</h2>
+        <h2 className="kat-body-md flex items-center gap-2 text-balance text-ink">
+          {c.title}
+          {/* Says up front that this one asks for a code, so the modal
+              isn't a surprise. Labelled, since the icon alone says nothing
+              to a screen reader. */}
+          {c.locked && (
+            <span className="text-ink-light">
+              <LockIcon className="h-3 w-3" />
+              <span className="sr-only">(password protected)</span>
+            </span>
+          )}
+        </h2>
         <div className="flex flex-wrap gap-1 @sm:gap-1.5">
           {c.tags.map((t) => (
             <span
@@ -264,42 +311,59 @@ function CaseDetail({ c }: { c: Case }) {
   );
 }
 
+/*
+  Unlocking is remembered for the tab, in sessionStorage: long enough that
+  opening the case twice doesn't ask twice, short enough that closing the tab
+  locks it again. Wrapped in try/catch because storage can be blocked (private
+  windows, strict settings), and then the code is just asked for each time.
+*/
+const UNLOCK_KEY = "katcal-unlocked";
+
+function readUnlocked(): boolean {
+  try {
+    return sessionStorage.getItem(UNLOCK_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
 export default function WorkCases() {
   const [openId, setOpenId] = useState<string | null>(null);
+  const [askingFor, setAskingFor] = useState<string | null>(null);
   const shown = CASES.filter((c) => !c.draft);
   const active = shown.find((c) => c.id === openId) ?? null;
+  const asking = shown.find((c) => c.id === askingFor) ?? null;
+
+  function open(c: Case) {
+    // Read at the click rather than kept in state: storage only exists in the
+    // browser, and asking it at the moment it matters means there is no copy
+    // to fall out of step.
+    if (c.locked && !readUnlocked()) setAskingFor(c.id);
+    else setOpenId(c.id);
+  }
+
+  function unlock() {
+    try {
+      sessionStorage.setItem(UNLOCK_KEY, "1");
+    } catch {}
+    setOpenId(askingFor);
+    setAskingFor(null);
+  }
 
   return (
     <>
-      <div className="mt-10 grid items-start gap-x-4 gap-y-8 sm:grid-cols-2">
+      <div className="grid items-start gap-x-4 gap-y-8 sm:grid-cols-2">
         {shown.map((c) => (
-          <CaseCard key={c.id} c={c} onOpen={() => setOpenId(c.id)} />
+          <CaseCard key={c.id} c={c} onOpen={() => open(c)} />
         ))}
-
-        {/*
-          The empty half of the row, while there is only one case published.
-
-          It earns its place twice: it stops a lone card sitting next to a gap
-          that reads as a layout bug, and it says the section is mid-build
-          rather than finished and thin.
-
-          A div, not a button, and no hover state: there is nothing behind it,
-          and a card that looks clickable but isn't is worse than no card. It
-          takes the same 4:3 frame as a real card's image, so the two pictures
-          line up and the caption below the real one has nothing to match.
-
-          NOT aria-hidden. The empty frame is decoration, but the sentence inside
-          it isn't: "more coming" is the same useful news to someone listening
-          to the page as it is to someone looking at it.
-
-          Delete this block once a second case is published.
-        */}
-        <div className="flex aspect-[4/3] items-center justify-center bg-ink/2 p-5 text-center">
-          <span className="kat-mono-xs uppercase tracking-wider text-ink-light">
-            More projects coming soon
-          </span>
-        </div>
       </div>
+
+      <PinModal
+        open={!!asking}
+        title={asking?.title ?? ""}
+        onUnlock={unlock}
+        onClose={() => setAskingFor(null)}
+      />
 
       <SidePanel
         open={!!active}

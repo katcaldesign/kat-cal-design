@@ -101,6 +101,14 @@ const WIDTHS = [96, 144, 320, 512, 900, 1280, 1600];
 const LOGO_QUALITY = 95;
 const PHOTO_QUALITY = 78;
 
+/*
+  Work case images are the same problem as the logos at a larger size: flat UI
+  with small type all over it. The design system's annotated token screen came
+  out of q78 at half its file size with every label visibly smeared, so
+  anything under /work/ gets the logo treatment.
+*/
+const flatArtwork = (rel) => rel.startsWith("/logos/") || rel.startsWith("/work/");
+
 // Only raster photos. SVGs are already tiny and resolution-independent, and
 // videos are the browser's problem, not ours.
 const RASTER = /\.(png|jpe?g|webp)$/i;
@@ -189,7 +197,7 @@ for (const rel of sources) {
     */
     await sharp(srcPath)
       .resize({ width: w, withoutEnlargement: true })
-      .webp({ quality: rel.startsWith("/logos/") ? LOGO_QUALITY : PHOTO_QUALITY })
+      .webp({ quality: flatArtwork(rel) ? LOGO_QUALITY : PHOTO_QUALITY })
       .toFile(outPaths[i]);
   }
   generated += 1;
