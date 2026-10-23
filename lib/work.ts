@@ -24,6 +24,13 @@ export type Case = {
   title: string;
   tags: string[]; // skill tags on the card (Katie will tune these)
   image?: string; // card art — placeholder until supplied
+  /*
+    A screen recording to play on the card instead of the still `image`. It sits
+    in a phone frame on a blurred colour field, so the clip wants to be a whole
+    phone screen. `poster` is its first frame, shown before it loads and to
+    anyone who has asked for reduced motion.
+  */
+  coverVideo?: { src: string; width: number; height: number; poster: string };
   // ── panel detail ──
   thesis: string; // one line
   role: string;
