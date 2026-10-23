@@ -2,7 +2,7 @@
 
 import { Spectral } from "next/font/google";
 import type { CSSProperties } from "react";
-import { useCoverParams, type CoverParams } from "./design-system-cover-params";
+import { COVER, type CoverParams } from "./design-system-cover-params";
 
 /*
   Cover for the design system case: Ffern's summer 26 citrus loop, with the
@@ -152,7 +152,7 @@ function PixelFilters({ pixel }: { pixel: CoverParams["pixel"] }) {
 }
 
 export default function DesignSystemCover() {
-  const p = useCoverParams();
+  const p = COVER;
 
   return (
     /*

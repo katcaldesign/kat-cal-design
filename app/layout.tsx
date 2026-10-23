@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Geist, JetBrains_Mono } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
-import DevDials from "./components/DevDials";
 import Sidebar from "./components/Sidebar";
 
 /*
@@ -74,8 +73,6 @@ export default function RootLayout({
             {children}
           </main>
         </div>
-        {/* Live tuning sliders, local development only. See DevDials. */}
-        <DevDials />
       </body>
     </html>
   );
