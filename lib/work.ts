@@ -31,6 +31,12 @@ export type Case = {
     anyone who has asked for reduced motion.
   */
   coverVideo?: { src: string; width: number; height: number; poster: string };
+  /*
+    A cover built in code, for when the card art is more than one file: footage
+    with live type over it, say. It fills the same portrait frame as
+    `coverVideo` and takes priority over both that and `image`.
+  */
+  Cover?: () => ReactNode;
   // ── panel detail ──
   thesis: string; // one line
   role: string;
@@ -61,4 +67,10 @@ export type Case = {
     case back on the page.
   */
   draft?: boolean;
+  /*
+    Asks for a code (see app/components/PinModal.tsx) before the case opens.
+    Unlocking lasts until the tab is closed, so moving between cases doesn't
+    ask again.
+  */
+  locked?: boolean;
 };
