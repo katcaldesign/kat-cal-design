@@ -55,6 +55,8 @@ export default function LoopVideo({
   width,
   height,
   label,
+  poster,
+  decorative = false,
   className = "",
 }: {
   src: string;
@@ -67,6 +69,15 @@ export default function LoopVideo({
   width: number;
   height: number;
   label: string;
+  poster?: string;
+  /*
+    Decorative clips sit inside something that is already clickable and named
+    (a work card is a button carrying the case title). Native controls there
+    would be a control inside a control, and the label would be read twice. So
+    a decorative clip is hidden from assistive tech, and under reduced motion it
+    rests on its poster instead of growing a play button.
+  */
+  decorative?: boolean;
   className?: string;
 }) {
   const ref = useRef<HTMLVideoElement>(null);
@@ -104,8 +115,10 @@ export default function LoopVideo({
       muted
       playsInline
       preload="metadata"
-      controls={reducedMotion}
-      aria-label={label}
+      poster={poster}
+      controls={reducedMotion && !decorative}
+      aria-label={decorative ? undefined : label}
+      aria-hidden={decorative || undefined}
       className={`block h-auto w-full bg-sand-50 ${className}`}
     />
   );
