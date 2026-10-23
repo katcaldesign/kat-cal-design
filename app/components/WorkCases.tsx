@@ -20,6 +20,7 @@
 import Image from "next/image";
 import { useState } from "react";
 import type { Case } from "../../lib/work";
+import DesignSystemCase from "../work/_cases/design-system";
 import SignInCase from "../work/_cases/sign-in";
 import SidePanel from "./SidePanel";
 
@@ -65,6 +66,29 @@ const CASES: Case[] = [
       "Rebuilt in React from the Figma design, auth stubbed",
     ],
     Detail: SignInCase,
+    wide: true,
+  },
+  {
+    id: "design-system",
+    kicker: "Systems",
+    title: "Ffern design system for agents",
+    /*
+      The copy below is a first pass by Claude, written from the "before" state
+      Katie supplied. Replace it once the after is written.
+    */
+    tags: ["Design systems", "AI agents", "Figma → code"],
+    thesis:
+      "Took ownership of Ffern's design system and rebuilt it so Figma, Storybook and AI agents work from one source.",
+    role: "Senior Product Designer",
+    org: "Ffern",
+    year: "2026",
+    artifactLabel: "Design system: Figma and Storybook, before and after",
+    moves: [
+      "Matched 291 Storybook components against the Figma library",
+      "Redrew the icon set on a single 24×24 grid",
+      "Moved documentation to where engineers and agents read it",
+    ],
+    Detail: DesignSystemCase,
     wide: true,
   },
   {
@@ -218,30 +242,6 @@ export default function WorkCases() {
         {shown.map((c) => (
           <CaseCard key={c.id} c={c} onOpen={() => setOpenId(c.id)} />
         ))}
-
-        {/*
-          The empty half of the row, while there is only one case published.
-
-          It earns its place twice: it stops a lone card sitting next to a gap
-          that reads as a layout bug, and it says the section is mid-build
-          rather than finished and thin.
-
-          A div, not a button, and no hover state: there is nothing behind it,
-          and a card that looks clickable but isn't is worse than no card. Grid
-          items stretch by default, so it takes the height of the real card
-          beside it without being told what that height is.
-
-          NOT aria-hidden. The dashed box is decoration, but the sentence inside
-          it isn't: "more coming" is the same useful news to someone listening
-          to the page as it is to someone looking at it.
-
-          Delete this block once a second case is published.
-        */}
-        <div className="flex min-h-40 items-center justify-center rounded-card border border-dashed border-border-dark p-5 text-center">
-          <span className="kat-mono-xs uppercase tracking-wider text-ink-light">
-            More projects coming soon
-          </span>
-        </div>
       </div>
 
       <SidePanel
