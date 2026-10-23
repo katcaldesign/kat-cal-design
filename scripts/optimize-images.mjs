@@ -107,7 +107,22 @@ const PHOTO_QUALITY = 78;
   out of q78 at half its file size with every label visibly smeared, so
   anything under /work/ gets the logo treatment.
 */
-const flatArtwork = (rel) => rel.startsWith("/logos/") || rel.startsWith("/work/");
+/*
+  Archive covers that are illustration or UI rather than photographs. Same
+  problem again: hard edges, thin lines and type, all of which q78 smears. These
+  are listed by name because the archive folder mixes them with photos, so the
+  folder alone can't say which treatment a file needs.
+*/
+const FLAT_ARCHIVE_COVERS = new Set([
+  "/archive/brompton.png",
+  "/archive/brompton-digital.png",
+  "/archive/collaboraid.png",
+  "/archive/weight-rack-cad-cropped.png",
+  "/archive/windsor-cycle-hub.png",
+]);
+
+const flatArtwork = (rel) =>
+  rel.startsWith("/logos/") || rel.startsWith("/work/") || FLAT_ARCHIVE_COVERS.has(rel);
 
 // Only raster photos. SVGs are already tiny and resolution-independent, and
 // videos are the browser's problem, not ours.
