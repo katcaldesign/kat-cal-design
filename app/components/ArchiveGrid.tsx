@@ -28,6 +28,34 @@ import {
 const FILTERS = ["All", ...ARCHIVE_CATEGORIES] as const;
 type Filter = (typeof FILTERS)[number];
 
+/*
+  The tile's `sizes`, scaled up for landscape covers.
+
+  `sizes` describes the SQUARE slot, but object-cover fills that square by
+  height when the cover is wider than it is tall, so the image is drawn wider
+  than the tile and its sides are cropped off. A 16:9 cover in a 256px tile is
+  really drawn about 450px wide. Left as the slot width, the browser fetches a
+  file sized for 256 and stretches it 1.76x, which is what made the landscape
+  covers blurry.
+
+  So each width is multiplied by the cover's width-to-height ratio. Square and
+  portrait covers (ratio 1 or less) fill by width already and are left alone.
+*/
+function tileSizes(cover: string) {
+  const size = imageSize(cover);
+  const ratio = size ? Math.max(1, size.width / size.height) : 1;
+  const k = Math.round(ratio * 100) / 100;
+  const scale = (w: string) => (k === 1 ? w : `calc(${w} * ${k})`);
+
+  return [
+    `(min-width: 1392px) ${scale("256px")}`, // capped: (1152 - 80 - 48) / 4
+    `(min-width: 1024px) ${scale("calc(25vw - 92px)")}`, // 4 across, sidebar + padding
+    `(min-width: 768px) ${scale("calc(33.3vw - 118px)")}`, // 3 across, sidebar appears
+    `(min-width: 640px) ${scale("calc(33.3vw - 27px)")}`, // 3 across, no sidebar yet
+    scale("calc(50vw - 32px)"), // 2 across on a phone
+  ].join(", ");
+}
+
 // ── One tile. Cover image (or placeholder); the title washes in on hover. ───
 //
 // `priority` on the first few: they're on screen the moment the page opens, so
@@ -38,7 +66,7 @@ function Tile({ p, onOpen, priority }: { p: ArchiveProject; onOpen: () => void; 
     <button
       type="button"
       onClick={onOpen}
-      className="group relative aspect-square w-full overflow-hidden rounded-lg border border-border bg-surface text-left"
+      className="group relative aspect-square w-full overflow-hidden bg-surface text-left"
     >
       {p.cover ? (
         /*
@@ -61,13 +89,7 @@ function Tile({ p, onOpen, priority }: { p: ArchiveProject; onOpen: () => void; 
           alt={p.title}
           fill
           priority={priority}
-          sizes={[
-            "(min-width: 1392px) 256px", // capped: (1152 - 80 - 48) / 4
-            "(min-width: 1024px) calc(25vw - 92px)", // 4 across, sidebar + padding
-            "(min-width: 768px) calc(33.3vw - 118px)", // 3 across, sidebar appears
-            "(min-width: 640px) calc(33.3vw - 27px)", // 3 across, no sidebar yet
-            "calc(50vw - 32px)", // 2 across on a phone
-          ].join(", ")}
+          sizes={tileSizes(p.cover)}
           className="object-cover"
         />
       ) : (
