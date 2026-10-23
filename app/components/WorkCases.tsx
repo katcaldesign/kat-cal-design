@@ -7,7 +7,7 @@
   component; only this piece (which holds "which case is open?" state) runs in
   the browser.
 
-  The index is a grid of BENTO CARDS — image + title + skill tags. Clicking a
+  The index is a grid of flat cards: image, with title + skill tags beneath. Clicking a
   card opens its full detail in the shared SidePanel (right drawer on desktop,
   bottom sheet on mobile). Every case is ONE object in CASES, all sharing the
   same schema, so adding a case later = adding an object.
@@ -22,6 +22,7 @@ import { useState } from "react";
 import type { Case } from "../../lib/work";
 import DesignSystemCase from "../work/_cases/design-system";
 import SignInCase from "../work/_cases/sign-in";
+import LoopVideo from "./LoopVideo";
 import SidePanel from "./SidePanel";
 
 const CASES: Case[] = [
@@ -53,7 +54,19 @@ const CASES: Case[] = [
       to trim and the framing on the page is the framing it was cropped to.
     */
     image: "/work/sign-in-cover.png",
-    tags: ["Component design", "Design → build", "React"],
+    /*
+      A real sign-in on a phone, from the tab switch to the portal: 18.5
+      seconds, re-encoded to H.264 at 600px wide, about twice what the card
+      shows it at, so it stays sharp on a 2x screen.
+      The still above stays as the fallback if the clip is ever dropped.
+    */
+    coverVideo: {
+      src: "/work/sign-in-cover.mp4",
+      width: 600,
+      height: 1304,
+      poster: "/work/sign-in-cover-poster.jpg",
+    },
+    tags: ["Design → build", "Interaction design", "Edge cases"],
     thesis:
       "Designed and built the member sign-in as a real, working component — not a screenshot.",
     role: "Senior Product Designer",
@@ -111,35 +124,27 @@ const CASES: Case[] = [
   },
 ];
 
-// ── One bento card in the index. Whole card opens the panel. ────────────────
+// ── One card in the index. Whole card opens the panel. ─────────────────────
 function CaseCard({ c, onOpen }: { c: Case; onOpen: () => void }) {
   return (
-    <button
-      type="button"
-      onClick={onOpen}
-      className="group @container relative block w-full overflow-hidden rounded-card border border-border text-left transition hover:border-border-dark hover:shadow-sm"
-    >
+    <button type="button" onClick={onOpen} className="group @container block w-full text-left">
       {/*
-        The card IS the artwork: one 4:3 frame, with the caption laid over its
-        foot rather than stacked underneath it.
+        A flat frame: no radius, no stroke, no shadow. The artwork is the edge
+        of the card, so there is nothing drawn around it to compete.
 
-        This is what makes the frost real, and it took a few tries to see why.
-        With the caption in normal flow the card became taller than the artwork
-        (4:3 image plus a 100px caption is nearly square), so covering it threw
-        away a quarter of the picture off the sides AND left the caption sitting
-        over the empty margin at the bottom of the crop. Nothing behind it, so
-        nothing to blur.
+        Still covers are 4:3. A phone cover is portrait (4:5) so the whole
+        handset fits, and next to its 4:3 neighbours that height difference is
+        what breaks the grid: rows stop lining up along their feet.
 
-        Overlaying instead fixes both at once: the card is exactly the artwork's
-        own shape, so object-cover trims nothing, and the caption falls on the
-        part of the picture that has something in it.
-
-        The cover is cut to suit: the component is bottom-anchored in the frame
-        so its passcode boxes and helper text sit in the bottom third, under the
-        glass, instead of being centred with dead space there.
+        overflow-hidden stays on the frame (not the button) so the hover zoom
+        is clipped to the picture and never spills over the caption below.
       */}
-      <div className="relative aspect-[4/3] w-full bg-ink/2">
-        {c.image ? (
+      <div
+        className={`relative w-full overflow-hidden bg-ink/2 ${c.coverVideo ? "aspect-[4/5]" : "aspect-[4/3]"}`}
+      >
+        {c.coverVideo ? (
+          <PhoneCover video={c.coverVideo} />
+        ) : c.image ? (
           <Image
             src={c.image}
             alt=""
@@ -162,43 +167,95 @@ function CaseCard({ c, onOpen }: { c: Case; onOpen: () => void }) {
             image
           </span>
         )}
+      </div>
 
-        {/*
-          Title + tags on glass.
-
-          bg-bg is the hueless grey token, so the panel itself adds no colour and
-          everything warm or cool in it is the artwork showing through.
-
-          30% and an 8px blur: sheer enough that the passcode boxes stay legible
-          shapes rather than a smear, which is the whole point of putting them
-          under there. The title stays readable because what is behind it is
-          light (white boxes on sand) and the text is near-black, so the scrim is
-          softening contrast that was never close to the limit.
-
-          The top stroke is the edge of the glass. Without it the panel's top
-          just dissolves and the artwork appears to fade out for no reason
-          rather than passing under something.
-
-          Padding and gaps tighten on a narrow CARD, not a narrow window. The
-          same card is 327px on a phone and 376px in the desktop two-up, and at
-          both the tags were wrapping to a second row, which pushed the panel to
-          half the artwork. The saving is mostly that second row disappearing.
-        */}
-        <div className="absolute inset-x-0 bottom-0 flex flex-col gap-2 border-t border-ink/4 bg-bg/30 p-4 backdrop-blur-[8px] @sm:gap-3 @sm:p-5">
-          <h2 className="kat-body-lg font-medium text-balance text-ink">{c.title}</h2>
-          <div className="flex flex-wrap gap-1 @sm:gap-1.5">
-            {c.tags.map((t) => (
-              <span
-                key={t}
-                className="kat-mono-xs rounded-full border border-border/70 bg-bg/40 px-1.5 py-1 uppercase tracking-wider text-ink-mid @sm:px-2"
-              >
-                {t}
-              </span>
-            ))}
-          </div>
+      {/*
+        Title + tags sit under the frame in normal flow, rather than on glass
+        over it. The whole picture shows, and the caption no longer depends on
+        what happens to be behind it to stay readable.
+      */}
+      <div className="mt-2 flex flex-col gap-2">
+        <h2 className="kat-body-md text-balance text-ink">{c.title}</h2>
+        <div className="flex flex-wrap gap-1 @sm:gap-1.5">
+          {c.tags.map((t) => (
+            <span
+              key={t}
+              className="kat-mono-xs rounded-[4px] border border-border px-1.5 py-1 uppercase tracking-wider text-ink-mid"
+            >
+              {t}
+            </span>
+          ))}
         </div>
       </div>
     </button>
+  );
+}
+
+// ── A screen recording in a phone, on a blurred colour field. ──────────────
+function PhoneCover({ video }: { video: NonNullable<Case["coverVideo"]> }) {
+  return (
+    <>
+      {/*
+        The colour field. Soft blobs, mostly from the sand family with only a
+        breath of terracotta and blue, each blurred far past its own edges so they melt
+        into one wash rather than reading as shapes. Kept close in value on
+        purpose: it should read as warm light on paper, not as colour, so the
+        phone stays the only thing on the card with contrast.
+
+        Drawn in CSS rather than baked into the video: the colours and blur can
+        be tuned here without re-recording, and the clip stays small.
+      */}
+      <div aria-hidden className="absolute inset-0 bg-sand-75">
+        <div className="absolute -left-[15%] -top-[15%] h-[70%] w-[65%] rounded-full bg-[#d9a07e] opacity-20 blur-3xl" />
+        <div className="absolute -right-[15%] top-[20%] h-[80%] w-[60%] rounded-full bg-sand-200 opacity-60 blur-3xl" />
+        {/* A cool note against the warm: a dusty blue, kept faint so it reads
+            as daylight in the corner rather than as a colour of its own. */}
+        <div className="absolute -right-[10%] -top-[15%] h-[55%] w-[55%] rounded-full bg-[#b7c8da] opacity-45 blur-3xl" />
+        <div className="absolute bottom-[-25%] left-[20%] h-[60%] w-[60%] rounded-full bg-sand-50 opacity-90 blur-3xl" />
+      </div>
+
+      {/*
+        The phone, whole and centred, drawn to iPhone 17 proportions.
+
+        The recording is 1206 x 2622: an iPhone 17's 402 x 874pt screen at 3x.
+        Everything else is measured against that screen and the published body
+        (71.9mm wide), then written as a share of the phone's own width, so the
+        shape holds at any size:
+
+          bezel          3.7%   (71.9mm body less a 66.6mm screen, per side)
+          screen corner  14.3%  (iOS's 62pt display radius over 402pt)
+          body corner    18%    (screen corner plus the bezel, so the two
+                                 curves run parallel, as they do on the phone)
+
+        cqw here is the PHONE's width, not the card's: the phone is its own
+        @container. The side buttons sit just outside the body: Action button
+        and volume on the left, side button and Camera Control on the right.
+
+        The hover zoom lives on the phone, matching the still covers.
+      */}
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="@container relative w-[49%] transition-transform duration-500 group-hover:scale-[1.03]">
+          <span aria-hidden className="absolute -left-[1.1cqw] top-[18%] h-[4%] w-[1.4cqw] rounded-l-full bg-grey-700" />
+          <span aria-hidden className="absolute -left-[1.1cqw] top-[26%] h-[7%] w-[1.4cqw] rounded-l-full bg-grey-700" />
+          <span aria-hidden className="absolute -left-[1.1cqw] top-[35%] h-[7%] w-[1.4cqw] rounded-l-full bg-grey-700" />
+          <span aria-hidden className="absolute -right-[1.1cqw] top-[28%] h-[10%] w-[1.4cqw] rounded-r-full bg-grey-700" />
+          <span aria-hidden className="absolute -right-[1.1cqw] top-[56%] h-[7%] w-[1.4cqw] rounded-r-full bg-grey-700" />
+
+          <div className="relative rounded-[18cqw] bg-ink p-[3.7cqw]">
+            <div className="overflow-hidden rounded-[14.3cqw]">
+              <LoopVideo
+                src={video.src}
+                width={video.width}
+                height={video.height}
+                poster={video.poster}
+                label=""
+                decorative
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
   );
 }
 
@@ -238,7 +295,7 @@ export default function WorkCases() {
 
   return (
     <>
-      <div className="mt-10 grid gap-4 sm:grid-cols-2">
+      <div className="mt-10 grid items-start gap-x-4 gap-y-8 sm:grid-cols-2">
         {shown.map((c) => (
           <CaseCard key={c.id} c={c} onOpen={() => setOpenId(c.id)} />
         ))}
